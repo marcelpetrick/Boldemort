@@ -153,6 +153,22 @@ function supports(base: string, style: Style) {
       ? plain.includes(base)
       : acceptsLine.test(base);
 }
+
+export function activeUnicodeStyles(text: string, editable?: EditableGlyph) {
+  const present = new Set<Style>();
+  const absent = new Set<Style>();
+  for (const { index, segment } of graphemes(text)) {
+    if (editable && !editable(index, index + segment.length)) continue;
+    const { base, active } = decode(segment);
+    if (horizontalSpace.test(base)) continue;
+    for (const style of styles) {
+      if (supports(base, style))
+        (active.has(style) ? present : absent).add(style);
+    }
+    if (absent.size === styles.length) return [];
+  }
+  return styles.filter((style) => present.has(style) && !absent.has(style));
+}
 function encode(item: ReturnType<typeof decode>, lineStyles: LineStyles) {
   const mask =
     Number(item.active.has('bold')) + 2 * Number(item.active.has('italic'));

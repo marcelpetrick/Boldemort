@@ -115,8 +115,10 @@ test('formats an entire mixed draft and toggles randomized text back to Latin', 
   await expect(random).toHaveAttribute('aria-pressed', 'false');
   await bold.click();
   await expect(editor).toHaveValue('𝐀𝐛͟\n\n`Code` 𝟐');
+  await expect(bold).toHaveAttribute('aria-pressed', 'true');
   await bold.click();
   await expect(editor).toHaveValue(source);
+  await expect(bold).toHaveAttribute('aria-pressed', 'false');
   await page.getByRole('button', { name: 'Markdown', exact: true }).click();
   await editor.fill(
     'First paragraph.\n\n`code` and [link](https://example.com).',

@@ -83,3 +83,5 @@
 - Final review reproduced a protection gap for numbered lists and code
   indented with mixed whitespace. Keep those constructs protected on the
   Unicode fast path and verify both list delimiters and indentation.
+- Verify that Bold shows its pressed state after formatting a mixed
+  selection, using the same eligible characters as the toggle itself.

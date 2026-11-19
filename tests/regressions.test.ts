@@ -175,6 +175,9 @@ describe('formatting boundaries', () => {
       preservedSyntax: true,
     });
     const styled = result!.value;
+    expect(selectionStyles(draft(styled, 0, styled.length, 'unicode'))).toEqual(
+      ['bold'],
+    );
     expect(
       formatSelection(draft(styled, 0, styled.length, 'unicode'), 'bold')
         ?.value,

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import { inspectMarkdown, project, type Projection } from './markdown.ts';
 import {
-  decode,
+  activeUnicodeStyles,
   defaultLineStyles,
   graphemes,
   hasRandomFont,
@@ -575,17 +575,10 @@ export function selectionStyles(frame: Frame) {
       ({ start, end }) => start <= frame.start && end >= frame.end,
     );
     if (!part) return [];
-    return selectedStyles(part.value);
+    return activeUnicodeStyles(part.value);
   }
-  return selectedStyles(selected);
-}
-
-function selectedStyles(text: string) {
-  const glyphs = Array.from(graphemes(text.trim()), ({ segment }) =>
-    decode(segment),
-  ).filter(({ base }) => /\S/u.test(base));
-  return styles.filter(
-    (style) =>
-      glyphs.length > 0 && glyphs.every(({ active }) => active.has(style)),
+  return activeUnicodeStyles(
+    selected,
+    editableGlyphs(unicodeProtection(frame.text), frame.start),
   );
 }
