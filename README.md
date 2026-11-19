@@ -33,6 +33,10 @@ and [project vision](vision.md).
 
 [Dark theme](media/editor-dark.png) · [Bavarian theme](media/editor-bavarian.png)
 
+[Watch Markdown to copyable Unicode](media/linkedin-formatting.gif) ·
+[Watch Random font turn on and off](media/linkedin-random-font.gif) ·
+[Read the demo storyboards](docs/DEMO.md)
+
 ## Using the editor
 
 1. Write or paste into the draft. Select text to format it, or toggle a style
@@ -52,7 +56,9 @@ sentence statistics use parsed text. Character count uses visible grapheme
 clusters when supported. A nonempty top-level Markdown block counts once.
 
 In Unicode mode, **Random font** mixes Unicode alphabets in a selection or
-toggles mixed lettering for new typing. Undo restores a transformed selection.
+toggles mixed lettering for new typing. Click again on the randomized selection
+to restore plain Latin letters and digits. Select all to format across the
+draft while preserving protected Markdown and code.
 
 The top bar has English and German and follows the system theme unless you
 select Light, Dark, or Bavarian. Hover or focus a control for brief help.

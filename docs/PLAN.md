@@ -77,3 +77,6 @@
   local and CI pipeline.
 - Compare long-draft operations against the v0.4.0 profile. Keep formatting
   and syntax-protection assertions in the benchmark as timing improves.
+- Record the Markdown-to-Unicode and reversible Random font workflows as two
+  6.8-second LinkedIn GIFs. Check the rendered frames and file limits, and
+  link the [storyboards](DEMO.md) and recordings from the README.
