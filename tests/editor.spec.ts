@@ -1,6 +1,16 @@
 import { expect, test } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
-import { readFile } from 'node:fs/promises';
+import { readFile, writeFile } from 'node:fs/promises';
+
+test.afterEach(async ({ page }, info) => {
+  if (process.env.BOLD_COVERAGE !== '1') return;
+  const counters = await page.evaluate(() =>
+    Reflect.get(window, '__coverage__'),
+  );
+  if (!counters)
+    throw new Error('Coverage build did not expose browser counters.');
+  await writeFile(info.outputPath('istanbul.json'), JSON.stringify(counters));
+});
 
 test.beforeEach(async ({ page }) => {
   await page.goto('./');
@@ -72,8 +82,90 @@ test('arms Markdown typing, handles composition, and keeps manual drafts', async
   await expect(draft).toHaveValue('');
   await page.getByRole('button', { name: 'Undo' }).click();
   await expect(draft).toHaveValue(/日本語/u);
+});
+
+test('a reload opens a fresh draft', async ({ page }) => {
+  const draft = page.locator('#editor');
+  await draft.fill('Only in memory');
   await page.reload();
   await expect(draft).toHaveValue('');
+});
+
+test('keyboard formatting, protected syntax, bullets and native history events', async ({
+  page,
+}) => {
+  const draft = page.locator('#editor');
+  const markdown = page.getByRole('button', { name: 'Markdown', exact: true });
+  await markdown.click();
+  await markdown.click();
+  await draft.press('Control+b');
+  await draft.pressSequentially('bold');
+  await draft.press('Control+b');
+  await expect(draft).toHaveJSProperty('selectionStart', 8);
+  await draft.fill('`literal`');
+  await draft.press('Control+a');
+  await draft.press('Control+i');
+  await expect(draft).toHaveValue('`literal`');
+  await expect(page.getByRole('status')).toContainText('Markdown syntax');
+  await draft.fill('one\ntwo');
+  await draft.press('Control+a');
+  await page.getByRole('button', { name: 'Bulleted list' }).click();
+  await expect(draft).toHaveValue('- one\n- two');
+  await draft.evaluate((element) => {
+    element.dispatchEvent(
+      new InputEvent('beforeinput', {
+        inputType: 'historyUndo',
+        cancelable: true,
+        bubbles: true,
+      }),
+    );
+  });
+  await expect(draft).toHaveValue('one\ntwo');
+  await page.getByRole('button', { name: 'Redo' }).click();
+  await expect(draft).toHaveValue('- one\n- two');
+});
+
+test('keeps diagnostics accessible during edits, scrolling and offline use', async ({
+  page,
+  context,
+}) => {
+  const draft = page.locator('#editor');
+  await draft.fill('Opening.\n\n~~~js\ncode');
+  await page.getByText('Writing hints').click();
+  await expect(page.locator('#warning-list')).toContainText(
+    'Markdown · Line 3',
+  );
+  await page.getByRole('button', { name: 'Markdown', exact: true }).click();
+  await expect(page.getByRole('button', { name: /^Line 3/ })).toBeVisible();
+  await page.getByRole('button', { name: /^Line 3/ }).focus();
+  await page.locator('#destination').selectOption('article');
+  await draft.click();
+  await context.setOffline(true);
+  await draft.fill('line\n'.repeat(1601));
+  await expect(page.locator('#line-markers')).toBeEmpty();
+  await draft.evaluate((element) => {
+    element.scrollTop = 100;
+  });
+  await draft.press('End');
+  await draft.pressSequentially('kept');
+  await expect(draft).toHaveValue(/kept/u);
+  await expect(page.locator('#limit')).toContainText('125,000');
+});
+
+test('opens full help and keeps UTF-8 exports available', async ({ page }) => {
+  await page.getByRole('button', { name: 'Help', exact: true }).click();
+  const dialog = page.getByRole('dialog', { name: 'Help' });
+  await expect(dialog).toContainText('Mathematical Unicode');
+  await expect(dialog).toContainText('Toggle underline.');
+  await dialog.getByRole('button', { name: 'Close' }).click();
+  await page.locator('#editor').fill('Ää');
+  const pending = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Export' }).click();
+  const download = await pending;
+  expect(download.suggestedFilename()).toBe('boldemort-draft.txt');
+  expect(await readFile(await download.path(), 'utf8')).toBe('Ää');
+  await page.clock.install();
+  await page.clock.fastForward(1250);
 });
 
 test('copies either representation and exports UTF-8', async ({ page }) => {

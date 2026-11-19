@@ -6,6 +6,9 @@ export default tseslint.config(
   {
     ignores: [
       'dist/**',
+      'dist-coverage/**',
+      '.stryker-tmp/**',
+      'reports/**',
       'coverage/**',
       'playwright-report/**',
       'test-results/**',

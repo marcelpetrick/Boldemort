@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import {
   Document,
   bulletLines,
@@ -245,4 +245,43 @@ describe('writing assistance', () => {
     }
     expect(localize('de', 'line', { line: '2' })).toBe('Zeile 2');
   });
+});
+
+it('uses fallback segmentation without Intl.Segmenter', async () => {
+  vi.resetModules();
+  vi.stubGlobal(
+    'Intl',
+    Object.create(Intl, { Segmenter: { value: undefined } }),
+  );
+  try {
+    const { graphemes: fallback } = await import('../src/unicode.ts');
+    const { analyze: fallbackAnalyze } = await import('../src/analysis.ts');
+    expect([...fallback('é👩🏽‍💻🇩🇪')].map(({ segment }) => segment)).toEqual([
+      'é',
+      '👩🏽‍💻',
+      '🇩🇪',
+    ]);
+    expect(fallbackAnalyze("One. Don't skip words.", 'en')).toMatchObject({
+      words: 4,
+      median: 2,
+    });
+  } finally {
+    vi.unstubAllGlobals();
+  }
+});
+
+it('keeps caret mapping and intact Unicode while changing projected chunks', () => {
+  const doc = new Document();
+  doc.switchTo('markdown');
+  doc.edit('__one__ __two__', { start: 0, end: 15 });
+  doc.switchTo('unicode');
+  expect(doc.frame).toMatchObject({ text: '𝐨𝐧𝐞 𝐭𝐰𝐨', start: 0, end: 13 });
+  doc.edit('𝐨𝐧𝐞, 𝐭𝐰𝐨', { start: 7, end: 7 });
+  expect(doc.output('markdown')).toBe('__one__, __two__');
+  doc.edit('𝐨𝐧𝐞, 𝐭𝐰𝐲', { start: 14, end: 14 });
+  expect(doc.output('markdown')).toBe('__one__, **twy**');
+  doc.edit('𝐨𝐧𝐞, 𝐭𝐰🟲', { start: 14, end: 14 });
+  expect(doc.output('markdown')).toBe('__one__, **tw**🟲');
+  doc.switchTo('markdown');
+  expect(doc.frame.end).toBe(doc.frame.text.length);
 });

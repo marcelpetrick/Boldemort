@@ -1,0 +1,35 @@
+{
+  "testRunner": "vitest",
+  "vitest": {
+    "configFile": "vitest.config.ts"
+  },
+  "mutate": [
+    "src/analysis.ts",
+    "src/document.ts",
+    "src/markdown.ts",
+    "src/unicode.ts"
+  ],
+  "ignorePatterns": [
+    "**",
+    "!src/**/*.ts",
+    "!tests/**/*.test.ts",
+    "!package.json",
+    "!tsconfig.json",
+    "!vitest.config.ts"
+  ],
+  "inPlace": false,
+  "coverageAnalysis": "perTest",
+  "concurrency": 2,
+  "timeoutMS": 5000,
+  "reporters": ["clear-text", "progress", "html", "json"],
+  "tempDirName": ".stryker-tmp",
+  "thresholds": {
+    "high": 80,
+    "low": 65,
+    "break": 60
+  },
+  "clearTextReporter": {
+    "reportTests": false,
+    "reportMutants": false
+  }
+}

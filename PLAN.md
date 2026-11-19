@@ -22,3 +22,6 @@
   whole editor.
 - Local pipeline passed with Chromium, Firefox and WebKit. Added Actions
   verification, Pages publication and checksum-backed releases from SemVer tags.
+- Added a 98% combined line coverage gate for every application module and
+  sandboxed mutation testing for conversion, editing, and writing analysis.
+  Regression tests exercise offline use, long drafts, and clipboard fallback.

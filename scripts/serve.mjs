@@ -3,7 +3,9 @@ import { stat } from 'node:fs/promises';
 import { createServer } from 'node:http';
 import { extname, resolve, sep } from 'node:path';
 
-const root = resolve('dist');
+const root = resolve(
+  process.env.BOLD_COVERAGE === '1' ? 'dist-coverage' : 'dist',
+);
 const prefix = '/Boldemort/';
 const mime = {
   '.html': 'text/html',

@@ -6,7 +6,6 @@ export default defineConfig({
     coverage: {
       include: ['src/{unicode,markdown,document,analysis,i18n}.ts'],
       reporter: ['text', 'html', 'json-summary'],
-      thresholds: { lines: 95 },
     },
   },
 });

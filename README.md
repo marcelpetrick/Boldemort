@@ -3,11 +3,13 @@
 [![CI](https://github.com/marcelpetrick/Boldemort/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/marcelpetrick/Boldemort/actions/workflows/ci.yml)
 [![GitHub Pages](https://github.com/marcelpetrick/Boldemort/actions/workflows/pages.yml/badge.svg)](https://github.com/marcelpetrick/Boldemort/actions/workflows/pages.yml)
 [![Release pipeline](https://github.com/marcelpetrick/Boldemort/actions/workflows/release.yml/badge.svg)](https://github.com/marcelpetrick/Boldemort/actions/workflows/release.yml)
-[![Version 0.1.1](https://img.shields.io/badge/version-0.1.1-6241c2)](CHANGELOG.md)
+[![Version 0.1.2](https://img.shields.io/badge/version-0.1.2-6241c2)](CHANGELOG.md)
 [![License GPLv3](https://img.shields.io/badge/license-GPLv3-blue)](LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-6-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Vite](https://img.shields.io/badge/Vite-8-646cff?logo=vite&logoColor=white)](https://vite.dev/)
 [![GFM](https://img.shields.io/badge/Markdown-GFM-24292f)](https://github.github.com/gfm/)
+[![Coverage gate](https://img.shields.io/badge/coverage%20gate-98%25-26704d)](#local-development)
+[![Mutation testing](https://img.shields.io/badge/mutation%20testing-Stryker-f28c28)](#local-development)
 [![Playwright](https://img.shields.io/badge/tested_with-Playwright-2ead33)](https://playwright.dev/)
 [![Languages](https://img.shields.io/badge/languages-English%20%7C%20Deutsch-6241c2)](#using-the-editor)
 [![Privacy](https://img.shields.io/badge/drafts-browser%20memory-26704d)](#using-the-editor)
@@ -58,7 +60,14 @@ npx playwright install --with-deps chromium firefox webkit
 
 The pipeline checks formatting, TypeScript, CSS, HTML, Markdown, dependency
 inventory and audit results, then runs unit coverage, the production build,
-and Playwright against the GitHub Pages subpath. On a host without WebKit's
+and Playwright against the GitHub Pages subpath. The coverage gate requires
+at least 98% line coverage across every application TypeScript module.
+Run `npm run mutation` for Stryker mutation testing of the conversion and
+analysis core. It runs on a sandbox copy, and reports to `reports/mutation/`.
+Unit coverage is reported in `coverage/`. Browser instrumentation uses a
+separate build directory and is excluded from Pages and release artifacts.
+
+On a host without WebKit's
 system prerequisites, `./localPipeline.sh --project=chromium --project=firefox`
 runs the locally supported browsers. CI is intended to run all three engines.
 
@@ -75,7 +84,7 @@ CI triggers Pages deployment. The Pages workflow can also be dispatched for
 the current tip of `main`.
 
 For a release, update the package version and changelog, verify the pipeline,
-then push a matching tag such as `v0.1.1` from `main`. The release workflow
+then push a matching tag such as `v0.1.2` from `main`. The release workflow
 reruns local verification, packages the static site with licensing information,
 and publishes a SHA-256 checksum alongside the archive.
 

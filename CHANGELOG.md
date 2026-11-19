@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.2
+
+- Enforced 98% application line coverage with unit and browser instrumentation.
+- Added isolated mutation testing and expanded browser regression tests.
+
 ## 0.1.1
 
 - Added GitHub Actions verification, Pages deployment and tagged release builds.

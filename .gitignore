@@ -6,3 +6,6 @@ test-results/
 /vision(1).md
 /Boldemort-vision.zip
 release/
+dist-coverage/
+.stryker-tmp/
+reports/

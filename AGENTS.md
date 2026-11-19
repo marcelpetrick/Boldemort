@@ -15,8 +15,8 @@
 - Make `localPipeline.sh` the shared entry point for local and CI verification.
   Include applicable format, lint, static analysis, test, coverage, and build
   checks. Add end-to-end and container checks as those entry points become
-  available. The DarkFactory baseline is at least 95% automated test coverage.
-  Define the coverage metric for the chosen stack and enforce it in the pipeline.
+  available. Enforce at least 98% combined application line coverage across
+  unit-tested and browser-tested modules. Run mutation tests in a sandbox.
 - Follow the repository's integration branch. DarkFactory defaults to `main`
   for an empty repository. Verify each atomic change before committing, use
   Conventional Commits, and push verified commits when authorized. Once the
