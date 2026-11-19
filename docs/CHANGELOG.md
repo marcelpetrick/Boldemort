@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.1
+
+- Switched the Unicode editor font so short strikes overlay their letters.
+
 ## 0.2.0
 
 - Added three Unicode underline and three strikethrough choices.

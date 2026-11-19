@@ -263,13 +263,17 @@ button[aria-pressed='true'] {
 .editor-shell {
   --gutter: 2.75rem;
   --editor-pad: 0.9rem;
-  --editor-font: 1rem/1.65 ui-monospace, 'DejaVu Sans Mono', monospace;
+  --editor-font: 1rem/1.65 system-ui, sans-serif;
 
   position: relative;
   flex: 1 0 auto;
   display: flex;
   min-height: clamp(10rem, 43vh, 42rem);
   background: var(--surface);
+}
+
+.writing-card:has([data-mode='markdown'][aria-pressed='true']) .editor-shell {
+  --editor-font: 1rem/1.65 ui-monospace, monospace;
 }
 
 #gutter {

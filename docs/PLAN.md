@@ -44,3 +44,6 @@
   alternatives, and round-trip acceptance in the vision. Verify exact
   clipboard bytes, pasted variants, and the editor’s help and project links
   before publishing to GitHub Pages.
+- Compared fonts against the actual Unicode output. Use the system UI font
+  in Unicode mode so stroke overlays render through letters. Test the font
+  switch and retain monospace in Markdown mode.

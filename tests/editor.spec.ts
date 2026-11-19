@@ -336,6 +336,7 @@ test('copies the selected Unicode line variants and links to project and tests',
     });
   });
   const draft = page.locator('#editor');
+  await expect(draft).toHaveCSS('font-family', /system-ui/u);
   await page.locator('#strike-style').selectOption('tilde');
   await draft.fill('a b');
   await draft.press('Control+a');
@@ -347,6 +348,7 @@ test('copies the selected Unicode line variants and links to project and tests',
   await expect(page.locator('body')).toHaveAttribute('data-clipboard', 'a̴ ̴b̴');
   await page.getByRole('button', { name: 'Markdown', exact: true }).click();
   await expect(draft).toHaveValue('~~a b~~');
+  await expect(draft).toHaveCSS('font-family', /ui-monospace/u);
 
   await page.locator('#underline-style').selectOption('double');
   await draft.fill('<u>a b</u>');

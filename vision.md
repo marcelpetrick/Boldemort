@@ -204,7 +204,8 @@ A suitable approach is to keep an internal **loss-preserving document model** th
   double macron. Decorative under-shapes are outside the line controls.
 - Offer independent choices in the editor. Applying them writes one selected
   combining mark per supported grapheme, including inter-word spaces.
-  Tabs and line breaks retain their original bytes.
+  Tabs and line breaks retain their original bytes. Verify that the editor
+  font renders strike marks over their base letters in Unicode mode.
 - Recognize older and pasted line variants. Toggling off removes the selected
   style and preserves the other style, accents, and emoji. Existing styled
   text keeps its Unicode spelling when changing a choice. Convert supported
