@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.3
+
+- Continue armed Bold inside nested Markdown formatting and at the start of
+  an existing bold span without inserting extra delimiters.
+- Verify both scenarios through browser typing and Markdown-to-Unicode
+  conversion.
+
 ## 0.3.2
 
 - Preserve nearby Markdown styling when typing with an armed format. Keep

@@ -476,6 +476,42 @@ describe('editing existing styles and emoji', () => {
     ).toEqual({ start: caret, end: caret, value: 'x' });
   });
 
+  it('preserves the nested Markdown wrapper and its closing boundary', () => {
+    const bold = new Set(['bold'] as const);
+    const text = '<u>**one**</u>';
+    const closing = text.indexOf('**</u>');
+    const frame = draft(text, closing, closing);
+    expect(formatTyping(frame, 'x', bold)).toEqual({
+      start: closing,
+      end: closing,
+      value: 'x',
+    });
+    expect(formatTyping(frame, ' ', bold)).toEqual({
+      start: closing + 2,
+      end: closing + 2,
+      value: ' ',
+    });
+  });
+
+  it('keeps newly typed text inside an adjacent span and padding outside', () => {
+    const bold = new Set(['bold'] as const);
+    expect(formatTyping(draft('**one**', 0, 0), ' x ', bold)).toEqual({
+      start: 0,
+      end: 2,
+      value: ' **x ',
+    });
+    expect(formatTyping(draft('**x one**', 3, 3), 'y', bold)).toEqual({
+      start: 3,
+      end: 3,
+      value: 'y',
+    });
+    expect(formatTyping(draft('**one**', 2, 2), ' ', bold)).toEqual({
+      start: 0,
+      end: 0,
+      value: ' ',
+    });
+  });
+
   it.each([
     ['<u>one</u> ', ['underline'], '<u>one two</u>'],
     ['~~***one***~~ ', ['bold', 'italic', 'strike'], '~~***one two***~~'],

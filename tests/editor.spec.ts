@@ -105,6 +105,37 @@ test('armed bold preserves a previous bold-italic span', async ({ page }) => {
   await expect(editor).toHaveValue('**!**plain');
 });
 
+for (const { label, text, caret, markdown, unicode } of [
+  {
+    label: 'continues inside nested underline and bold',
+    text: '<u>**one**</u>',
+    caret: 8,
+    markdown: '<u>**onexy**</u>',
+    unicode: '𝐨͟𝐧͟𝐞͟𝐱͟𝐲͟',
+  },
+  {
+    label: 'prepends to the adjacent bold span',
+    text: '**one**',
+    caret: 0,
+    markdown: '**xyone**',
+    unicode: '𝐱𝐲𝐨𝐧𝐞',
+  },
+]) {
+  test(`armed bold ${label}`, async ({ page }) => {
+    const editor = page.locator('#editor');
+    await page.getByRole('button', { name: 'Markdown', exact: true }).click();
+    await editor.fill(text);
+    await editor.evaluate((element, point) => {
+      (element as HTMLTextAreaElement).setSelectionRange(point, point);
+    }, caret);
+    await page.getByRole('button', { name: 'Bold', exact: true }).click();
+    await editor.pressSequentially('xy');
+    await expect(editor).toHaveValue(markdown);
+    await page.getByRole('button', { name: 'Unicode', exact: true }).click();
+    await expect(editor).toHaveValue(unicode);
+  });
+}
+
 test('keyboard formatting, protected syntax, bullets and native history events', async ({
   page,
 }) => {

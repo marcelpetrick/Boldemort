@@ -92,6 +92,13 @@ export function inspectMarkdown(
   const formattingRanges: Positioned[] = [];
   const protectedRanges: Positioned[] = [];
   let literal = false;
+  function recordFormatting(range: Positioned, children: Node[]) {
+    formattingRanges.push(range);
+    for (const child of children) {
+      if (emphasis.has(child.type) && 'children' in child)
+        recordFormatting(span(child), child.children);
+    }
+  }
   const visit = (nodes: Node[]) => {
     for (let index = 0; index < nodes.length; index++) {
       const node = nodes[index]!;
@@ -111,7 +118,7 @@ export function inspectMarkdown(
             lineStyles,
           );
           if (value !== undefined)
-            formattingRanges.push({ start: range.start, end: span(end).end });
+            recordFormatting({ start: range.start, end: span(end).end }, body);
           if (value !== undefined && /\S/u.test(value)) {
             changes.push({ start: range.start, end: span(end).end, value });
             index = closing;
@@ -119,9 +126,9 @@ export function inspectMarkdown(
           }
         }
       }
-      if (emphasis.has(node.type)) {
+      if (emphasis.has(node.type) && 'children' in node) {
         const value = inline(node, source, new Set(), lineStyles);
-        if (value !== undefined) formattingRanges.push(range);
+        if (value !== undefined) recordFormatting(range, node.children);
         if (
           value !== undefined &&
           value !==

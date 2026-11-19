@@ -338,29 +338,42 @@ export function formatTyping(
     const marker = suffix[0];
     const closing = raw.length - suffix.length;
     return (
-      start >= part.start + prefix.length &&
-      (!marker ||
-        !'*~'.includes(marker) ||
-        (raw[prefix.length] !== marker && raw[closing - 1] !== marker))
+      !marker ||
+      !'*~'.includes(marker) ||
+      (raw[prefix.length] !== marker && raw[closing - 1] !== marker)
     );
   }
-  const inside =
-    start === end &&
-    formattingRanges.some(
-      (part) => part.end === end + suffix.length && matchesSpan(part),
+  if (start === end) {
+    const inside = formattingRanges.find(
+      (part) =>
+        start >= part.start + prefix.length &&
+        end <= part.end - suffix.length &&
+        matchesSpan(part),
     );
-  if (inside && !input.trim()) {
-    return {
-      start: end + suffix.length,
-      end: end + suffix.length,
-      value: input,
-    };
+    if (inside) {
+      if (!input.trim()) {
+        // Whitespace against an opening or closing marker invalidates it.
+        if (start === inside.start + prefix.length)
+          return { start: inside.start, end: inside.start, value: input };
+        if (end === inside.end - suffix.length)
+          return { start: inside.end, end: inside.end, value: input };
+      }
+      return { start, end, value: input };
+    }
   }
-  if (inside) return { start, end, value: input };
   if (!input.trim()) return { start, end, value: input };
   const leading = input.match(/^\s*/u)![0];
   const trailing = input.match(/\s*$/u)![0];
   if (start === end) {
+    if (
+      formattingRanges.some((part) => part.start === start && matchesSpan(part))
+    ) {
+      return {
+        start,
+        end: start + prefix.length,
+        value: leading + prefix + input.trimStart(),
+      };
+    }
     const gap = /[ \t]+$/u.exec(text.slice(0, start))?.[0];
     const previousEnd = start - (gap?.length ?? 0);
     if (

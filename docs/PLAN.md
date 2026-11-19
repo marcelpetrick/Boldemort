@@ -60,3 +60,7 @@
   Markdown styles and Unicode line styling without `Intl.Segmenter`.
   Verify compatible typing continuation, styled emoji round-trips, and undo
   before rerunning mutation and the release checks.
+- Reproduce the v0.3.2 review findings in browser tests before changing the
+  editor. Verify armed Bold at a nested closing delimiter and immediately
+  before a bold opener in both Markdown and Unicode. Preserve the previous
+  bold-italic and punctuation checks, then run the release gates.
