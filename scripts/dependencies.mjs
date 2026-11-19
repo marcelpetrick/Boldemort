@@ -80,9 +80,9 @@ ${table}
 `;
 
 if (values.check) {
-  if (readFileSync('DEPENDENCIES.md', 'utf8') !== contents) {
+  if (readFileSync('docs/DEPENDENCIES.md', 'utf8') !== contents) {
     throw new Error(
-      'Regenerate DEPENDENCIES.md with node scripts/dependencies.mjs',
+      'Regenerate docs/DEPENDENCIES.md with node scripts/dependencies.mjs',
     );
   }
-} else writeFileSync('DEPENDENCIES.md', contents);
+} else writeFileSync('docs/DEPENDENCIES.md', contents);

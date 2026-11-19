@@ -3,7 +3,8 @@
 ## Start here
 
 1. Read `vision.md`, the canonical product brief.
-2. Read [PLAN.md](PLAN.md), [DECISIONS.md](DECISIONS.md), and [README.md](README.md).
+2. Read [the plan](docs/PLAN.md), [the decisions](docs/DECISIONS.md), and
+   [the README](README.md).
 3. Update the plan with acceptance scenarios and ordered deliverables before
    changing product code. Wait for the vision before starting implementation.
    Raise material conflicts between the vision and existing project decisions.

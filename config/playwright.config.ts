@@ -6,7 +6,7 @@ const baseURL = coverage
   : 'http://127.0.0.1:4173/Boldemort/';
 
 export default defineConfig({
-  testDir: './tests',
+  testDir: '../tests',
   testMatch: '**/*.spec.ts',
   fullyParallel: true,
   retries: process.env.CI ? 1 : 0,
@@ -20,9 +20,10 @@ export default defineConfig({
     { name: 'firefox', use: { ...devices['Desktop Firefox'] } },
     { name: 'webkit', use: { ...devices['Desktop Safari'] } },
   ],
-  outputDir: coverage ? 'test-results/coverage' : 'test-results/browser',
+  outputDir: coverage ? '../test-results/coverage' : '../test-results/browser',
   webServer: {
     command: 'node scripts/serve.mjs',
+    cwd: process.cwd(),
     url: baseURL,
     env: { PORT: coverage ? '4174' : '4173' },
     reuseExistingServer: !process.env.CI && !coverage,

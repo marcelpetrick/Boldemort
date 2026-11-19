@@ -7,12 +7,12 @@ const tag = process.argv[2];
 if (!/^v\d+\.\d+\.\d+$/u.test(tag ?? '') || tag !== 'v' + metadata.version) {
   throw new Error('Release tag must match the package version.');
 }
-const changelog = await readFile('CHANGELOG.md', 'utf8');
+const changelog = await readFile('docs/CHANGELOG.md', 'utf8');
 if (!changelog.split('\n').includes('## ' + metadata.version)) {
   throw new Error('The release needs a matching changelog entry.');
 }
 await mkdir('release', { recursive: true });
-await cp('DEPENDENCIES.md', 'dist/DEPENDENCIES.md');
+await cp('docs/DEPENDENCIES.md', 'dist/DEPENDENCIES.md');
 const filename = 'Boldemort-' + tag + '.tar.gz';
 execFileSync('tar', [
   '--sort=name',

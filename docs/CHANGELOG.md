@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.6
+
+- Organized project documents and tool configuration into dedicated folders.
+- Made the author byline and GitHub Pages link easier to find in the README.
+
 ## 0.1.5
 
 - Added GitHub Actions dry runs for Pages artifacts and release packages.

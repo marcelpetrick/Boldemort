@@ -1,6 +1,6 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { defineConfig, type Plugin } from 'vite';
-import lock from './package-lock.json' with { type: 'json' };
+import lock from '../package-lock.json' with { type: 'json' };
 import istanbul from 'vite-plugin-istanbul';
 
 function licenseAssets(): Plugin {

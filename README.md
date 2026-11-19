@@ -3,7 +3,7 @@
 [![CI](https://github.com/marcelpetrick/Boldemort/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/marcelpetrick/Boldemort/actions/workflows/ci.yml)
 [![GitHub Pages](https://github.com/marcelpetrick/Boldemort/actions/workflows/pages.yml/badge.svg)](https://github.com/marcelpetrick/Boldemort/actions/workflows/pages.yml)
 [![Release pipeline](https://github.com/marcelpetrick/Boldemort/actions/workflows/release.yml/badge.svg)](https://github.com/marcelpetrick/Boldemort/actions/workflows/release.yml)
-[![Version 0.1.5](https://img.shields.io/badge/version-0.1.5-6241c2)](CHANGELOG.md)
+[![Version 0.1.6](https://img.shields.io/badge/version-0.1.6-6241c2)](docs/CHANGELOG.md)
 [![License GPLv3](https://img.shields.io/badge/license-GPLv3-blue)](LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-6-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Vite](https://img.shields.io/badge/Vite-8-646cff?logo=vite&logoColor=white)](https://vite.dev/)
@@ -16,6 +16,16 @@
 
 Boldemort is a one-editor writing tool that converts compatible Markdown
 formatting to copyable Unicode and back. It runs entirely in the browser.
+
+**[Try Boldemort on GitHub Pages](https://marcelpetrick.github.io/Boldemort/)**
+
+Public launch is pending GPL variant confirmation.
+
+**Author: Marcel Petrick <mail@marcelpetrick.it>**
+
+Credit to **Masapetric**. Developed with AI assistance. See the [GPLv3
+license](LICENSE), [dependency inventory](docs/DEPENDENCIES.md),
+[implementation plan](docs/PLAN.md), and [project vision](vision.md).
 
 ![The Boldemort editor with a sample Unicode draft and a LinkedIn length estimate](media/editor.png)
 
@@ -46,6 +56,12 @@ spellings when the same conversion span is still recognized. Browser text
 input normalizes line endings to LF. Mathematical letters, combining marks
 and Markdown can be interpreted differently by external applications.
 Drafts live in the current tab. Export a copy to keep one.
+
+## Repository layout
+
+- [Application source](src/) and [browser and unit tests](tests/)
+- [Tool configuration](config/) and [maintenance scripts](scripts/)
+- [Project documentation](docs/) and [editor screenshots](media/)
 
 ## Local development
 
@@ -80,21 +96,14 @@ building, then open <http://127.0.0.1:4173/Boldemort/>.
 
 ## GitHub Pages and releases
 
-The hosted path is <https://marcelpetrick.github.io/Boldemort/>.
 Set **Settings → Pages → Source** to **GitHub Actions** and the Actions variable
 `PAGES_ENABLED` to `true` to enable public deployment. Successful main-branch
 CI triggers Pages deployment. The Pages workflow can also be dispatched for
 the current tip of `main`.
 
 For a release, update the package version and changelog, verify the pipeline,
-then push a matching tag such as `v0.1.5` from `main`. The release workflow
+then push a matching tag such as `v0.1.6` from `main`. The release workflow
 reruns local verification, packages the static site with licensing information,
 and publishes a SHA-256 checksum alongside the archive. Dispatch the Release
 workflow on `main` to verify and download the archive from Actions without
 creating a GitHub release.
-
-## Credits and license
-
-Credit to **Masapetric**. Developed with AI assistance. See the [GPLv3
-license](LICENSE), [dependency inventory](DEPENDENCIES.md), [implementation
-plan](PLAN.md), and [project vision](vision.md).

@@ -4,7 +4,6 @@ cd -- "$(dirname -- "${BASH_SOURCE[0]}")"
 npm run format:check
 npm run lint
 npm run typecheck
-npx prettier --check ".github/workflows/*.yml"
 npm run coverage
 npm run coverage:browser
 npm run build

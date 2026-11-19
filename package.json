@@ -1,23 +1,23 @@
 {
   "name": "boldemort",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "private": true,
   "type": "module",
   "license": "GPL-3.0-only",
   "scripts": {
-    "dev": "vite --host 127.0.0.1",
-    "build": "vite build",
-    "preview": "vite preview --host 127.0.0.1",
-    "lint": "eslint . --max-warnings 0 && stylelint src/*.css && html-validate index.html && markdownlint-cli2 README.md AGENTS.md PLAN.md DECISIONS.md CHANGELOG.md DEPENDENCIES.md",
-    "format": "prettier --write index.html \"src/**/*\" \"tests/**/*\" \"scripts/*.mjs\" \"*.json\" \"*.config.*\"",
-    "format:check": "prettier --check index.html \"src/**/*\" \"tests/**/*\" \"scripts/*.mjs\" \"*.json\" \"*.config.*\"",
-    "typecheck": "tsc --noEmit",
-    "test": "vitest run",
-    "coverage": "vitest run --coverage",
-    "e2e": "playwright test",
+    "dev": "vite --config config/vite.config.ts --host 127.0.0.1",
+    "build": "vite build --config config/vite.config.ts",
+    "preview": "vite preview --config config/vite.config.ts --host 127.0.0.1",
+    "lint": "eslint --config config/eslint.config.mjs . --max-warnings 0 && stylelint --config config/stylelint.config.mjs src/*.css && html-validate --config config/htmlvalidate.json index.html && markdownlint-cli2 README.md AGENTS.md \"docs/*.md\"",
+    "format": "prettier --config config/prettier.json --write index.html package.json \"src/**/*\" \"tests/**/*\" \"scripts/*.mjs\" \"config/**/*\" \".github/workflows/*.yml\"",
+    "format:check": "prettier --config config/prettier.json --check index.html package.json \"src/**/*\" \"tests/**/*\" \"scripts/*.mjs\" \"config/**/*\" \".github/workflows/*.yml\"",
+    "typecheck": "tsc --project config/tsconfig.json --noEmit",
+    "test": "vitest run --config config/vitest.config.ts",
+    "coverage": "vitest run --config config/vitest.config.ts --coverage",
+    "e2e": "playwright test --config config/playwright.config.ts",
     "dependencies:check": "node scripts/dependencies.mjs --check",
-    "coverage:browser": "vite build --mode coverage && BOLD_COVERAGE=1 playwright test --project=chromium && node scripts/coverage.mjs",
-    "mutation": "stryker run"
+    "coverage:browser": "vite build --config config/vite.config.ts --mode coverage && BOLD_COVERAGE=1 npm run e2e -- --project=chromium && node scripts/coverage.mjs",
+    "mutation": "stryker run config/stryker.config.json"
   },
   "engines": {
     "node": ">=24"

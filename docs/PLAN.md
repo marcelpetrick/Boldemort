@@ -33,3 +33,6 @@
 - Verified an article-length paste and follow-up edit in all three browsers.
   Added release and Pages artifact dry runs. Public deployment is pending the
   project owner's license variant confirmation specified in the vision.
+- Moved supporting docs into `docs/` and tool configuration into `config/`.
+  Updated all pipeline and release paths. Added the author and Pages link
+  near the top of the README and reviewed the reorganization against main.

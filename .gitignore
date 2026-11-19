@@ -3,8 +3,7 @@ dist/
 coverage/
 playwright-report/
 test-results/
-/vision(1).md
-/Boldemort-vision.zip
+/reference/
 release/
 dist-coverage/
 .stryker-tmp/

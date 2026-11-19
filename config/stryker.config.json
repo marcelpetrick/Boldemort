@@ -1,7 +1,7 @@
 {
   "testRunner": "vitest",
   "vitest": {
-    "configFile": "vitest.config.ts"
+    "configFile": "config/vitest.config.ts"
   },
   "mutate": [
     "src/analysis.ts",
@@ -14,8 +14,8 @@
     "!src/**/*.ts",
     "!tests/**/*.test.ts",
     "!package.json",
-    "!tsconfig.json",
-    "!vitest.config.ts"
+    "!config/tsconfig.json",
+    "!config/vitest.config.ts"
   ],
   "inPlace": false,
   "coverageAnalysis": "perTest",
