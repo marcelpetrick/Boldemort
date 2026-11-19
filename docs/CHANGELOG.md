@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.0
+
+- Added three Unicode underline and three strikethrough choices.
+- Added the author, source repository, test results, and a short editor overview.
+
 ## 0.1.8
 
 - Updated the Markdown linter’s KaTeX dependency to clear the npm audit.

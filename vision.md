@@ -186,14 +186,33 @@ A suitable approach is to keep an internal **loss-preserving document model** th
 | Bold | `**text**` (also recognize valid GFM `__text__`) | Unicode mathematical bold letters; digits when supported | Preserve punctuation and unsupported scripts. |
 | Italic | `*text*` (also recognize GFM `_text_`) | Unicode mathematical italic letters | No script/calligraphic style. |
 | Bold + italic | `***text***` or equivalent valid nesting | Unicode mathematical bold italic where available | Not all digit/letter combinations exist. |
-| Underline | `<u>text</u>` | Combining low line `U+0332` as a candidate | Rendering/reversibility differ across apps. HTML tag literal is the agreed Markdown syntax. |
-| Strikethrough | `~~text~~` (GFM) | Combining long stroke overlay `U+0336` as a candidate | Do not add duplicate marks when toggling. |
+| Underline | `<u>text</u>` | Selected underline mark from §5.3.1 | Rendering/reversibility differ across apps. HTML tag literal is the agreed Markdown syntax. |
+| Strikethrough | `~~text~~` (GFM) | Selected strikethrough mark from §5.3.1 | Do not add duplicate marks when toggling. |
 | Unordered bullet | Valid GFM `- item`, `* item`, `+ item` | `• item` as candidate | Nested indentation/round-trip semantics need care. |
 | Ordered list | `1. item`, etc. | Preserve numbered plain text when possible | Continue numbering only when semantics are clear. |
 | Task list | `- [ ] task`, `- [x] task` | Preserve literal GFM or document a safe glyph mapping | Check status and nesting must not vanish. |
 | Headings, tables, links, images, code | Full literal GFM | Preserve source when no faithful Unicode equivalent exists | No destructive approximations. |
 
 **Specific limitation:** not every Unicode script, diacritic, number, emoji, or punctuation character has a mathematical bold/italic equivalent. Mathematical italic has no universal digits. Some input is already stylized; normalization may be many-to-one. Use explicit lookup tables and reverse mappings, not arithmetic offsets that assume every glyph range is contiguous. Track Unicode grapheme clusters and combining sequences so marks attach to whole characters.
+
+### 5.3.1 Copyable line variants
+
+- [YayText strikethrough](https://yaytext.com/strike/) defines short (U+0335),
+  long (U+0336), and tilde (U+0334). Default to short.
+- [YayText underline](https://yaytext.com/underline/) defines double macron
+  below (U+035F), low line (U+0332), and double low line (U+0333). Default to
+  double macron. Decorative under-shapes are outside the line controls.
+- Offer independent choices in the editor. Applying them writes one selected
+  combining mark per supported grapheme, including inter-word spaces.
+  Tabs and line breaks retain their original bytes.
+- Recognize older and pasted line variants. Toggling off removes the selected
+  style and preserves the other style, accents, and emoji. Existing styled
+  text keeps its Unicode spelling when changing a choice. Convert supported
+  runs into Markdown and restore the exact pasted spelling on an unchanged
+  round-trip.
+- The footer links to the source project, Marcel Petrick's email, and CI test
+  results. A short overview describes LinkedIn and plain-text email use in
+  one paragraph and at most five bullets, in both supported languages.
 
 ### 5.4 Selection and toggle semantics
 

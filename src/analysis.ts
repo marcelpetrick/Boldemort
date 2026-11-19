@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import { parse } from './markdown.ts';
-import { decode, graphemes } from './unicode.ts';
+import { decode, graphemes, needsUnicodeDecoding } from './unicode.ts';
 
 type Node =
   | ReturnType<typeof parse>['children'][number]
@@ -73,7 +73,7 @@ export function analyze(source: string, locale: string) {
   for (const child of tree.children) diagnostics(child);
   const paragraphs = tree.children.map(prose).filter((text) => text.trim());
   const body = paragraphs.join('\n\n');
-  const plain = /[\u0332\u0336\u210e\u{1d400}-\u{1d7ff}]/u.test(body)
+  const plain = needsUnicodeDecoding.test(body)
     ? Array.from(graphemes(body), ({ segment }) => {
         const { base, tail } = decode(segment);
         return base + tail;

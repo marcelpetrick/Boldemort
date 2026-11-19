@@ -302,3 +302,54 @@ test('pastes and edits an article-length draft without truncating it', async ({
   await expect(draft).toHaveJSProperty('textLength', size + 1);
   await expect(page.locator('#limit')).toContainText('125,001 / 125,000');
 });
+
+test('copies the selected Unicode line variants and links to project and tests', async ({
+  page,
+}) => {
+  await expect(
+    page.getByRole('link', { name: 'Marcel Petrick' }),
+  ).toHaveAttribute('href', 'mailto:mail@marcelpetrick.it');
+  await expect(
+    page.getByRole('link', { name: 'GitHub project' }),
+  ).toHaveAttribute('href', 'https://github.com/marcelpetrick/Boldemort');
+  await expect(
+    page.getByRole('link', { name: 'CI and test results' }),
+  ).toHaveAttribute('href', /actions\/workflows\/ci.yml$/u);
+  await page.getByText('What Boldemort does', { exact: true }).click();
+  await expect(page.locator('.introduction')).toContainText('plain-text email');
+  await expect(page.locator('.introduction li')).toHaveCount(3);
+  await page.locator('#language').selectOption('de');
+  await expect(
+    page.getByText('Was Boldemort kann', { exact: true }),
+  ).toBeVisible();
+  await page.locator('#language').selectOption('en');
+
+  await page.evaluate(() => {
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: {
+        writeText: (text: string) => {
+          document.body.dataset.clipboard = text;
+          return Promise.resolve();
+        },
+      },
+    });
+  });
+  const draft = page.locator('#editor');
+  await page.locator('#strike-style').selectOption('tilde');
+  await draft.fill('a b');
+  await draft.press('Control+a');
+  await page
+    .getByRole('button', { name: 'Strikethrough', exact: true })
+    .click();
+  await expect(draft).toHaveValue('a̴ ̴b̴');
+  await page.getByRole('button', { name: 'Copy all' }).click();
+  await expect(page.locator('body')).toHaveAttribute('data-clipboard', 'a̴ ̴b̴');
+  await page.getByRole('button', { name: 'Markdown', exact: true }).click();
+  await expect(draft).toHaveValue('~~a b~~');
+
+  await page.locator('#underline-style').selectOption('double');
+  await draft.fill('<u>a b</u>');
+  await page.getByRole('button', { name: 'Unicode', exact: true }).click();
+  await expect(draft).toHaveValue('a̳ ̳b̳');
+});

@@ -1,5 +1,36 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 export const messages = {
+  project: ['GitHub project', 'GitHub-Projekt'],
+  tests: ['CI and test results', 'CI und Testergebnisse'],
+  lineStyles: ['Unicode line styles', 'Unicode-Linienstile'],
+  underlineStyle: ['Unicode underline style', 'Unicode-Unterstreichungsstil'],
+  strikeStyle: ['Unicode strikethrough style', 'Unicode-Durchstreichungsstil'],
+  macronUnderline: [
+    'Underline · Double macron',
+    'Unterstreichen · Doppelmakron',
+  ],
+  lowUnderline: ['Underline · Low line', 'Unterstreichen · Unterstrich'],
+  doubleUnderline: ['Underline · Double line', 'Unterstreichen · Doppelstrich'],
+  shortStrike: ['Strikethrough · Short', 'Durchstreichen · Kurz'],
+  longStrike: ['Strikethrough · Long', 'Durchstreichen · Lang'],
+  tildeStrike: ['Strikethrough · Tilde', 'Durchstreichen · Tilde'],
+  introTitle: ['What Boldemort does', 'Was Boldemort kann'],
+  introBody: [
+    'Boldemort adds emphasis where formatting is limited, such as LinkedIn posts and plain-text email. Write in Markdown or copy styled Unicode text.',
+    'Boldemort hilft beim Hervorheben, wenn die Formatierung begrenzt ist, etwa in LinkedIn-Beiträgen oder Klartext-E-Mails. Schreibe in Markdown oder kopiere formatierten Unicode-Text.',
+  ],
+  introCompose: [
+    'Switch between Markdown and Unicode in one draft.',
+    'Wechsle in einem Entwurf zwischen Markdown und Unicode.',
+  ],
+  introFormat: [
+    'Apply bold, italic, underline, or strikethrough and copy the result.',
+    'Formatiere Text fett, kursiv, unterstrichen oder durchgestrichen und kopiere das Ergebnis.',
+  ],
+  introCheck: [
+    'Check writing stats and LinkedIn length, or export your draft as a file.',
+    'Prüfe Schreibstatistik und LinkedIn-Länge oder exportiere den Entwurf als Datei.',
+  ],
   subtitle: ['Markdown & Unicode editor', 'Markdown- und Unicode-Editor'],
   language: ['Language', 'Sprache'],
   theme: ['Theme', 'Farbschema'],
@@ -95,6 +126,36 @@ export type Key = keyof typeof messages;
 export type Locale = 'en' | 'de';
 
 export const help = {
+  project: [
+    'View the GitHub project.',
+    'Find source code, documentation, and release history.',
+    'GitHub-Projekt ansehen.',
+    'Hier findest du Quelltext, Dokumentation und Versionsverlauf.',
+  ],
+  author: [
+    'Contact the author.',
+    'Opens an email to Marcel Petrick.',
+    'Autor kontaktieren.',
+    'Öffnet eine E-Mail an Marcel Petrick.',
+  ],
+  tests: [
+    'View automated test results.',
+    'GitHub Actions runs format, lint, type, browser, coverage, and mutation checks.',
+    'Automatische Testergebnisse ansehen.',
+    'GitHub Actions prüft Format, Stil, Typen, Browser, Abdeckung und Mutationen.',
+  ],
+  intro: [
+    'See what Boldemort can do.',
+    'Open a short overview of the editor and why Unicode formatting is useful.',
+    'Lies, was Boldemort kann.',
+    'Öffnet eine kurze Übersicht über den Editor und den Nutzen der Unicode-Formatierung.',
+  ],
+  lineStyles: [
+    'Choose how new Unicode lines look.',
+    'Choose an underline or strike for new formatting and newly converted Markdown. Existing styled text retains its own marks.',
+    'Aussehen neuer Unicode-Linien wählen.',
+    'Wähle einen Unterstrich oder Durchstrich für neue Formatierungen und frisch umgewandeltes Markdown. Bestehende Formatierungen bleiben erhalten.',
+  ],
   language: [
     'Choose the interface language.',
     'Changes labels, messages, help and number formatting. Your draft stays as written.',
@@ -133,15 +194,15 @@ export const help = {
   ],
   underline: [
     'Toggle underline.',
-    'Formats selected text or arms underline for typing. Markdown uses literal <u> tags. Unicode adds a combining low line.',
+    'Formats selected text or arms underline for typing. Markdown uses literal <u> tags. Unicode uses the selected underline mark.',
     'Unterstreichen umschalten.',
-    'Formatiert die Auswahl oder die weitere Eingabe. Markdown nutzt <u>-Tags. Unicode ergänzt einen kombinierenden Unterstrich.',
+    'Formatiert die Auswahl oder die weitere Eingabe. Markdown nutzt <u>-Tags. Unicode nutzt den gewählten Unterstrich.',
   ],
   strike: [
     'Toggle strikethrough.',
-    'Formats selected text or arms strikethrough for typing. Unicode uses a combining stroke that may render differently in other apps.',
+    'Formats selected text or arms strikethrough for typing. Unicode uses the selected stroke, which may render differently in other apps.',
     'Durchstreichen umschalten.',
-    'Formatiert die Auswahl oder die weitere Eingabe. Unicode ergänzt einen überlagerten Strich, der je nach App anders aussehen kann.',
+    'Formatiert die Auswahl oder die weitere Eingabe. Unicode nutzt den gewählten Strich, der je nach App anders aussehen kann.',
   ],
   bullets: [
     'Toggle bullets on the selected lines.',

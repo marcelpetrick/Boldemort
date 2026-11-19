@@ -4,6 +4,10 @@ import { gfmFromMarkdown } from 'mdast-util-gfm';
 import { gfm } from 'micromark-extension-gfm';
 import {
   decode,
+  defaultLineStyles,
+  horizontalSpace,
+  needsUnicodeDecoding,
+  type LineStyles,
   graphemes,
   styleUnicode,
   styles,
@@ -42,24 +46,33 @@ function inline(
   node: Node,
   source: string,
   active: ReadonlySet<Style>,
+  lineStyles: LineStyles,
 ): string | undefined {
   if (node.type === 'text') {
     const { start, end } = span(node);
     const raw = source.slice(start, end);
-    return raw === node.value ? styleUnicode(raw, active) : undefined;
+    return raw === node.value
+      ? styleUnicode(raw, active, false, lineStyles)
+      : undefined;
   }
   const style = emphasis.get(node.type);
   if (!style || !('children' in node)) return undefined;
-  return renderInline(node.children, source, new Set([...active, style]));
+  return renderInline(
+    node.children,
+    source,
+    new Set([...active, style]),
+    lineStyles,
+  );
 }
 function renderInline(
   nodes: Node[],
   source: string,
   active: ReadonlySet<Style>,
+  lineStyles: LineStyles,
 ) {
   let value = '';
   for (const node of nodes) {
-    const rendered = inline(node, source, active);
+    const rendered = inline(node, source, active, lineStyles);
     if (rendered === undefined) return undefined;
     value += rendered;
   }
@@ -70,7 +83,10 @@ type MarkdownAnalysis = {
   protectedRanges: Positioned[];
   literal: boolean;
 };
-export function inspectMarkdown(source: string): MarkdownAnalysis {
+export function inspectMarkdown(
+  source: string,
+  lineStyles = defaultLineStyles,
+): MarkdownAnalysis {
   const changes: Change[] = [];
   const protectedRanges: Positioned[] = [];
   let literal = false;
@@ -86,7 +102,12 @@ export function inspectMarkdown(source: string): MarkdownAnalysis {
         const end = nodes[closing];
         if (end?.type === 'html' && end.value === '</u>') {
           const body = nodes.slice(index + 1, closing);
-          const value = renderInline(body, source, new Set(['underline']));
+          const value = renderInline(
+            body,
+            source,
+            new Set(['underline']),
+            lineStyles,
+          );
           if (value !== undefined && /\S/u.test(value)) {
             changes.push({ start: range.start, end: span(end).end, value });
             index = closing;
@@ -95,7 +116,7 @@ export function inspectMarkdown(source: string): MarkdownAnalysis {
         }
       }
       if (emphasis.has(node.type)) {
-        const value = inline(node, source, new Set());
+        const value = inline(node, source, new Set(), lineStyles);
         if (
           value !== undefined &&
           value !==
@@ -137,7 +158,7 @@ export function inspectMarkdown(source: string): MarkdownAnalysis {
 }
 
 function unicodeChanges(source: string) {
-  if (!/[•\u210e\u{1d400}-\u{1d7ff}]|\u0332|\u0336/u.test(source)) return [];
+  if (!source.includes('•') && !needsUnicodeDecoding.test(source)) return [];
   const analysis = inspectMarkdown(source);
   const protectedRanges = analysis.protectedRanges
     .concat(analysis.changes)
@@ -159,7 +180,9 @@ function unicodeChanges(source: string) {
       run = '';
     }
   };
-  for (const { segment, index } of graphemes(source)) {
+  const glyphs = Array.from(graphemes(source));
+  for (let position = 0; position < glyphs.length; position++) {
+    const { segment, index } = glyphs[position]!;
     while (
       protectedRanges[protection] &&
       protectedRanges[protection]!.end <= index
@@ -179,22 +202,33 @@ function unicodeChanges(source: string) {
       continue;
     }
     const item = decode(segment);
-    if (
-      (range && index >= range.start) ||
-      (!item.active.size && !/^\s+$/u.test(segment))
-    ) {
+    if (range && index >= range.start) {
       emit();
-    } else if (!item.active.size && /^[ \t]+$/u.test(segment) && run) {
-      // Join spaces only when the following grapheme has the same styles.
-      const following = source.slice(index).match(/^[ \t]+(\S)/u)?.[1];
+    } else if (horizontalSpace.test(item.base)) {
+      if (!run) continue;
+      let next = position;
+      while (
+        next < glyphs.length &&
+        horizontalSpace.test(glyphs[next]!.segment)
+      )
+        next++;
+      const following = glyphs[next];
       if (
         following &&
+        (!range || following.index < range.start) &&
         styles.every(
-          (style) => decode(following).active.has(style) === active.has(style),
+          (style) =>
+            decode(following.segment).active.has(style) === active.has(style),
         )
       ) {
-        run += segment;
-        end = index + segment.length;
+        for (const space of glyphs.slice(position, next)) {
+          const blank = decode(space.segment);
+          run += [...blank.active].every((style) => active.has(style))
+            ? blank.base + blank.tail
+            : space.segment;
+        }
+        end = following.index;
+        position = next - 1;
       } else emit();
     } else if (item.active.size) {
       if (styles.some((style) => item.active.has(style) !== active.has(style)))
@@ -211,11 +245,15 @@ function unicodeChanges(source: string) {
   return changes;
 }
 
-export function project(source: string, mode: Mode): Projection[] {
+export function project(
+  source: string,
+  mode: Mode,
+  lineStyles = defaultLineStyles,
+): Projection[] {
   if (!source) return [];
   const changes =
     mode === 'markdown'
-      ? inspectMarkdown(source).changes
+      ? inspectMarkdown(source, lineStyles).changes
       : unicodeChanges(source);
   const pieces: Projection[] = [];
   const append = (raw: string, converted: string) => {

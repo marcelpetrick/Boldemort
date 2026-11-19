@@ -18,7 +18,12 @@ import {
   type Locale,
 } from './i18n.ts';
 import { inspectMarkdown } from './markdown.ts';
-import { graphemes, type Mode, type Style } from './unicode.ts';
+import {
+  graphemes,
+  type LineStyles,
+  type Mode,
+  type Style,
+} from './unicode.ts';
 import { installTooltips } from './tooltip.ts';
 import { version } from '../package.json';
 
@@ -261,7 +266,7 @@ function toggle(style: Style) {
     renderEditor(true);
     return;
   }
-  const patch = formatSelection(doc.frame, style);
+  const patch = formatSelection(doc.frame, style, doc.lineStyles);
   if (patch) replace(patch, true);
   else setNotice('protected');
 }
@@ -289,6 +294,7 @@ editor.addEventListener('beforeinput', (event) => {
         doc.frame,
         kind === 'insertLineBreak' ? '\n' : (event.data ?? ''),
         armed,
+        doc.lineStyles,
       ),
       false,
       kind,
@@ -395,6 +401,17 @@ output.addEventListener('change', () => {
   renderAnalysis();
 });
 destination.addEventListener('change', renderAnalysis);
+const underlineStyle = get<HTMLSelectElement>('underline-style');
+const strikeStyle = get<HTMLSelectElement>('strike-style');
+underlineStyle.addEventListener('change', () => {
+  doc.lineStyles.underline = underlineStyle.value as LineStyles['underline'];
+  renderAnalysis();
+});
+strikeStyle.addEventListener('change', () => {
+  doc.lineStyles.strike = strikeStyle.value as LineStyles['strike'];
+  renderAnalysis();
+});
+
 sourceLink.target = '_blank';
 sourceLink.rel = 'noopener noreferrer';
 get<HTMLSelectElement>('theme').addEventListener('change', (event) => {

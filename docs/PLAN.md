@@ -40,3 +40,7 @@
 - Reviewed exact npm pins against the registry. Updated KaTeX from 0.16.47 to
   0.19.1 to clear the audit. Kept TypeScript at 6.0.3, the latest stable version
   supported by the TypeScript ESLint peer range.
+- Verified YayText’s published Unicode line mappings and recorded defaults,
+  alternatives, and round-trip acceptance in the vision. Verify exact
+  clipboard bytes, pasted variants, and the editor’s help and project links
+  before publishing to GitHub Pages.

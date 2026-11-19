@@ -151,6 +151,38 @@
             </button>
           </div>
         </div>
+        <div class="line-options" role="group" data-name="lineStyles">
+          <select
+            id="underline-style"
+            data-name="underlineStyle"
+            data-help="lineStyles"
+          >
+            <option value="macron" data-i="macronUnderline">
+              Underline · Double macron
+            </option>
+            <option value="low" data-i="lowUnderline">
+              Underline · Low line
+            </option>
+            <option value="double" data-i="doubleUnderline">
+              Underline · Double line
+            </option>
+          </select>
+          <select
+            id="strike-style"
+            data-name="strikeStyle"
+            data-help="lineStyles"
+          >
+            <option value="short" data-i="shortStrike">
+              Strikethrough · Short
+            </option>
+            <option value="long" data-i="longStrike">
+              Strikethrough · Long
+            </option>
+            <option value="tilde" data-i="tildeStrike">
+              Strikethrough · Tilde
+            </option>
+          </select>
+        </div>
         <div class="editor-shell">
           <div id="gutter" aria-hidden="true">
             <div id="line-markers"></div>
@@ -220,6 +252,25 @@
       <footer class="footer">
         <span id="version" tabindex="0" data-help="version"></span>
         <span data-i="privacy"></span>
+        <a href="mailto:mail@marcelpetrick.it" data-help="author"
+          >Marcel Petrick</a
+        >
+        <a
+          href="https://github.com/marcelpetrick/Boldemort"
+          target="_blank"
+          rel="noopener noreferrer"
+          data-i="project"
+          data-help="project"
+          >GitHub project</a
+        >
+        <a
+          href="https://github.com/marcelpetrick/Boldemort/actions/workflows/ci.yml"
+          target="_blank"
+          rel="noopener noreferrer"
+          data-i="tests"
+          data-help="tests"
+          >CI and test results</a
+        >
         <button
           type="button"
           id="help"
@@ -239,6 +290,28 @@
           Clear draft
         </button>
       </footer>
+      <details class="introduction">
+        <summary data-i="introTitle" data-help="intro">
+          What Boldemort does
+        </summary>
+        <p data-i="introBody">
+          Boldemort helps you add emphasis where formatting is limited, such as
+          LinkedIn posts and plain-text email. Write in Markdown or copy styled
+          Unicode text.
+        </p>
+        <ul>
+          <li data-i="introCompose">
+            Switch between Markdown and Unicode in one draft.
+          </li>
+          <li data-i="introFormat">
+            Apply bold, italic, underline, or strikethrough and copy the result.
+          </li>
+          <li data-i="introCheck">
+            Check writing stats and LinkedIn length before you post, or export
+            your draft as a file.
+          </li>
+        </ul>
+      </details>
     </main>
 
     <div id="tooltip" role="tooltip" hidden></div>

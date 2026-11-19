@@ -22,7 +22,23 @@ for (const [mask, glyphs] of maps.entries()) {
   for (const [index, glyph] of glyphs.entries())
     reverse.set(glyph, [plain[index]!, mask]);
 }
-const marks = { underline: '\u0332', strike: '\u0336' };
+export const lineMarks = {
+  underline: { macron: '\u035f', low: '\u0332', double: '\u0333' },
+  strike: { short: '\u0335', long: '\u0336', tilde: '\u0334' },
+} as const;
+export type LineStyles = {
+  [Kind in keyof typeof lineMarks]: keyof (typeof lineMarks)[Kind];
+};
+export const defaultLineStyles: LineStyles = {
+  underline: 'macron',
+  strike: 'short',
+};
+const underlines = new Set<string>(Object.values(lineMarks.underline));
+const strikes = new Set<string>(Object.values(lineMarks.strike));
+export const needsUnicodeDecoding =
+  /[\u210e\u{1d400}-\u{1d7ff}]|[\u0332-\u0336]|\u035f/u;
+const acceptsLine = /[^\s]|\p{Zs}/u;
+export const horizontalSpace = /^\p{Zs}|^\t/u;
 const segmenter =
   typeof Intl.Segmenter === 'function' ? new Intl.Segmenter() : undefined;
 type Grapheme = { segment: string; index: number };
@@ -39,18 +55,23 @@ export function* graphemes(text: string): Iterable<Grapheme> {
 export function decode(segment: string) {
   const [glyph = '', ...rest] = Array.from(segment);
   const [base, mask] = reverse.get(glyph) ?? [glyph, 0];
-  const eligible = /\S/u.test(glyph);
+  const eligible = acceptsLine.test(glyph);
+  const underline = eligible
+    ? rest.find((mark) => underlines.has(mark))
+    : undefined;
+  const strike = eligible ? rest.find((mark) => strikes.has(mark)) : undefined;
   const active = new Set<Style>();
   if (mask & 1) active.add('bold');
   if (mask & 2) active.add('italic');
-  if (eligible && rest.includes(marks.underline)) active.add('underline');
-  if (eligible && rest.includes(marks.strike)) active.add('strike');
+  if (underline) active.add('underline');
+  if (strike) active.add('strike');
   return {
     base,
+    underline,
+    strike,
     tail: rest
       .filter(
-        (mark) =>
-          !eligible || (mark !== marks.underline && mark !== marks.strike),
+        (mark) => !eligible || (!underlines.has(mark) && !strikes.has(mark)),
       )
       .join(''),
     active,
@@ -61,9 +82,9 @@ function supports(base: string, style: Style) {
     ? letters.includes(base)
     : style === 'bold'
       ? plain.includes(base)
-      : /\S/u.test(base);
+      : acceptsLine.test(base);
 }
-function encode(item: ReturnType<typeof decode>) {
+function encode(item: ReturnType<typeof decode>, lineStyles: LineStyles) {
   const mask =
     Number(item.active.has('bold')) + 2 * Number(item.active.has('italic'));
   const glyph =
@@ -73,14 +94,19 @@ function encode(item: ReturnType<typeof decode>) {
   return (
     glyph +
     item.tail +
-    (item.active.has('underline') ? marks.underline : '') +
-    (item.active.has('strike') ? marks.strike : '')
+    (item.active.has('underline')
+      ? (item.underline ?? lineMarks.underline[lineStyles.underline])
+      : '') +
+    (item.active.has('strike')
+      ? (item.strike ?? lineMarks.strike[lineStyles.strike])
+      : '')
   );
 }
 export function styleUnicode(
   text: string,
   selected: Iterable<Style>,
   toggle = false,
+  lineStyles: LineStyles = defaultLineStyles,
 ) {
   const glyphs = Array.from(graphemes(text), ({ segment }) => ({
     segment,
@@ -89,7 +115,11 @@ export function styleUnicode(
   for (const style of selected) {
     const eligible = glyphs.filter(({ item }) => supports(item.base, style));
     const remove =
-      toggle && eligible.every(({ item }) => item.active.has(style));
+      toggle &&
+      eligible
+        .filter(({ item }) => !horizontalSpace.test(item.base))
+        .every(({ item }) => item.active.has(style)) &&
+      eligible.some(({ item }) => item.active.has(style));
     for (const { item } of eligible) {
       if (remove) item.active.delete(style);
       else item.active.add(style);
@@ -102,7 +132,7 @@ export function styleUnicode(
         (style) => original.active.has(style) === item.active.has(style),
       )
         ? segment
-        : encode(item);
+        : encode(item, lineStyles);
     })
     .join('');
 }

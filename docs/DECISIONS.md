@@ -29,3 +29,6 @@
 - The owner selected GPL-3.0-or-later. Credit Marcel Petrick
   (<mail@marcelpetrick.it>) as the author in the app and README and acknowledge
   AI assistance.
+- Use short strikethrough and double macron below as the default Unicode line
+  marks. New formatting follows the chosen variant. Pasted text and unchanged
+  round-trips preserve their original marks.

@@ -9,6 +9,8 @@ import {
 import { convert, inspectMarkdown, parse, project } from '../src/markdown.ts';
 import {
   graphemes,
+  defaultLineStyles,
+  lineMarks,
   styleUnicode,
   styles,
   wrapMarkdown,
@@ -45,8 +47,8 @@ describe('GFM source conversion', () => {
       '\n\n# Heading\n\n- [x] Task\n  - Child\n\n| A | B |\n| :- | -: |\n| 1 | 2 |\n\n~~~js\n**literal**\n~~~\n\n![alt](url) [source](https://example.com)\n\n> **Quote**\n';
     expect(
       convert('**Hello** *my* <u>draft</u>.' + structure, 'markdown'),
-    ).toBe('𝐇𝐞𝐥𝐥𝐨 𝑚𝑦 d̲r̲a̲f̲t̲.' + structure);
-    expect(convert('***hello*** ~~draft~~', 'markdown')).toBe('𝒉𝒆𝒍𝒍𝒐 d̶r̶a̶f̶t̶');
+    ).toBe('𝐇𝐞𝐥𝐥𝐨 𝑚𝑦 d͟r͟a͟f͟t͟.' + structure);
+    expect(convert('***hello*** ~~draft~~', 'markdown')).toBe('𝒉𝒆𝒍𝒍𝒐 d̵r̵a̵f̵t̵');
     expect(convert('__one__ _two_', 'markdown')).toBe('𝐨𝐧𝐞 𝑡𝑤𝑜');
     expect(convert('𝐇𝐞𝐥𝐥𝐨 𝐰𝐨𝐫𝐥𝐝.', 'unicode')).toBe('**Hello world**.');
     expect(convert('𝐀. 𝐁 <u>x</u>', 'unicode')).toBe('**A**. **B** <u>x</u>');
@@ -322,4 +324,38 @@ it('matches the expected mathematical glyph values at alphabet boundaries', () =
   expect(styleUnicode('AZaz09', ['bold'])).toBe('𝐀𝐙𝐚𝐳𝟎𝟗');
   expect(styleUnicode('AZahz09', ['italic'])).toBe('𝐴𝑍𝑎ℎ𝑧09');
   expect(styleUnicode('AZaz09', ['bold', 'italic'])).toBe('𝑨𝒁𝒂𝒛𝟎𝟗');
+});
+
+it('uses exact line marks for defaults, alternate styles and word gaps', () => {
+  expect(styleUnicode('Hi all', ['strike'])).toBe('H̵i̵ ̵a̵l̵l̵');
+  expect(styleUnicode('Hi all', ['underline'])).toBe('H͟i͟ ͟a͟l͟l͟');
+  expect(styleUnicode('Hi\tall\r\né 👩🏽‍💻', ['strike'])).toBe('H̵i̵\ta̵l̵l̵\r\né̵ ̵👩🏽‍💻̵');
+  expect(styleUnicode('a̶ b̶', ['strike'], true)).toBe('a b');
+  expect(styleUnicode('a̴̳', ['bold'])).toBe('𝐚̴̳');
+  expect(styleUnicode('é̴̳', ['underline'], true)).toBe('é̴');
+  for (const underline of ['macron', 'low', 'double'] as const) {
+    const mark = lineMarks.underline[underline];
+    const styled = styleUnicode('a b', ['underline'], false, {
+      ...defaultLineStyles,
+      underline,
+    });
+    expect(styled).toBe('a' + mark + ' ' + mark + 'b' + mark);
+    expect(convert(styled, 'unicode')).toBe('<u>a b</u>');
+  }
+  for (const strike of ['short', 'long', 'tilde'] as const) {
+    const mark = lineMarks.strike[strike];
+    const styled = styleUnicode('a b', ['strike'], false, {
+      ...defaultLineStyles,
+      strike,
+    });
+    expect(styled).toBe('a' + mark + ' ' + mark + 'b' + mark);
+    expect(convert(styled, 'unicode')).toBe('~~a b~~');
+  }
+  const doc = new Document();
+  doc.edit('a̳ ̳b̳', { start: 0, end: 0 });
+  doc.switchTo('markdown');
+  expect(doc.frame.text).toBe('<u>a b</u>');
+  doc.lineStyles.underline = 'low';
+  doc.switchTo('unicode');
+  expect(doc.frame.text).toBe('a̳ ̳b̳');
 });

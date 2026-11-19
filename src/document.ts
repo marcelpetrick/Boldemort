@@ -2,6 +2,7 @@
 import { inspectMarkdown, project, type Projection } from './markdown.ts';
 import {
   decode,
+  defaultLineStyles,
   graphemes,
   styleUnicode,
   styles,
@@ -48,6 +49,7 @@ function changedRange(previous: string, next: string) {
 }
 
 export class Document {
+  lineStyles = { ...defaultLineStyles };
   #state: State = { mode: 'unicode', text: '', start: 0, end: 0, pieces: [] };
   #undo: State[] = [];
   #redo: State[] = [];
@@ -154,7 +156,7 @@ export class Document {
       }
     }
     offset = 0;
-    return project(text, mode).map((piece) => {
+    return project(text, mode, this.lineStyles).map((piece) => {
       const original = remembered.get(offset);
       offset += piece[mode].length;
       return piece.markdown !== piece.unicode &&
@@ -229,6 +231,7 @@ export type Replacement = Selection & { value: string; caret?: number };
 export function formatSelection(
   frame: Frame,
   style: Style,
+  lineStyles = defaultLineStyles,
 ): Replacement | undefined {
   const { text, mode } = frame;
   let { start, end } = frame;
@@ -249,7 +252,7 @@ export function formatSelection(
     return {
       start,
       end,
-      value: styleUnicode(text.slice(start, end), [style], true),
+      value: styleUnicode(text.slice(start, end), [style], true, lineStyles),
     };
   }
   const selection = text.slice(start, end);
@@ -297,6 +300,7 @@ export function formatTyping(
   frame: Frame,
   input: string,
   active: ReadonlySet<Style>,
+  lineStyles = defaultLineStyles,
 ): Replacement {
   const { text, start, end, mode } = frame;
   // Avoid parsing a long prose draft on each keystroke when it has no markup.
@@ -310,7 +314,11 @@ export function formatTyping(
     return { start, end, value: input };
   }
   if (mode === 'unicode')
-    return { start, end, value: styleUnicode(input, active) };
+    return {
+      start,
+      end,
+      value: styleUnicode(input, active, false, lineStyles),
+    };
   const open = wrapMarkdown('\0', active).split('\0');
   const prefix = open[0]!;
   const suffix = open[1]!;
