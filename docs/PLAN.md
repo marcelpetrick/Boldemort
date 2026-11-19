@@ -37,3 +37,6 @@
 - Confirmed GPL-3.0-or-later and corrected the author credit to Marcel Petrick.
   Added clean-checkout installation to the shared verification pipeline before
   enabling public Pages deployment.
+- Reviewed exact npm pins against the registry. Updated KaTeX from 0.16.47 to
+  0.19.1 to clear the audit. Kept TypeScript at 6.0.3, the latest stable version
+  supported by the TypeScript ESLint peer range.

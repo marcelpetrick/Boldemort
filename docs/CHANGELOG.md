@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.8
+
+- Updated the Markdown linter’s KaTeX dependency to clear the npm audit.
+
 ## 0.1.7
 
 - Confirmed GPL v3 or later and corrected the author credit.

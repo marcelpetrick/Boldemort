@@ -1,6 +1,6 @@
 {
   "name": "boldemort",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "private": true,
   "type": "module",
   "license": "GPL-3.0-or-later",
@@ -57,6 +57,9 @@
     "typed-rest-client": {
       "qs": "6.17.1"
     },
-    "minimatch": "11.0.9"
+    "minimatch": "11.0.9",
+    "micromark-extension-math": {
+      "katex": "0.19.1"
+    }
   }
 }

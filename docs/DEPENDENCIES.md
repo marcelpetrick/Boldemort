@@ -211,7 +211,7 @@ optional packages for other platforms.
 | cli-width | 4.1.0 | ISC | Transitive development | Dependency of a package listed here. |
 | colord | 2.14.0 | MIT | Transitive development | Dependency of a package listed here. |
 | commander | 14.0.3 | MIT | Transitive development | Dependency of a package listed here. |
-| commander | 8.3.0 | MIT | Transitive development | Dependency of a package listed here. |
+| commander | 15.1.0 | MIT | Transitive development | Dependency of a package listed here. |
 | convert-source-map | 2.0.0 | MIT | Transitive development | Dependency of a package listed here. |
 | cosmiconfig | 10.0.1 | MIT | Transitive development | Dependency of a package listed here. |
 | cross-spawn | 7.0.6 | MIT | Transitive development | Dependency of a package listed here. |
@@ -323,7 +323,7 @@ optional packages for other platforms.
 | json5 | 2.2.3 | MIT | Transitive development | Dependency of a package listed here. |
 | jsonc-parser | 3.3.1 | MIT | Transitive development | Dependency of a package listed here. |
 | jsonpointer | 5.0.1 | MIT | Transitive development | Dependency of a package listed here. |
-| katex | 0.16.47 | MIT | Transitive development | Dependency of a package listed here. |
+| katex | 0.19.1 | MIT | Transitive development | Dependency of a package listed here. |
 | keyv | 5.6.0 | MIT | Transitive development | Dependency of a package listed here. |
 | kleur | 3.0.3 | MIT | Transitive development | Dependency of a package listed here. |
 | kleur | 4.1.5 | MIT | Transitive development | Dependency of a package listed here. |
