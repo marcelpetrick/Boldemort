@@ -85,3 +85,6 @@
   Unicode fast path and verify both list delimiters and indentation.
 - Verify that Bold shows its pressed state after formatting a mixed
   selection, using the same eligible characters as the toggle itself.
+- Re-record both LinkedIn GIFs in Light mode with clear contrasts between
+  selected and untouched text. Remove the promotional label above the
+  formatting demo and verify its mixed-bold clipboard output.
