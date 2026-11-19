@@ -80,3 +80,6 @@
 - Record the Markdown-to-Unicode and reversible Random font workflows as two
   6.8-second LinkedIn GIFs. Check the rendered frames and file limits, and
   link the [storyboards](DEMO.md) and recordings from the README.
+- Final review reproduced a protection gap for numbered lists and code
+  indented with mixed whitespace. Keep those constructs protected on the
+  Unicode fast path and verify both list delimiters and indentation.

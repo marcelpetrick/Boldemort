@@ -243,9 +243,11 @@ function editableGlyphs(ranges: Selection[], offset: number) {
 }
 
 function unicodeProtection(text: string) {
-  // Plain paragraphs cannot contain any protected GFM syntax without one
-  // of these markers. A bare web address and an indented code line count too.
-  return /[!#*+<=>@[\]\\_`|~:-]|\bwww\.|^(?: {4}|\t)/imu.test(text)
+  // Check inline markers, bare web addresses, and block patterns before
+  // skipping the GFM parse for a plain Unicode draft.
+  return /[!#*+<=>@[\]\\_`|~:-]|\bwww\.|^(?: {4}| {0,3}\t| {0,3}\d{1,9}[.)](?:[ \t]|$))/imu.test(
+    text,
+  )
     ? inspectMarkdown(text).protectedRanges
     : [];
 }

@@ -142,6 +142,16 @@ describe('formatting boundaries', () => {
     }
   });
 
+  it.each(['1. item', '1) item', ' \tcode'])(
+    'preserves protected structure without inline markers: %j',
+    (structure) => {
+      const text = 'Intro\n\n' + structure;
+      expect(
+        formatSelection(draft(text, 0, text.length, 'unicode'), 'bold')?.value,
+      ).toBe('𝐈𝐧𝐭𝐫𝐨\n\n' + structure);
+    },
+  );
+
   it('keeps the original code points when a repeated toggle cancels out', () => {
     expect(styleUnicode('A̲Ｂ̳C͟', ['underline', 'underline'], true)).toBe('A̲Ｂ̳C͟');
     expect(styleUnicode('𝐀́', [], false)).toBe('𝐀́');
