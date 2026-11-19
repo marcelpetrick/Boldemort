@@ -33,9 +33,32 @@
             <option value="system" data-i="system"></option>
             <option value="light" data-i="light"></option>
             <option value="dark" data-i="dark"></option>
+            <option value="bavarian" data-i="bavarian">Bavarian</option>
           </select>
         </div>
       </header>
+      <details class="introduction" open>
+        <summary data-i="introTitle" data-help="intro">
+          What Boldemort does
+        </summary>
+        <p data-i="introBody">
+          Boldemort helps you add emphasis where formatting is limited, such as
+          LinkedIn posts and plain-text email. Write in Markdown or copy styled
+          Unicode text.
+        </p>
+        <ul>
+          <li data-i="introCompose">
+            Switch between Markdown and Unicode in one draft.
+          </li>
+          <li data-i="introFormat">
+            Apply bold, italic, underline, or strikethrough and copy the result.
+          </li>
+          <li data-i="introCheck">
+            Check writing stats and LinkedIn length before you post, or export
+            your draft as a file.
+          </li>
+        </ul>
+      </details>
 
       <section class="writing-card" aria-labelledby="draft-heading">
         <div class="card-heading">
@@ -109,6 +132,15 @@
               data-help="bullets"
             >
               ≡
+            </button>
+            <button
+              type="button"
+              id="random-font"
+              data-i="randomFont"
+              data-help="randomFont"
+              aria-pressed="false"
+            >
+              Random font
             </button>
             <span class="separator" aria-hidden="true"></span>
             <button
@@ -290,28 +322,6 @@
           Clear draft
         </button>
       </footer>
-      <details class="introduction">
-        <summary data-i="introTitle" data-help="intro">
-          What Boldemort does
-        </summary>
-        <p data-i="introBody">
-          Boldemort helps you add emphasis where formatting is limited, such as
-          LinkedIn posts and plain-text email. Write in Markdown or copy styled
-          Unicode text.
-        </p>
-        <ul>
-          <li data-i="introCompose">
-            Switch between Markdown and Unicode in one draft.
-          </li>
-          <li data-i="introFormat">
-            Apply bold, italic, underline, or strikethrough and copy the result.
-          </li>
-          <li data-i="introCheck">
-            Check writing stats and LinkedIn length before you post, or export
-            your draft as a file.
-          </li>
-        </ul>
-      </details>
     </main>
 
     <div id="tooltip" role="tooltip" hidden></div>

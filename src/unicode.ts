@@ -17,11 +17,40 @@ italic[letters.indexOf('h')] = 'ℎ';
 const combined = alphabet(0x1d468, 0x1d482);
 const plain = letters + digits;
 const maps = [Array.from(plain), bold, italic, combined];
+const makeFont = (upper: number, lower: number, digit: number) =>
+  alphabet(upper, lower).concat(
+    [...digits].map((_, index) => String.fromCodePoint(digit + index)),
+  );
+const randomFonts = [
+  makeFont(0x1d5a0, 0x1d5ba, 0x1d7e2),
+  makeFont(0x1d5d4, 0x1d5ee, 0x1d7ec),
+  makeFont(0x1d670, 0x1d68a, 0x1d7f6),
+  makeFont(0xff21, 0xff41, 0xff10),
+];
 const reverse = new Map<string, [string, number]>();
 for (const [mask, glyphs] of maps.entries()) {
   for (const [index, glyph] of glyphs.entries())
     reverse.set(glyph, [plain[index]!, mask]);
 }
+for (const font of randomFonts) {
+  for (const [index, glyph] of font.entries())
+    reverse.set(glyph, [plain[index]!, 0]);
+}
+
+export function randomizeUnicode(text: string, random = Math.random) {
+  return Array.from(graphemes(text), ({ segment }) => {
+    const [glyph = ''] = segment;
+    const base = reverse.get(glyph)?.[0];
+    if (base === undefined) return segment;
+    const index = plain.indexOf(base);
+    const choices = randomFonts
+      .map((font) => font[index]!)
+      .filter((value) => value !== glyph);
+    const replacement = choices[Math.floor(random() * choices.length)]!;
+    return replacement + segment.slice(glyph.length);
+  }).join('');
+}
+
 export const lineMarks = {
   underline: { macron: '\u035f', low: '\u0332', double: '\u0333' },
   strike: { short: '\u0335', long: '\u0336', tilde: '\u0334' },
@@ -36,7 +65,7 @@ export const defaultLineStyles: LineStyles = {
 const underlines = new Set<string>(Object.values(lineMarks.underline));
 const strikes = new Set<string>(Object.values(lineMarks.strike));
 export const needsUnicodeDecoding =
-  /[\u210e\u{1d400}-\u{1d7ff}]|[\u0332-\u0336]|\u035f/u;
+  /[\u210e\u{1d400}-\u{1d7ff}\uff10-\uff19\uff21-\uff3a\uff41-\uff5a]|[\u0332-\u0336]|\u035f/u;
 const acceptsLine = /[^\s]|\p{Zs}/u;
 export const horizontalSpace = /^\p{Zs}|^\t/u;
 const segmenter =
@@ -67,6 +96,7 @@ export function decode(segment: string) {
   if (strike) active.add('strike');
   return {
     base,
+    alternative: mask === 0 && base !== glyph ? glyph : undefined,
     underline,
     strike,
     tail: rest
@@ -88,6 +118,7 @@ function encode(item: ReturnType<typeof decode>, lineStyles: LineStyles) {
   const mask =
     Number(item.active.has('bold')) + 2 * Number(item.active.has('italic'));
   const glyph =
+    (mask === 0 ? item.alternative : undefined) ??
     maps[mask]?.[plain.indexOf(item.base)] ??
     (mask === 3 ? bold[plain.indexOf(item.base)] : undefined) ??
     item.base;

@@ -315,7 +315,7 @@ test('copies the selected Unicode line variants and links to project and tests',
   await expect(
     page.getByRole('link', { name: 'CI and test results' }),
   ).toHaveAttribute('href', /actions\/workflows\/ci.yml$/u);
-  await page.getByText('What Boldemort does', { exact: true }).click();
+  await expect(page.locator('.introduction')).toHaveAttribute('open', '');
   await expect(page.locator('.introduction')).toContainText('plain-text email');
   await expect(page.locator('.introduction li')).toHaveCount(3);
   await page.locator('#language').selectOption('de');
@@ -368,4 +368,58 @@ test('keeps a typed space outside Markdown formatting when turning it off', asyn
   await bold.click();
   await draft.pressSequentially('two');
   await expect(draft).toHaveValue('**one** two');
+});
+
+test('offers random Unicode lettering, an overview above the draft, and a Bavarian theme', async ({
+  page,
+}) => {
+  const draft = page.locator('#editor');
+  const overview = page.locator('.introduction');
+  await expect(overview.locator('p')).toBeVisible();
+  const overviewBox = await overview.boundingBox();
+  const draftBox = await draft.boundingBox();
+  expect(overviewBox!.y + overviewBox!.height).toBeLessThan(draftBox!.y);
+  await overview.locator('summary').click();
+  await expect(overview.locator('p')).toBeHidden();
+
+  await page.evaluate(() => {
+    Math.random = () => 0;
+  });
+  const random = page.getByRole('button', { name: 'Random font' });
+  await draft.fill('Ab 2 👩🏽‍💻');
+  await draft.press('Control+a');
+  await random.click();
+  await expect(draft).toHaveValue('𝖠𝖻 𝟤 👩🏽‍💻');
+  await page.getByRole('button', { name: 'Undo' }).click();
+  await expect(draft).toHaveValue('Ab 2 👩🏽‍💻');
+  await draft.fill('`code`');
+  await draft.press('Control+a');
+  await random.click();
+  await expect(draft).toHaveValue('`code`');
+  await expect(page.getByRole('status')).toContainText('Markdown syntax');
+  await draft.fill('');
+  await random.click();
+  await expect(random).toHaveAttribute('aria-pressed', 'true');
+  await draft.pressSequentially('Az');
+  await expect(draft).toHaveValue('𝖠𝗓');
+  await random.click();
+  await draft.pressSequentially('!');
+  await expect(draft).toHaveValue(/^𝖠.+!$/u);
+  await page.getByRole('button', { name: 'Markdown', exact: true }).click();
+  await expect(random).toHaveAttribute('aria-disabled', 'true');
+  await random.click({ force: true });
+  await expect(draft).toHaveValue(/^𝖠.+!$/u);
+
+  await page.locator('#theme').selectOption('bavarian');
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'bavarian');
+  await expect(page.locator('html')).toHaveCSS('color-scheme', 'light');
+  const { violations } = await new AxeBuilder({ page })
+    .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+    .analyze();
+  expect(violations).toEqual([]);
+  await page.locator('#language').selectOption('de');
+  await expect(
+    page.getByRole('button', { name: 'Zufallsschrift' }),
+  ).toBeVisible();
+  await expect(page.locator('#theme option:checked')).toHaveText('Bayerisch');
 });

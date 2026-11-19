@@ -50,3 +50,6 @@
 - Reviewed published main and all tracked Markdown. Fixed Markdown edge
   cases, ran ShellCheck directly, and added the vision to the lint gate.
 - Added two README charts from historical CI measurements and Git revisions.
+- Added Random font, the Bavarian theme, and an open overview above the draft.
+  Verify glyph preservation, selection undo, typing toggle, theme accessibility,
+  and localized labels before publishing.

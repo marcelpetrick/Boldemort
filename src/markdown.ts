@@ -235,7 +235,7 @@ function unicodeChanges(source: string) {
         emit();
       if (!run) runStart = index;
       active = item.active;
-      run += item.base + item.tail;
+      run += (item.alternative ?? item.base) + item.tail;
       end = index + segment.length;
     } else {
       emit();

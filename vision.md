@@ -235,7 +235,7 @@ metrics available without stealing the viewport.
 
 **TARGET:** clean typography, comfortable line height, visible text selection,
 subtle separations between header/toolbar/editor/status, and light visual
-density. The editor offers light, dark, and system themes; let the
+density. The editor offers light, dark, Bavarian, and system themes; let the
 implementation agent choose an accessible neutral default and document the
 choice.
 
@@ -344,6 +344,20 @@ grapheme clusters and combining sequences so marks attach to whole characters.
 - The footer links to the source project, Marcel Petrick's email, and CI test
   results. A short overview describes LinkedIn and plain-text email use in one
   paragraph and at most five bullets, in both supported languages.
+
+### 5.3.2 Random font and Bavarian theme
+
+- Put the overview beneath the headline and before the draft, open on first
+  load. Keep the introductory paragraph and three bullets in English and German.
+- In Unicode mode, Random font remaps Latin letters and digits independently
+  to copyable Unicode alphabets. With a selection it applies once and is
+  undoable. With an empty selection it toggles random styles for new typing.
+- Preserve original character order, punctuation, accents, emoji, line marks,
+  and code spans. Copy the produced code points, and preserve them literally
+  when switching to Markdown. The control is unavailable in Markdown mode.
+- Offer a Bavarian blue-and-white theme alongside System, Light, and Dark.
+  Theme selection keeps the draft, and its colors must pass the browser
+  accessibility checks.
 
 ### 5.4 Selection and toggle semantics
 

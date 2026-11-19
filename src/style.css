@@ -30,6 +30,23 @@
   color-scheme: dark;
 }
 
+:root[data-theme='bavarian'] {
+  color-scheme: light;
+
+  --bg: #eaf5fc;
+  --surface: #fff;
+  --wash: #eff7ff;
+  --line: #bfd9eb;
+  --ink: #123254;
+  --quiet: #385870;
+  --accent: #00538d;
+  --solid: #005b9f;
+  --on-solid: #fff;
+  --accent-bg: #d5ebff;
+  --warning: #7a3b07;
+  --shadow: #06305914;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -130,6 +147,17 @@ a {
   font-size: 1.38rem;
   font-weight: 800;
   letter-spacing: -0.075em;
+}
+
+:root[data-theme='bavarian'] .brand-icon {
+  background-image: conic-gradient(
+    from 45deg,
+    #fff2 25%,
+    transparent 0 50%,
+    #fff2 0 75%,
+    transparent 0
+  );
+  background-size: 14px 18px;
 }
 
 .brand-icon span {
@@ -533,13 +561,23 @@ dialog pre {
 }
 
 .introduction {
+  padding: 0.55rem 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: 0.7rem;
+  background: var(--surface);
   font-size: 0.875rem;
 }
 
 .introduction summary {
   cursor: pointer;
+  font-weight: 650;
 }
 
 .introduction p {
-  margin-top: 0.45rem;
+  margin-top: 0.35rem;
+}
+
+.introduction ul {
+  margin-block: 0.3rem 0;
+  padding-inline-start: 1.25rem;
 }

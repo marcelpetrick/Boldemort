@@ -10,6 +10,8 @@ import { convert, inspectMarkdown, parse, project } from '../src/markdown.ts';
 import {
   graphemes,
   defaultLineStyles,
+  randomizeUnicode,
+  decode,
   lineMarks,
   styleUnicode,
   styles,
@@ -383,4 +385,31 @@ it('reports malformed fence closers while accepting correctly closed and nested 
   ]) {
     expect(analyze(valid, 'en').warnings).toEqual([]);
   }
+});
+
+it('mixes compatible copyable fonts while preserving content and line marks', () => {
+  const source = 'Aé é 2 中 👩🏽‍💻 a̴̳';
+  const mixed = randomizeUnicode(source, () => 0);
+  expect(mixed).toBe('𝖠é 𝖾́ 𝟤 中 👩🏽‍💻 𝖺̴̳');
+  expect(randomizeUnicode('Ab2', () => 0.99)).toBe('Ａｂ２');
+  expect(randomizeUnicode('𝖠', () => 0)).toBe('𝗔');
+  expect(decode('Ａ').base).toBe('A');
+  expect(styleUnicode('𝖠', ['underline'])).toBe('𝖠͟');
+  expect(convert('𝖠͟', 'unicode')).toBe('<u>𝖠</u>');
+  expect(convert('<u>𝖠</u>', 'markdown')).toBe('𝖠͟');
+  expect(analyze('𝖠 ｂ𝟤', 'en').words).toBe(2);
+  expect(convert('Ａ𝖾', 'unicode')).toBe('Ａ𝖾');
+  expect(formatSelection(select('code'), 'random')).toBeUndefined();
+  expect(
+    formatSelection(select('`code`', 'unicode'), 'random'),
+  ).toBeUndefined();
+  expect(
+    formatTyping(
+      select('', 'unicode'),
+      'x',
+      new Set(['underline']),
+      defaultLineStyles,
+      true,
+    ).value,
+  ).toMatch(/͟$/u);
 });

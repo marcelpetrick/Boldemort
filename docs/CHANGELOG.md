@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.0
+
+- Added Random font in Unicode mode and a Bavarian blue-and-white theme.
+- Moved the open editor overview above the draft.
+- Recorded the additional requirements and acceptance checks.
+
 ## 0.2.2
 
 - Fixed single-tilde toggling, unfinished typing spans, and fence warnings.

@@ -3,7 +3,7 @@
 [![CI](https://github.com/marcelpetrick/Boldemort/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/marcelpetrick/Boldemort/actions/workflows/ci.yml)
 [![GitHub Pages](https://github.com/marcelpetrick/Boldemort/actions/workflows/pages.yml/badge.svg)](https://github.com/marcelpetrick/Boldemort/actions/workflows/pages.yml)
 [![Release pipeline](https://github.com/marcelpetrick/Boldemort/actions/workflows/release.yml/badge.svg)](https://github.com/marcelpetrick/Boldemort/actions/workflows/release.yml)
-[![Version 0.2.2](https://img.shields.io/badge/version-0.2.2-6241c2)](docs/CHANGELOG.md)
+[![Version 0.3.0](https://img.shields.io/badge/version-0.3.0-6241c2)](docs/CHANGELOG.md)
 [![License GPL v3 or later](https://img.shields.io/badge/license-GPLv3%20or%20later-blue.svg)](LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-6-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Vite](https://img.shields.io/badge/Vite-8-646cff?logo=vite&logoColor=white)](https://vite.dev/)
@@ -25,12 +25,13 @@ formatting to copyable Unicode and back. It runs entirely in the browser.
 
 **Developed with AI assistance.**
 
-See the [dependency inventory](docs/DEPENDENCIES.md),
-[implementation plan](docs/PLAN.md), and [project vision](vision.md).
+See the [requirements](docs/REQUIREMENTS.md),
+[dependency inventory](docs/DEPENDENCIES.md), [implementation plan](docs/PLAN.md),
+and [project vision](vision.md).
 
 ![The Boldemort editor with a sample Unicode draft and a LinkedIn length estimate](media/editor.png)
 
-[View the dark theme](media/editor-dark.png)
+[Dark theme](media/editor-dark.png) · [Bavarian theme](media/editor-bavarian.png)
 
 ## Using the editor
 
@@ -50,10 +51,13 @@ for the chosen output. Reported and conservative limits are labeled. Word and
 sentence statistics use parsed text. Character count uses visible grapheme
 clusters when supported. A nonempty top-level Markdown block counts once.
 
+In Unicode mode, **Random font** mixes Unicode alphabets in a selection or
+toggles mixed lettering for new typing. Undo restores a transformed selection.
+
 The top bar has English and German and follows the system theme unless you
-select Light or Dark. Hover or focus a control to see brief help. Keep the
-pointer or focus there for four seconds to expand it, or open **Help** to read
-the full explanations.
+select Light, Dark, or Bavarian. Hover or focus a control for brief help.
+Keep the pointer or focus there for four seconds to expand it, or open
+**Help** to read the full explanations.
 
 The Unicode representation retains complex Markdown syntax such as links, code,
 tables and task lists literally. Simple unordered lists switch between

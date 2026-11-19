@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 export const messages = {
+  randomFont: ['Random font', 'Zufallsschrift'],
+  bavarian: ['Bavarian', 'Bayerisch'],
   project: ['GitHub project', 'GitHub-Projekt'],
   tests: ['CI and test results', 'CI und Testergebnisse'],
   lineStyles: ['Unicode line styles', 'Unicode-Linienstile'],
@@ -126,6 +128,12 @@ export type Key = keyof typeof messages;
 export type Locale = 'en' | 'de';
 
 export const help = {
+  randomFont: [
+    'Mix copyable Unicode styles.',
+    'In Unicode mode, mix the letters and digits in your selection, or switch it on for new typing. Underlines, strike marks, accents, and other characters stay intact. Use Undo to restore a selection.',
+    'Kopierbare Unicode-Stile mischen.',
+    'Mische im Unicode-Modus die Buchstaben und Ziffern der Auswahl oder schalte den Stil für neue Eingaben ein. Unterstreichungen, Durchstreichungen, Akzente und andere Zeichen bleiben erhalten. Nutze Rückgängig, um die Auswahl wiederherzustellen.',
+  ],
   project: [
     'View the GitHub project.',
     'Find source code, documentation, and release history.',
@@ -164,9 +172,9 @@ export const help = {
   ],
   theme: [
     'Choose a color theme.',
-    'System follows your device. Light and Dark override the device setting for this tab.',
+    'System follows your device. Light, Dark, and Bavarian override the device setting for this tab.',
     'Farbschema wählen.',
-    'System folgt deinem Gerät. Hell und Dunkel gelten unabhängig davon für diesen Tab.',
+    'System folgt deinem Gerät. Hell, Dunkel und Bayerisch gelten unabhängig davon für diesen Tab.',
   ],
   markdown: [
     'Edit GitHub Flavored Markdown.',

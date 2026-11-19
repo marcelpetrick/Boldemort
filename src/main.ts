@@ -42,6 +42,8 @@ const clearDialog = get<HTMLDialogElement>('clear-dialog');
 const clipboardDialog = get<HTMLDialogElement>('clipboard-dialog');
 const doc = new Document();
 const armed = new Set<Style>();
+const randomButton = get<HTMLButtonElement>('random-font');
+let randomFont = false;
 const modes = document.querySelectorAll<HTMLButtonElement>('[data-mode]');
 const formats = document.querySelectorAll<HTMLButtonElement>('[data-style]');
 const selection = () => ({
@@ -221,6 +223,9 @@ function renderControls() {
       ),
     );
   }
+  const unicode = doc.frame.mode === 'unicode';
+  randomButton.setAttribute('aria-disabled', String(!unicode));
+  randomButton.setAttribute('aria-pressed', String(unicode && randomFont));
   get('undo').setAttribute('aria-disabled', String(!doc.canUndo));
   get('redo').setAttribute('aria-disabled', String(!doc.canRedo));
 }
@@ -284,7 +289,7 @@ editor.addEventListener('beforeinput', (event) => {
     history(kind === 'historyUndo' ? 'undo' : 'redo');
   } else if (
     event.cancelable &&
-    armed.size &&
+    (armed.size || (randomFont && doc.frame.mode === 'unicode')) &&
     (kind === 'insertText' || kind === 'insertLineBreak')
   ) {
     event.preventDefault();
@@ -295,6 +300,7 @@ editor.addEventListener('beforeinput', (event) => {
         kind === 'insertLineBreak' ? '\n' : (event.data ?? ''),
         armed,
         doc.lineStyles,
+        randomFont,
       ),
       false,
       kind,
@@ -385,6 +391,19 @@ get('bullets').addEventListener('click', () => {
     editor.selectionStart !== editor.selectionEnd,
   );
 });
+randomButton.addEventListener('click', () => {
+  if (doc.frame.mode !== 'unicode') return;
+  doc.select(selection());
+  doc.endGroup();
+  if (doc.frame.start === doc.frame.end) {
+    randomFont = !randomFont;
+    renderEditor(true);
+    return;
+  }
+  const change = formatSelection(doc.frame, 'random', doc.lineStyles);
+  if (change) replace(change, true);
+  else setNotice('protected');
+});
 get('undo').addEventListener('click', () => {
   history('undo');
 });
@@ -465,6 +484,7 @@ clearDialog.addEventListener('close', () => {
   if (clearDialog.returnValue === 'clear') {
     clearDialog.returnValue = '';
     armed.clear();
+    randomFont = false;
     doc.edit('', { start: 0, end: 0 });
     setNotice();
     renderEditor(true);

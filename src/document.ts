@@ -4,6 +4,7 @@ import {
   decode,
   defaultLineStyles,
   graphemes,
+  randomizeUnicode,
   styleUnicode,
   styles,
   wrapMarkdown,
@@ -230,7 +231,7 @@ export type Replacement = Selection & { value: string; caret?: number };
 
 export function formatSelection(
   frame: Frame,
-  style: Style,
+  style: Style | 'random',
   lineStyles = defaultLineStyles,
 ): Replacement | undefined {
   const { text, mode } = frame;
@@ -252,9 +253,13 @@ export function formatSelection(
     return {
       start,
       end,
-      value: styleUnicode(text.slice(start, end), [style], true, lineStyles),
+      value:
+        style === 'random'
+          ? randomizeUnicode(text.slice(start, end))
+          : styleUnicode(text.slice(start, end), [style], true, lineStyles),
     };
   }
+  if (style === 'random') return;
   const selection = text.slice(start, end);
   if (!selection.trim()) return;
   const left = selection.length - selection.trimStart().length;
@@ -301,6 +306,7 @@ export function formatTyping(
   input: string,
   active: ReadonlySet<Style>,
   lineStyles = defaultLineStyles,
+  randomFont = false,
 ): Replacement {
   const { text, start, end, mode } = frame;
   // Avoid parsing a long prose draft on each keystroke when it has no markup.
@@ -313,12 +319,14 @@ export function formatTyping(
   ) {
     return { start, end, value: input };
   }
-  if (mode === 'unicode')
+  if (mode === 'unicode') {
+    const styled = styleUnicode(input, active, false, lineStyles);
     return {
       start,
       end,
-      value: styleUnicode(input, active, false, lineStyles),
+      value: randomFont ? randomizeUnicode(styled) : styled,
     };
+  }
   const open = wrapMarkdown('\0', active).split('\0');
   const prefix = open[0]!;
   const suffix = open[1]!;
