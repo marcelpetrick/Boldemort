@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.1
+
+- Added GitHub Actions verification, Pages deployment and tagged release builds.
+
 ## 0.1.0
 
 - Added one local editor with reversible Markdown and Unicode views, formatting
