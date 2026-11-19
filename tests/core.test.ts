@@ -285,3 +285,41 @@ it('keeps caret mapping and intact Unicode while changing projected chunks', () 
   doc.switchTo('markdown');
   expect(doc.frame.end).toBe(doc.frame.text.length);
 });
+
+it('reparses context around edits while retaining recognized source mappings', () => {
+  const doc = new Document();
+  doc.switchTo('markdown');
+  const original = '__one__ and **two**';
+  doc.edit(original, { start: 0, end: 0 });
+  expect(doc.output('unicode')).toBe('𝐨𝐧𝐞 and 𝐭𝐰𝐨');
+  doc.switchTo('unicode');
+  doc.switchTo('markdown');
+  doc.edit('`__one__` and **two**', { start: 0, end: 0 });
+  expect(doc.output('unicode')).toBe('`__one__` and 𝐭𝐰𝐨');
+
+  expect(
+    formatSelection(select('`code`', 'unicode', 1, 5), 'bold'),
+  ).toBeUndefined();
+  expect(
+    formatTyping(select('`code`', 'unicode', 3, 3), 'x', new Set(['bold']))
+      .value,
+  ).toBe('x');
+  expect(bulletLines(select('-   [x] Task')).value).toBe('-   [x] Task');
+  expect(bulletLines(select('-   [x] Task\n- plain')).value).toBe(
+    '-   [x] Task\n- plain',
+  );
+  expect(convert('- **One**\n- Two', 'markdown')).toBe('• 𝐎𝐧𝐞\n• Two');
+  expect(convert('• 𝐎𝐧𝐞\n• Two', 'unicode')).toBe('- **One**\n- Two');
+  expect(convert('Use • inline\n\n- [ ] Task', 'unicode')).toBe(
+    'Use • inline\n\n- [ ] Task',
+  );
+  expect(convert('- First\n  - Nested\n\n3. Third', 'markdown')).toBe(
+    '- First\n  - Nested\n\n3. Third',
+  );
+});
+
+it('matches the expected mathematical glyph values at alphabet boundaries', () => {
+  expect(styleUnicode('AZaz09', ['bold'])).toBe('𝐀𝐙𝐚𝐳𝟎𝟗');
+  expect(styleUnicode('AZahz09', ['italic'])).toBe('𝐴𝑍𝑎ℎ𝑧09');
+  expect(styleUnicode('AZaz09', ['bold', 'italic'])).toBe('𝑨𝒁𝒂𝒛𝟎𝟗');
+});

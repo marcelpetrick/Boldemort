@@ -26,14 +26,13 @@ export type Change = Positioned & { value: string };
 export type Projection = {
   markdown: string;
   unicode: string;
-  literal?: boolean;
 };
 const emphasis = new Map<string, Style>([
   ['strong', 'bold'],
   ['emphasis', 'italic'],
   ['delete', 'strike'],
 ]);
-function span(node: Node): Positioned {
+function span(node: Pick<Node, 'position'>): Positioned {
   return {
     start: node.position!.start.offset!,
     end: node.position!.end.offset!,
@@ -108,7 +107,24 @@ export function inspectMarkdown(source: string): MarkdownAnalysis {
           continue;
         }
       }
-      if (node.type === 'paragraph') {
+      if (
+        node.type === 'list' &&
+        !node.ordered &&
+        node.children.every(
+          (item) =>
+            item.checked == null &&
+            item.children.length === 1 &&
+            item.children[0]?.type === 'paragraph' &&
+            item.position?.start.line === item.position?.end.line,
+        )
+      ) {
+        for (const item of node.children) {
+          const { start } = span(item);
+          changes.push({ start, end: start + 1, value: '•' });
+          const paragraph = item.children[0];
+          if (paragraph?.type === 'paragraph') visit(paragraph.children);
+        }
+      } else if (node.type === 'paragraph') {
         visit(node.children);
       } else if (node.type !== 'text' && node.type !== 'break') {
         literal = true;
@@ -121,6 +137,7 @@ export function inspectMarkdown(source: string): MarkdownAnalysis {
 }
 
 function unicodeChanges(source: string) {
+  if (!/[•\u210e\u{1d400}-\u{1d7ff}]|\u0332|\u0336/u.test(source)) return [];
   const analysis = inspectMarkdown(source);
   const protectedRanges = analysis.protectedRanges
     .concat(analysis.changes)
@@ -149,6 +166,18 @@ function unicodeChanges(source: string) {
     )
       protection++;
     const range = protectedRanges[protection];
+    if (
+      segment === '•' &&
+      !(range && index >= range.start) &&
+      /^(?: {0,3})$/u.test(
+        source.slice(source.lastIndexOf('\n', index - 1) + 1, index),
+      ) &&
+      /[ \t]/u.test(source[index + 1] ?? '')
+    ) {
+      emit();
+      changes.push({ start: index, end: index + 1, value: '-' });
+      continue;
+    }
     const item = decode(segment);
     if (
       (range && index >= range.start) ||
@@ -179,33 +208,31 @@ function unicodeChanges(source: string) {
     }
   }
   emit();
-  return { changes, literal: analysis.literal };
+  return changes;
 }
 
 export function project(source: string, mode: Mode): Projection[] {
   if (!source) return [];
-  const { changes, literal } =
-    mode === 'markdown' ? inspectMarkdown(source) : unicodeChanges(source);
+  const changes =
+    mode === 'markdown'
+      ? inspectMarkdown(source).changes
+      : unicodeChanges(source);
   const pieces: Projection[] = [];
-  const append = (raw: string, converted: string, preserved = false) => {
+  const append = (raw: string, converted: string) => {
     if (!raw) return;
     pieces.push(
       mode === 'markdown'
-        ? { markdown: raw, unicode: converted, literal: preserved }
-        : { unicode: raw, markdown: converted, literal: preserved },
+        ? { markdown: raw, unicode: converted }
+        : { unicode: raw, markdown: converted },
     );
   };
   let position = 0;
   for (const { start, end, value } of changes) {
-    append(
-      source.slice(position, start),
-      source.slice(position, start),
-      literal,
-    );
+    append(source.slice(position, start), source.slice(position, start));
     append(source.slice(start, end), value);
     position = end;
   }
-  append(source.slice(position), source.slice(position), literal);
+  append(source.slice(position), source.slice(position));
   return pieces;
 }
 

@@ -140,14 +140,28 @@ export class Document {
     const { pieces, mode, text } = this.#state;
     if (pieces.every((piece): piece is Projection => !('text' in piece)))
       return pieces;
-    const result = pieces.every((piece) => 'text' in piece)
-      ? project(text, mode)
-      : pieces.flatMap((piece) =>
-          'text' in piece ? project(piece.text, mode) : [piece],
-        );
-    // Only lock the provenance after an actual mode change. Reading an output
-    // must not freeze parser context while the user is still drafting.
-    return result;
+    // Parse the entire current representation so newly inserted syntax can
+    // change the meaning of an adjacent span. Reuse a prior spelling when
+    // the parser still recognizes the same span as a conversion.
+    const remembered = new Map<number, Projection>();
+    let offset = 0;
+    for (const piece of pieces) {
+      if ('text' in piece) {
+        offset += piece.text.length;
+      } else {
+        if (piece.markdown !== piece.unicode) remembered.set(offset, piece);
+        offset += piece[mode].length;
+      }
+    }
+    offset = 0;
+    return project(text, mode).map((piece) => {
+      const original = remembered.get(offset);
+      offset += piece[mode].length;
+      return piece.markdown !== piece.unicode &&
+        original?.[mode] === piece[mode]
+        ? original
+        : piece;
+    });
   }
   switchTo(mode: Mode) {
     const before = this.#state;
@@ -218,6 +232,13 @@ export function formatSelection(
 ): Replacement | undefined {
   const { text, mode } = frame;
   let { start, end } = frame;
+  const analysis = inspectMarkdown(text);
+  if (
+    analysis.protectedRanges.some(
+      (range) => range.start < end && range.end > start,
+    )
+  )
+    return;
   if (mode === 'unicode') {
     for (const { segment, index } of graphemes(text)) {
       if (index > end) break;
@@ -231,13 +252,6 @@ export function formatSelection(
       value: styleUnicode(text.slice(start, end), [style], true),
     };
   }
-  const analysis = inspectMarkdown(text);
-  if (
-    analysis.protectedRanges.some(
-      (range) => range.start < end && range.end > start,
-    )
-  )
-    return;
   const selection = text.slice(start, end);
   if (!selection.trim()) return;
   const left = selection.length - selection.trimStart().length;
@@ -285,14 +299,18 @@ export function formatTyping(
   active: ReadonlySet<Style>,
 ): Replacement {
   const { text, start, end, mode } = frame;
-  if (mode === 'unicode')
-    return { start, end, value: styleUnicode(input, active) };
-  const { protectedRanges } = inspectMarkdown(text);
+  // Avoid parsing a long prose draft on each keystroke when it has no markup.
+  const { protectedRanges } =
+    /[`~#<>[\]!*_|:]|^(?: {4}|\t)|^ {0,3}(?:[-+>]|\d+[.)])[ \t]/mu.test(text)
+      ? inspectMarkdown(text)
+      : { protectedRanges: [] };
   if (
     protectedRanges.some((range) => start > range.start && start < range.end)
   ) {
     return { start, end, value: input };
   }
+  if (mode === 'unicode')
+    return { start, end, value: styleUnicode(input, active) };
   const open = wrapMarkdown('\0', active).split('\0');
   const prefix = open[0]!;
   const suffix = open[1]!;
@@ -335,7 +353,6 @@ export function bulletLines(frame: Frame): Replacement {
   );
   const end = next === -1 ? text.length : next;
   if (
-    mode === 'markdown' &&
     inspectMarkdown(text).protectedRanges.some(
       (range) =>
         range.start < end &&
@@ -346,7 +363,7 @@ export function bulletLines(frame: Frame): Replacement {
     return { start, end, value: text.slice(start, end) };
   }
   const lines = text.slice(start, end).split('\n');
-  const bullet = /^(\s*)(?:[-+*•])(?:[ \t]+|$)(?!\[[ xX]\])/u;
+  const bullet = /^([ \t]*)[-+*•](?![ \t]+\[[ xX]\])(?:[ \t]+|$)/u;
   const structured = /^\s*(?:\d+[.)][ \t]|[-+*][ \t]+\[[ xX]\])/u;
   const remove = lines.every((line) => bullet.test(line));
   const value = lines

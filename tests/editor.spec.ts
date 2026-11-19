@@ -234,15 +234,24 @@ test('staged help, localization, dark theme, responsive reflow and accessibility
   page,
 }) => {
   await page.setViewportSize({ width: 800, height: 600 });
-  await page.clock.install();
-  await page.getByRole('button', { name: 'Bold', exact: true }).hover();
+  const clockStart = new Date();
+  await page.clock.install({ time: clockStart });
+  await page.clock.pauseAt(new Date(clockStart.getTime() + 1000));
+  await page
+    .getByRole('button', { name: 'Bold', exact: true })
+    .hover({ force: true });
   await expect(page.getByRole('tooltip')).toHaveText('Toggle bold.');
-  await page.clock.fastForward(3950);
-  await expect(page.getByRole('tooltip')).not.toContainText('Ctrl');
-  await page.clock.fastForward(75);
+  await page.clock.runFor(3999);
+  await expect(page.getByRole('tooltip')).toHaveText('Toggle bold.');
+  await page.clock.runFor(1);
+  await expect(page.getByRole('tooltip')).toContainText('Ctrl');
+  await page.getByRole('tooltip').hover({ force: true });
   await expect(page.getByRole('tooltip')).toContainText('Ctrl');
   await page.keyboard.press('Escape');
   await expect(page.getByRole('tooltip')).toBeHidden();
+  await page.clock.resume();
+  await page.getByRole('button', { name: 'Italic', exact: true }).hover();
+  await expect(page.getByRole('tooltip')).toHaveText('Toggle italic.');
   await page.locator('#language').selectOption('de');
   await expect(
     page.getByRole('textbox', { name: 'Dein Entwurf' }),
@@ -260,4 +269,34 @@ test('staged help, localization, dark theme, responsive reflow and accessibility
     .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
     .analyze();
   expect(violations).toEqual([]);
+});
+
+test('pastes and edits an article-length draft without truncating it', async ({
+  page,
+}) => {
+  const draft = page.locator('#editor');
+  await page.locator('#destination').selectOption('article');
+  await draft.focus();
+  const size = 125_000;
+  await draft.evaluate((element, targetSize) => {
+    const sentence = 'A sentence contains five words.\r\n\r\n';
+    const text = sentence
+      .replace(/\r/gu, '')
+      .repeat(Math.ceil(targetSize / (sentence.length - 2)))
+      .slice(0, targetSize);
+    const data = new DataTransfer();
+    data.setData('text/plain', text.replace(/\n/gu, '\r\n'));
+    const paste = new ClipboardEvent('paste', {
+      clipboardData: data,
+      bubbles: true,
+      cancelable: true,
+    });
+    Object.defineProperty(paste, 'clipboardData', { value: data });
+    element.dispatchEvent(paste);
+  }, size);
+  await expect(draft).toHaveJSProperty('textLength', size);
+  await draft.press('End');
+  await draft.pressSequentially('!');
+  await expect(draft).toHaveJSProperty('textLength', size + 1);
+  await expect(page.locator('#limit')).toContainText('125,001 / 125,000');
 });

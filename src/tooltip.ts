@@ -7,10 +7,11 @@ export function installTooltips(tooltip: HTMLElement, locale: () => Locale) {
   let focus: HTMLElement | undefined;
   let dismissed: HTMLElement | undefined;
   let timer = 0;
+  let pointerSuppressed = false;
   function resolve(node: EventTarget | null) {
-    return node instanceof Element
-      ? (node.closest<HTMLElement>('[data-help]') ?? undefined)
-      : undefined;
+    if (!(node instanceof Element)) return;
+    if (tooltip.contains(node)) return target;
+    return node.closest<HTMLElement>('[data-help]') ?? undefined;
   }
   function position() {
     if (!target || tooltip.hidden) return;
@@ -25,6 +26,7 @@ export function installTooltips(tooltip: HTMLElement, locale: () => Locale) {
       below + rect.height + 8 <= innerHeight
         ? below
         : Math.max(8, bounds.top - rect.height - 7);
+    tooltip.dataset.side = top === below ? 'bottom' : 'top';
     tooltip.style.left = left + 'px';
     tooltip.style.top = top + 'px';
   }
@@ -54,15 +56,22 @@ export function installTooltips(tooltip: HTMLElement, locale: () => Locale) {
     }, 4000);
   }
   document.addEventListener('pointerover', (event) => {
-    if (event.pointerType === 'touch') return;
+    if (event.pointerType === 'touch' || pointerSuppressed) return;
     const next = resolve(event.target);
     if (pointer !== next) dismissed = undefined;
     pointer = next;
     show();
   });
   document.addEventListener('pointerout', (event) => {
-    if (event.pointerType === 'touch') return;
+    if (event.pointerType === 'touch' || pointerSuppressed) return;
     pointer = resolve(event.relatedTarget);
+    show();
+  });
+  document.addEventListener('pointermove', (event) => {
+    if (!pointerSuppressed || event.pointerType === 'touch') return;
+    pointerSuppressed = false;
+    dismissed = undefined;
+    pointer = resolve(event.target);
     show();
   });
   document.addEventListener('focusin', (event) => {
@@ -77,6 +86,8 @@ export function installTooltips(tooltip: HTMLElement, locale: () => Locale) {
   document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape' && target) {
       dismissed = target;
+      pointer = undefined;
+      pointerSuppressed = true;
       hide();
     }
   });

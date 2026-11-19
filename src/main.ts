@@ -105,7 +105,10 @@ function renderDiagnostics(warnings: Warning[]) {
         button.addEventListener('click', () => {
           editor.focus();
           editor.setSelectionRange(offset, offset);
+          const marker = lineMarkers.children[line - 1] as
+            HTMLElement | undefined;
           editor.scrollTop =
+            marker?.offsetTop ??
             (line - 1) * parseFloat(getComputedStyle(editor).lineHeight);
         });
         item.append(button);
@@ -115,7 +118,7 @@ function renderDiagnostics(warnings: Warning[]) {
       return item;
     }),
   );
-  if (lines.length > 1600) {
+  if (lines.length > 1600 || current.text.length > 100_000) {
     lineMarkers.replaceChildren();
     return;
   }
@@ -176,11 +179,13 @@ function renderAnalysis() {
     get(key).textContent = value === undefined ? '—' : number(value);
   }
   // Character count reflects what the user sees in the sole editor.
-  get('characters').textContent = number(
-    doc.frame.mode === 'markdown'
-      ? stats.characters
-      : Array.from(graphemes(doc.frame.text)).length,
-  );
+  let characters = stats.characters;
+  if (source !== doc.frame.text) {
+    characters = 0;
+    for (const grapheme of graphemes(doc.frame.text))
+      if (grapheme.segment) characters++;
+  }
+  get('characters').textContent = number(characters);
   renderDiagnostics(stats.warnings);
   get('literal-notice').hidden =
     outputMode !== 'unicode' || !inspectMarkdown(source).literal;
@@ -278,6 +283,7 @@ editor.addEventListener('beforeinput', (event) => {
     (kind === 'insertText' || kind === 'insertLineBreak')
   ) {
     event.preventDefault();
+    dismissTooltip();
     replace(
       formatTyping(
         doc.frame,
@@ -289,8 +295,18 @@ editor.addEventListener('beforeinput', (event) => {
     );
   }
 });
+editor.addEventListener('paste', (event) => {
+  const plain = event.clipboardData?.getData('text/plain');
+  if (!plain || plain.length <= 10_000 || composing) return;
+  event.preventDefault();
+  const range = selection();
+  doc.select(range);
+  dismissTooltip();
+  replace({ ...range, value: plain.replace(/\r\n?/gu, '\n') }, false);
+});
 editor.addEventListener('input', (event) => {
   if (composing) return;
+  dismissTooltip();
   const kind = (event as InputEvent).inputType;
   doc.edit(
     editor.value,

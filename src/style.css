@@ -276,6 +276,7 @@ button[aria-pressed='true'] {
   position: absolute;
   inset: 0;
   overflow: hidden;
+  scrollbar-gutter: stable;
   pointer-events: none;
 }
 
@@ -319,6 +320,7 @@ button[aria-pressed='true'] {
   font: var(--editor-font);
   tab-size: 4;
   overflow-wrap: break-word;
+  scrollbar-gutter: stable;
 }
 
 #editor:focus-visible {
@@ -440,7 +442,22 @@ button[aria-pressed='true'] {
   color: var(--ink);
   background: var(--surface);
   font-size: 0.875rem;
-  pointer-events: none;
+}
+
+#tooltip::before {
+  position: absolute;
+  right: 0;
+  left: 0;
+  height: 8px;
+  content: '';
+}
+
+#tooltip[data-side='bottom']::before {
+  bottom: 100%;
+}
+
+#tooltip[data-side='top']::before {
+  top: 100%;
 }
 
 dialog {

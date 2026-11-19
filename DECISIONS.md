@@ -9,3 +9,22 @@
 - Choose the runtime, dependencies, test tools, and packaging after reading
   the vision. Record consequential choices here with their rationale and
   tradeoffs when they are made.
+
+## Implementation
+
+- Use a static TypeScript application with Vite and a source-positioned GFM
+  parser. A single textarea displays one logical draft. The draft is in memory.
+- Use mathematical serif letters, with a lookup for italic h. Map simple
+  unordered bullets and keep nested lists, tasks, and other complex GFM
+  literal. Reuse original spellings for intact conversion spans. Reparse
+  edited content as a whole to respect new Markdown syntax.
+- Use English and German and system, light, and dark themes. All choices last
+  for the current tab. The Help dialog makes long contextual help available
+  on touch devices.
+- Use UTF-16 units for LinkedIn estimates, warn at 90%, and label reported or
+  conservative limits. Main writing statistics use parsed text and visible
+  grapheme clusters.
+- Build a static artifact for GitHub Pages. Use separate test instrumentation
+  and a copy of the source for mutation testing.
+- Provisional licensing choice is GPL-3.0-only pending owner confirmation for
+  the first public release. Masapetric is credited in the app and README.

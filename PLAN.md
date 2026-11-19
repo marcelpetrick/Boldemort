@@ -27,3 +27,6 @@
   Regression tests exercise offline use, long drafts, and clipboard fallback.
 - The first remote mutation job passed. Fixed the Firefox launch environment
   for the browser job by matching the GitHub runner's user inside the container.
+- Self-review tightened source-aware round-trips, preserved literal code and
+  task markers, and verified simple bullet conversion. Added scroll-aware
+  diagnostics, hoverable long help, and bundled license notices.

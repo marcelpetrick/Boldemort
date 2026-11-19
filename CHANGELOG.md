@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.4
+
+- Improved round-trips after edits, code protection, and unordered bullets.
+- Made expanded help hoverable and kept diagnostic jumps aligned with the gutter.
+- Packaged the full application and dependency licenses in the static build.
+
 ## 0.1.3
 
 - Run browser checks as the Playwright image user on GitHub-hosted runners.

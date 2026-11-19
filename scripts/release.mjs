@@ -12,8 +12,7 @@ if (!changelog.split('\n').includes('## ' + metadata.version)) {
   throw new Error('The release needs a matching changelog entry.');
 }
 await mkdir('release', { recursive: true });
-for (const name of ['LICENSE', 'DEPENDENCIES.md'])
-  await cp(name, 'dist/' + name);
+await cp('DEPENDENCIES.md', 'dist/DEPENDENCIES.md');
 const filename = 'Boldemort-' + tag + '.tar.gz';
 execFileSync('tar', ['-czf', 'release/' + filename, '-C', 'dist', '.']);
 const buffer = await readFile('release/' + filename);
