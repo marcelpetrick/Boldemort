@@ -1,0 +1,301 @@
+// SPDX-License-Identifier: GPL-3.0-only
+export const messages = {
+  subtitle: ['Markdown & Unicode editor', 'Markdown- und Unicode-Editor'],
+  language: ['Language', 'Sprache'],
+  theme: ['Theme', 'Farbschema'],
+  system: ['System', 'System'],
+  light: ['Light', 'Hell'],
+  dark: ['Dark', 'Dunkel'],
+  draft: ['Your draft', 'Dein Entwurf'],
+  mode: ['Editing mode', 'Bearbeitungsmodus'],
+  formatting: ['Formatting', 'Formatierung'],
+  bold: ['Bold', 'Fett'],
+  italic: ['Italic', 'Kursiv'],
+  underline: ['Underline', 'Unterstreichen'],
+  strike: ['Strikethrough', 'Durchstreichen'],
+  bullets: ['Bulleted list', 'Aufzählung'],
+  undo: ['Undo', 'Rückgängig'],
+  redo: ['Redo', 'Wiederholen'],
+  output: ['Output format', 'Ausgabeformat'],
+  save: ['Export', 'Exportieren'],
+  copy: ['Copy all', 'Alles kopieren'],
+  placeholder: [
+    'Start writing, or paste your text here…',
+    'Schreibe los oder füge deinen Text hier ein …',
+  ],
+  metrics: ['Writing statistics', 'Schreibstatistik'],
+  words: ['Words', 'Wörter'],
+  characters: ['Characters', 'Zeichen'],
+  paragraphs: ['Paragraphs', 'Absätze'],
+  average: ['Avg. words / sentence', 'Ø Wörter / Satz'],
+  median: ['Median words / sentence', 'Median Wörter / Satz'],
+  destination: ['LinkedIn destination', 'LinkedIn-Ziel'],
+  general: ['General', 'Allgemein'],
+  post: ['Feed post', 'Feed-Beitrag'],
+  article: ['Article', 'Artikel'],
+  message: ['Direct message', 'Direktnachricht'],
+  inmail: ['InMail', 'InMail'],
+  note: ['Connection note', 'Kontaktanfrage'],
+  source: ['Source', 'Quelle'],
+  diagnostics: ['Writing hints', 'Schreibhilfen'],
+  privacy: ['Drafts stay in this tab', 'Entwürfe bleiben in diesem Tab'],
+  help: ['Help', 'Hilfe'],
+  clear: ['Clear draft', 'Entwurf leeren'],
+  close: ['Close', 'Schließen'],
+  cancel: ['Cancel', 'Abbrechen'],
+  clearBody: [
+    'Clear the entire draft? You can undo this while this tab stays open.',
+    'Den gesamten Entwurf leeren? Solange dieser Tab geöffnet bleibt, kannst du das rückgängig machen.',
+  ],
+  helpBody: [
+    'Keep the pointer or keyboard focus on a control for four seconds to see more. On touch screens, use this list. Mathematical Unicode may be read differently by screen readers. Credit: Masapetric. Built with AI assistance.',
+    'Lass den Zeiger oder den Tastaturfokus vier Sekunden auf einem Element, um mehr zu erfahren. Auf Touchscreens hilft diese Liste. Screenreader können mathematische Unicode-Zeichen anders vorlesen. Dank an Masapetric. Mit KI-Unterstützung entwickelt.',
+  ],
+  clipboardTitle: ['Copy manually', 'Manuell kopieren'],
+  clipboardManual: [
+    'Clipboard access failed. The requested output is selected. Use your device’s copy command.',
+    'Der Zugriff auf die Zwischenablage ist fehlgeschlagen. Die gewünschte Ausgabe ist markiert. Nutze den Kopierbefehl deines Geräts.',
+  ],
+  copied: ['Copied as {format}.', 'Als {format} kopiert.'],
+  exported: ['Download started.', 'Download gestartet.'],
+  literal: [
+    'Complex Markdown stays literal in Unicode output.',
+    'Komplexes Markdown bleibt in der Unicode-Ausgabe als Quelltext erhalten.',
+  ],
+  protected: [
+    'This selection crosses or contains Markdown syntax. Select a complete emphasis span or plain text.',
+    'Die Auswahl berührt Markdown-Syntax. Wähle eine vollständige Hervorhebung oder reinen Text.',
+  ],
+  units: ['UTF-16 units in {format}', 'UTF-16-Einheiten in {format}'],
+  remaining: ['{count} remaining', 'Noch {count} frei'],
+  over: [
+    '{count} over the limit. Shorten the draft or choose a longer format.',
+    '{count} über dem Limit. Kürze den Entwurf oder wähle ein längeres Format.',
+  ],
+  near: ['Near the limit', 'Fast am Limit'],
+  reported: ['Reported limit', 'Gemeldetes Limit'],
+  conservative: ['Conservative estimate', 'Vorsichtige Schätzung'],
+  official: ['LinkedIn guidance', 'LinkedIn-Angabe'],
+  genericLength: ['{count} {units}', '{count} {units}'],
+  line: ['Line {line}', 'Zeile {line}'],
+  fence: [
+    'This code fence may be unclosed. Add a matching fence if the code block is finished.',
+    'Dieser Codeblock ist möglicherweise offen. Ergänze den passenden Abschluss, sobald du fertig bist.',
+  ],
+  table: [
+    'This row has a different cell count from the table heading. Check the pipes.',
+    'Diese Zeile hat eine andere Zellenzahl als der Tabellenkopf. Prüfe die senkrechten Striche.',
+  ],
+  longParagraph: [
+    'This paragraph is long. Consider splitting it for readability.',
+    'Dieser Absatz ist lang. Teile ihn für eine bessere Lesbarkeit auf.',
+  ],
+} as const;
+export type Key = keyof typeof messages;
+export type Locale = 'en' | 'de';
+
+export const help = {
+  language: [
+    'Choose the interface language.',
+    'Changes labels, messages, help and number formatting. Your draft stays as written.',
+    'Sprache der Oberfläche wählen.',
+    'Ändert Beschriftungen, Meldungen, Hilfe und Zahlenformate. Dein Entwurf bleibt erhalten.',
+  ],
+  theme: [
+    'Choose a color theme.',
+    'System follows your device. Light and Dark override the device setting for this tab.',
+    'Farbschema wählen.',
+    'System folgt deinem Gerät. Hell und Dunkel gelten unabhängig davon für diesen Tab.',
+  ],
+  markdown: [
+    'Edit GitHub Flavored Markdown.',
+    'Switches this draft to editable markup. Supported Unicode styles convert to markup. Existing GFM structure is preserved.',
+    'GitHub Flavored Markdown bearbeiten.',
+    'Wechselt zur bearbeitbaren Auszeichnung. Unterstützte Unicode-Stile werden umgewandelt. Vorhandene GFM-Struktur bleibt erhalten.',
+  ],
+  unicode: [
+    'Edit styled Unicode text.',
+    'Switches this draft to copyable styled glyphs. Complex Markdown stays literal. Screen readers may pronounce styled glyphs differently.',
+    'Formatierten Unicode-Text bearbeiten.',
+    'Wechselt zu kopierbaren Schriftzeichen. Komplexes Markdown bleibt als Quelltext erhalten. Screenreader können Schriftzeichen anders aussprechen.',
+  ],
+  bold: [
+    'Toggle bold.',
+    'Formats selected text or arms bold for typing. Use Ctrl or Cmd+B. Unicode supports Latin letters and digits.',
+    'Fett umschalten.',
+    'Formatiert die Auswahl oder die weitere Eingabe. Tastenkürzel Strg oder Cmd+B. Unicode unterstützt lateinische Buchstaben und Ziffern.',
+  ],
+  italic: [
+    'Toggle italic.',
+    'Formats selected text or arms italic for typing. Use Ctrl or Cmd+I. Unicode uses mathematical italic letters.',
+    'Kursiv umschalten.',
+    'Formatiert die Auswahl oder die weitere Eingabe. Tastenkürzel Strg oder Cmd+I. Unicode nutzt mathematisch kursive Buchstaben.',
+  ],
+  underline: [
+    'Toggle underline.',
+    'Formats selected text or arms underline for typing. Markdown uses literal <u> tags. Unicode adds a combining low line.',
+    'Unterstreichen umschalten.',
+    'Formatiert die Auswahl oder die weitere Eingabe. Markdown nutzt <u>-Tags. Unicode ergänzt einen kombinierenden Unterstrich.',
+  ],
+  strike: [
+    'Toggle strikethrough.',
+    'Formats selected text or arms strikethrough for typing. Unicode uses a combining stroke that may render differently in other apps.',
+    'Durchstreichen umschalten.',
+    'Formatiert die Auswahl oder die weitere Eingabe. Unicode ergänzt einen überlagerten Strich, der je nach App anders aussehen kann.',
+  ],
+  bullets: [
+    'Toggle bullets on the selected lines.',
+    'Adds bullets at the current indentation. Existing ordered lists and task-list states are kept.',
+    'Aufzählung für die ausgewählten Zeilen umschalten.',
+    'Fügt Aufzählungszeichen auf der vorhandenen Einrückung ein. Nummerierte Listen und Aufgabenstatus bleiben erhalten.',
+  ],
+  undo: [
+    'Undo the last edit.',
+    'Reverses the last typing group, toolbar change or mode switch. Use Ctrl or Cmd+Z.',
+    'Letzte Änderung rückgängig machen.',
+    'Setzt die letzte Eingabegruppe, Formatierung oder Modusänderung zurück. Tastenkürzel Strg oder Cmd+Z.',
+  ],
+  redo: [
+    'Redo an undone edit.',
+    'Reapplies the last undone change. Use Ctrl or Cmd+Shift+Z, or Ctrl+Y.',
+    'Rückgängig gemachte Änderung wiederholen.',
+    'Wendet die letzte rückgängig gemachte Änderung erneut an. Tastenkürzel Strg oder Cmd+Umschalt+Z oder Strg+Y.',
+  ],
+  output: [
+    'Choose Markdown or Unicode output.',
+    'This choice controls copy, export and the LinkedIn estimate independently of the editing mode.',
+    'Markdown- oder Unicode-Ausgabe wählen.',
+    'Gilt für Kopie, Export und die LinkedIn-Schätzung, unabhängig vom Bearbeitungsmodus.',
+  ],
+  save: [
+    'Download the entire draft.',
+    'Saves UTF-8 plain text using the output format you selected. The browser chooses where the file goes.',
+    'Gesamten Entwurf herunterladen.',
+    'Speichert UTF-8-Klartext im gewählten Ausgabeformat. Der Browser bestimmt den Speicherort.',
+  ],
+  copy: [
+    'Copy the entire draft.',
+    'Copies the selected output format as plain text. Use the usual copy command to copy only your current text selection.',
+    'Gesamten Entwurf kopieren.',
+    'Kopiert das gewählte Ausgabeformat als Klartext. Mit dem normalen Kopierbefehl kopierst du nur die aktuelle Textauswahl.',
+  ],
+  editor: [
+    'Write or paste plain text.',
+    'The text lives in this tab. Use the toolbar on a selection, or arm a style before typing. Export before closing to keep a copy.',
+    'Klartext schreiben oder einfügen.',
+    'Der Text bleibt in diesem Tab. Formatiere eine Auswahl oder aktiviere einen Stil für die Eingabe. Exportiere deinen Entwurf vor dem Schließen.',
+  ],
+  words: [
+    'Words in the draft.',
+    'Counts word-like segments in the prose after known styling delimiters are removed.',
+    'Wörter im Entwurf.',
+    'Zählt wortähnliche Segmente im Text ohne bekannte Formatierungszeichen.',
+  ],
+  characters: [
+    'Visible character groups.',
+    'Uses grapheme clusters. A combined emoji can count as one character even if its copy length is larger.',
+    'Sichtbare Zeichengruppen.',
+    'Zählt Grapheme. Ein zusammengesetztes Emoji kann trotz größerer Ausgabelänge als ein Zeichen zählen.',
+  ],
+  paragraphs: [
+    'Text blocks in the draft.',
+    'Counts nonempty parsed top-level Markdown blocks. A list counts as one block.',
+    'Textblöcke im Entwurf.',
+    'Zählt nichtleere Markdown-Blöcke der obersten Ebene. Eine Liste zählt als ein Block.',
+  ],
+  average: [
+    'Mean sentence length.',
+    'Adds the word counts of detected sentences and divides by the number of nonempty sentences.',
+    'Durchschnittliche Satzlänge.',
+    'Teilt die Wortanzahl der erkannten Sätze durch die Anzahl der Sätze mit Wörtern.',
+  ],
+  median: [
+    'Middle sentence length.',
+    'Orders sentences by word count. For an even number, averages the two middle lengths.',
+    'Mittlere Satzlänge.',
+    'Sortiert Sätze nach Wortanzahl. Bei gerader Satzanzahl wird der Mittelwert der beiden mittleren Längen berechnet.',
+  ],
+  destination: [
+    'Choose where the text will go.',
+    'LinkedIn limits are guidance. General mode shows the output length without a destination limit.',
+    'Ziel für den Text wählen.',
+    'LinkedIn-Limits dienen zur Orientierung. Allgemein zeigt die Ausgabelänge ohne Limit.',
+  ],
+  limit: [
+    'Estimated length of your chosen output.',
+    'Counts UTF-16 code units. Styled glyphs may occupy two units and combining marks also count. LinkedIn may count differently.',
+    'Geschätzte Länge deiner Ausgabe.',
+    'Zählt UTF-16-Einheiten. Formatierte Zeichen können zwei Einheiten belegen. Kombinierende Zeichen zählen mit. LinkedIn kann anders zählen.',
+  ],
+  source: [
+    'Read where this limit comes from.',
+    'Opens the published guidance or the cited third-party estimate in a new tab. Your draft stays here.',
+    'Quelle für das Limit ansehen.',
+    'Öffnet die veröffentlichte Angabe oder die Schätzung eines Drittanbieters in einem neuen Tab. Dein Entwurf bleibt hier.',
+  ],
+  diagnostics: [
+    'Show advisory writing hints.',
+    'Open the list, then select a line to go to the matching source location when it is available.',
+    'Schreibhilfen anzeigen.',
+    'Öffne die Liste und wähle eine Zeile, um zur verfügbaren Quellposition zu wechseln.',
+  ],
+  diagnosticLine: [
+    'Inspect this line.',
+    'Moves the editor caret to the reported line. Hints never change your draft.',
+    'Diese Zeile prüfen.',
+    'Verschiebt den Cursor zur gemeldeten Zeile. Hinweise ändern deinen Entwurf nicht.',
+  ],
+  version: [
+    'Installed app version.',
+    'Boldemort is published under GPL version 3. See the repository for release history and dependencies.',
+    'Installierte App-Version.',
+    'Boldemort steht unter GPL Version 3. Versionsverlauf und Abhängigkeiten stehen im Repository.',
+  ],
+  help: [
+    'Open the complete help list.',
+    'Read each control’s expanded explanation immediately. This is also available on instruments without hover.',
+    'Vollständige Hilfe öffnen.',
+    'Lies direkt die ausführlichen Erläuterungen. Das gilt auch für Geräte ohne Hover-Funktion.',
+  ],
+  clear: [
+    'Clear your draft.',
+    'Clearing asks for confirmation. Undo can recover the cleared text while this tab is open.',
+    'Entwurf leeren.',
+    'Leeren erfordert eine Bestätigung. Solange der Tab geöffnet ist, kannst du es rückgängig machen.',
+  ],
+  close: [
+    'Close the dialog.',
+    'Returns to the previous control. Escape also closes the dialog.',
+    'Dialog schließen.',
+    'Kehrt zum vorherigen Bedienelement zurück. Escape schließt den Dialog ebenfalls.',
+  ],
+  cancel: [
+    'Keep your draft.',
+    'Closes the confirmation dialog and returns to the draft.',
+    'Entwurf behalten.',
+    'Schließt die Bestätigung und kehrt zum Entwurf zurück.',
+  ],
+  manual: [
+    'Output selected for manual copy.',
+    'Use your device’s copy command. Copying this text does not change your draft.',
+    'Ausgabe zum manuellen Kopieren markiert.',
+    'Nutze den Kopierbefehl deines Geräts. Das Kopieren verändert deinen Entwurf nicht.',
+  ],
+} as const;
+export type Help = keyof typeof help;
+
+export function localize(
+  locale: Locale,
+  key: Key,
+  values: Record<string, string> = {},
+) {
+  return messages[key][locale === 'de' ? 1 : 0].replace(
+    /\{(\w+)\}/gu,
+    (placeholder, name: string) => values[name] ?? placeholder,
+  );
+}
+
+export function explanation(locale: Locale, key: Help) {
+  const index = locale === 'de' ? 2 : 0;
+  return { short: help[key][index], long: help[key][index + 1]! };
+}

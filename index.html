@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'none'; form-action 'none'"
+    />
+    <meta
+      name="description"
+      content="A private plain-text editor for Markdown and copyable Unicode styling."
+    />
+    <title>Boldemort</title>
+    <link rel="icon" href="./icon.svg" type="image/svg+xml" />
+  </head>
+  <body>
+    <main class="workspace">
+      <header class="topbar">
+        <div class="identity">
+          <span class="brand-icon" aria-hidden="true">B<span>.</span></span>
+          <div>
+            <h1>Boldemort</h1>
+            <span class="subtitle" data-i="subtitle"></span>
+          </div>
+        </div>
+        <div class="settings">
+          <select id="language" data-name="language" data-help="language">
+            <option value="en" lang="en">English</option>
+            <option value="de" lang="de">Deutsch</option>
+          </select>
+          <select id="theme" data-name="theme" data-help="theme">
+            <option value="system" data-i="system"></option>
+            <option value="light" data-i="light"></option>
+            <option value="dark" data-i="dark"></option>
+          </select>
+        </div>
+      </header>
+
+      <section class="writing-card" aria-labelledby="draft-heading">
+        <div class="card-heading">
+          <h2 id="draft-heading" data-i="draft">Your draft</h2>
+          <div class="modes" role="group" data-name="mode">
+            <button
+              type="button"
+              data-mode="markdown"
+              data-help="markdown"
+              aria-pressed="false"
+            >
+              Markdown
+            </button>
+            <button
+              type="button"
+              data-mode="unicode"
+              data-help="unicode"
+              aria-pressed="true"
+            >
+              Unicode
+            </button>
+          </div>
+        </div>
+        <div class="toolbar">
+          <div class="formatting" role="group" data-name="formatting">
+            <button
+              type="button"
+              class="icon bold"
+              data-style="bold"
+              data-name="bold"
+              data-help="bold"
+              aria-pressed="false"
+            >
+              B
+            </button>
+            <button
+              type="button"
+              class="icon italic"
+              data-style="italic"
+              data-name="italic"
+              data-help="italic"
+              aria-pressed="false"
+            >
+              I
+            </button>
+            <button
+              type="button"
+              class="icon underline"
+              data-style="underline"
+              data-name="underline"
+              data-help="underline"
+              aria-pressed="false"
+            >
+              U
+            </button>
+            <button
+              type="button"
+              class="icon strike"
+              data-style="strike"
+              data-name="strike"
+              data-help="strike"
+              aria-pressed="false"
+            >
+              S
+            </button>
+            <button
+              type="button"
+              class="icon"
+              id="bullets"
+              data-name="bullets"
+              data-help="bullets"
+            >
+              ≡
+            </button>
+            <span class="separator" aria-hidden="true"></span>
+            <button
+              type="button"
+              class="icon"
+              id="undo"
+              data-name="undo"
+              data-help="undo"
+              aria-disabled="true"
+            >
+              ↶
+            </button>
+            <button
+              type="button"
+              class="icon"
+              id="redo"
+              data-name="redo"
+              data-help="redo"
+              aria-disabled="true"
+            >
+              ↷
+            </button>
+          </div>
+          <div class="actions">
+            <select id="output" data-name="output" data-help="output">
+              <option value="unicode">Unicode · .txt</option>
+              <option value="markdown">Markdown · .md</option>
+            </select>
+            <button type="button" id="save" data-i="save" data-help="save">
+              Export
+            </button>
+            <button
+              type="button"
+              id="copy"
+              class="primary"
+              data-i="copy"
+              data-help="copy"
+            >
+              Copy all
+            </button>
+          </div>
+        </div>
+        <div class="editor-shell">
+          <div id="gutter" aria-hidden="true">
+            <div id="line-markers"></div>
+          </div>
+          <textarea
+            id="editor"
+            rows="8"
+            autocomplete="off"
+            data-name="draft"
+            data-help="editor"
+            spellcheck="true"
+            dir="auto"
+          ></textarea>
+        </div>
+        <div class="metrics" role="group" data-name="metrics">
+          <div class="metric" data-help="words" tabindex="0">
+            <span data-i="words"></span><strong id="words">0</strong>
+          </div>
+          <div class="metric" data-help="characters" tabindex="0">
+            <span data-i="characters"></span><strong id="characters">0</strong>
+          </div>
+          <div class="metric" data-help="paragraphs" tabindex="0">
+            <span data-i="paragraphs"></span><strong id="paragraphs">0</strong>
+          </div>
+          <div class="metric" data-help="average" tabindex="0">
+            <span data-i="average"></span><strong id="average">—</strong>
+          </div>
+          <div class="metric" data-help="median" tabindex="0">
+            <span data-i="median"></span><strong id="median">—</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="destination" aria-labelledby="destination-heading">
+        <div class="destination-picker">
+          <h2 id="destination-heading" data-i="destination">
+            LinkedIn destination
+          </h2>
+          <select
+            id="destination"
+            aria-labelledby="destination-heading"
+            data-help="destination"
+          >
+            <option value="general" data-i="general"></option>
+            <option value="post" data-i="post"></option>
+            <option value="article" data-i="article"></option>
+            <option value="message" data-i="message"></option>
+            <option value="inmail" data-i="inmail"></option>
+            <option value="note" data-i="note"></option>
+          </select>
+        </div>
+        <div class="destination-result">
+          <div id="limit" tabindex="0" data-help="limit"></div>
+          <a id="limit-source" data-i="source" data-help="source" hidden></a>
+        </div>
+      </section>
+      <div class="notices">
+        <p id="literal-notice" data-i="literal" hidden></p>
+        <p id="hint" class="hint" role="status"></p>
+        <details id="diagnostics" hidden>
+          <summary data-help="diagnostics">
+            <span data-i="diagnostics"></span> <span id="warning-count"></span>
+          </summary>
+          <ul id="warning-list"></ul>
+        </details>
+      </div>
+      <footer class="footer">
+        <span id="version" tabindex="0" data-help="version"></span>
+        <span data-i="privacy"></span>
+        <button
+          type="button"
+          id="help"
+          class="quiet"
+          data-i="help"
+          data-help="help"
+        >
+          Help
+        </button>
+        <button
+          type="button"
+          id="clear"
+          class="quiet"
+          data-i="clear"
+          data-help="clear"
+        >
+          Clear draft
+        </button>
+      </footer>
+    </main>
+
+    <div id="tooltip" role="tooltip" hidden></div>
+    <dialog id="help-dialog" aria-labelledby="help-heading">
+      <h2 id="help-heading" data-i="help">Help</h2>
+      <p data-i="helpBody"></p>
+      <dl id="help-list"></dl>
+      <form method="dialog">
+        <button type="submit" data-i="close" data-help="close">Close</button>
+      </form>
+    </dialog>
+    <dialog id="clear-dialog" aria-labelledby="clear-heading">
+      <h2 id="clear-heading" data-i="clear">Clear draft</h2>
+      <p data-i="clearBody"></p>
+      <form method="dialog">
+        <button
+          type="submit"
+          value="cancel"
+          autofocus
+          data-i="cancel"
+          data-help="cancel"
+        >
+          Cancel
+        </button>
+        <button type="submit" value="clear" data-i="clear" data-help="clear">
+          Clear draft
+        </button>
+      </form>
+    </dialog>
+    <dialog id="clipboard-dialog" aria-labelledby="clipboard-heading">
+      <h2 id="clipboard-heading" data-i="clipboardTitle">Copy manually</h2>
+      <p data-i="clipboardManual"></p>
+      <pre
+        id="manual-output"
+        tabindex="0"
+        data-name="output"
+        data-help="manual"
+      ></pre>
+      <form method="dialog">
+        <button type="submit" data-i="close" data-help="close">Close</button>
+      </form>
+    </dialog>
+    <script type="module" src="./src/main.ts"></script>
+  </body>
+</html>

@@ -1,0 +1,503 @@
+/* SPDX-License-Identifier: GPL-3.0-only */
+:root {
+  color-scheme: light dark;
+
+  --bg: light-dark(#f6f5fb, #13121a);
+  --surface: light-dark(#fff, #1c1a27);
+  --wash: light-dark(#f8f7fc, #221f2d);
+  --line: light-dark(#e0dcea, #393448);
+  --ink: light-dark(#231b36, #f2edf9);
+  --quiet: light-dark(#5e5670, #b9aecb);
+  --accent: light-dark(#5633b4, #c8adff);
+  --solid: light-dark(#603bc4, #b799ff);
+  --on-solid: light-dark(#fff, #241544);
+  --accent-bg: light-dark(#eee8ff, #342652);
+  --warning: light-dark(#82430c, #ffbd79);
+  --shadow: light-dark(#27145510, #0005);
+
+  font:
+    100%/1.5 system-ui,
+    sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 0;
+}
+
+button,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+h1,
+h2,
+p {
+  margin: 0;
+}
+
+a {
+  color: var(--accent);
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.workspace {
+  width: min(100%, 68rem);
+  min-height: 100dvh;
+  margin-inline: auto;
+  padding: clamp(0.7rem, 2.8vw, 2rem);
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.topbar,
+.identity,
+.settings,
+.card-heading,
+.toolbar,
+.formatting,
+.actions,
+.metrics,
+.destination,
+.destination-picker,
+.destination-result,
+.footer {
+  display: flex;
+  align-items: center;
+}
+
+.topbar,
+.card-heading,
+.toolbar,
+.destination {
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.topbar {
+  padding: 0.3rem 0 0.45rem;
+}
+
+.identity {
+  gap: 0.7rem;
+}
+
+.identity h1 {
+  font-size: 1.53rem;
+  line-height: 1.15;
+  letter-spacing: -0.045em;
+}
+
+.subtitle {
+  color: var(--quiet);
+  font-size: 0.88rem;
+}
+
+.brand-icon {
+  width: 2.6rem;
+  height: 2.6rem;
+  display: grid;
+  place-content: center;
+  grid-auto-flow: column;
+  border-radius: 0.75rem;
+  color: var(--on-solid);
+  background: var(--solid);
+  font-size: 1.38rem;
+  font-weight: 800;
+  letter-spacing: -0.075em;
+}
+
+.brand-icon span {
+  opacity: 0.85;
+}
+
+.settings,
+.actions,
+.formatting {
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+button,
+select {
+  touch-action: manipulation;
+  min-height: 2.25rem;
+  border: 1px solid var(--line);
+  border-radius: 0.45rem;
+  padding: 0.25rem 0.65rem;
+  background: var(--surface);
+  font-size: 0.875rem;
+}
+
+select {
+  max-width: 100%;
+}
+
+button:hover,
+select:hover {
+  border-color: var(--accent);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+button[aria-disabled='true'] {
+  color: var(--quiet);
+  cursor: default;
+}
+
+.writing-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 0.9rem;
+  box-shadow: 0 8px 28px var(--shadow);
+}
+
+.card-heading {
+  padding: 0.65rem 0.9rem;
+}
+
+h2 {
+  font-size: 1rem;
+}
+
+.modes {
+  display: inline-flex;
+  gap: 0.12rem;
+  background: var(--wash);
+  padding: 0.15rem;
+  border: 1px solid var(--line);
+  border-radius: 0.6rem;
+}
+
+.modes button {
+  min-height: 1.85rem;
+  border-color: transparent;
+  background: transparent;
+}
+
+button[aria-pressed='true'] {
+  color: var(--accent);
+  background: var(--accent-bg);
+  border-color: transparent;
+  font-weight: 650;
+}
+
+.toolbar {
+  background: var(--wash);
+  border-block: 1px solid var(--line);
+  padding: 0.42rem 0.8rem;
+}
+
+.icon {
+  width: 2.2rem;
+  padding-inline: 0;
+  font-size: 1rem;
+}
+
+.bold {
+  font-weight: 800;
+}
+
+.italic {
+  font-style: italic;
+}
+
+.underline {
+  text-decoration: underline;
+}
+
+.strike {
+  text-decoration: line-through;
+}
+
+.separator {
+  width: 1px;
+  height: 1.25rem;
+  margin-inline: 0.2rem;
+  background: var(--line);
+}
+
+.primary {
+  color: var(--on-solid);
+  background: var(--solid);
+  border-color: var(--solid);
+  font-weight: 650;
+}
+
+.primary:hover {
+  filter: brightness(1.12);
+}
+
+.editor-shell {
+  --gutter: 2.75rem;
+  --editor-pad: 0.9rem;
+  --editor-font: 1rem/1.65 ui-monospace, 'DejaVu Sans Mono', monospace;
+
+  position: relative;
+  flex: 1 0 auto;
+  display: flex;
+  min-height: clamp(10rem, 43vh, 42rem);
+  background: var(--surface);
+}
+
+#gutter {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+#line-markers {
+  color: transparent;
+  border-inline-start: 1px solid transparent;
+  margin-inline-start: var(--gutter);
+  padding: var(--editor-pad);
+  font: var(--editor-font);
+  tab-size: 4;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
+
+.marker {
+  position: absolute;
+  width: var(--gutter);
+  inset-inline-start: 0;
+  color: var(--quiet);
+  text-align: center;
+  font-size: 0.75rem;
+  line-height: 1.65rem;
+}
+
+.marker.flagged {
+  color: var(--warning);
+  font-weight: 800;
+}
+
+#editor {
+  position: absolute;
+  inset: 0 0 0 var(--gutter);
+  width: calc(100% - var(--gutter));
+  height: 100%;
+  padding: var(--editor-pad);
+  resize: none;
+  border: 0;
+  border-inline-start: 1px solid var(--line);
+  border-radius: 0;
+  background: var(--surface);
+  font: var(--editor-font);
+  tab-size: 4;
+  overflow-wrap: break-word;
+}
+
+#editor:focus-visible {
+  outline-offset: -2px;
+}
+
+#editor::placeholder {
+  color: var(--quiet);
+}
+
+#editor::selection {
+  background: var(--accent-bg);
+  color: var(--ink);
+}
+
+.editor-shell:has(#editor:dir(rtl)) #line-markers {
+  direction: rtl;
+}
+
+.metrics {
+  flex-wrap: wrap;
+  min-height: 2.95rem;
+  gap: 0.35rem 1.15rem;
+  padding: 0.55rem 0.9rem;
+  background: var(--wash);
+  border-top: 1px solid var(--line);
+}
+
+.metric {
+  display: inline-flex;
+  gap: 0.35rem;
+  font-size: 0.875rem;
+  color: var(--quiet);
+}
+
+.metric strong {
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.destination {
+  padding: 0.58rem 0.8rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 0.65rem;
+}
+
+.destination-picker,
+.destination-result {
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.destination-picker h2,
+.destination-result,
+.notices,
+.footer {
+  font-size: 0.875rem;
+}
+
+.destination-result,
+.footer {
+  color: var(--quiet);
+}
+
+#limit[data-state='near'],
+#limit[data-state='over'],
+.hint {
+  color: var(--warning);
+}
+
+.notices {
+  color: var(--quiet);
+}
+
+.hint:empty,
+.notices:has(.hint:empty):has(details[hidden]):has(#literal-notice[hidden]) {
+  display: none;
+}
+
+.notices summary {
+  cursor: pointer;
+  width: fit-content;
+}
+
+.notices ul {
+  margin-block: 0.3rem;
+  padding-inline-start: 1.25rem;
+}
+
+.notices li button {
+  text-align: start;
+}
+
+.footer {
+  gap: 0.3rem 0.65rem;
+  flex-wrap: wrap;
+}
+
+.footer button:first-of-type {
+  margin-inline-start: auto;
+}
+
+.quiet {
+  border-color: transparent;
+  background: transparent;
+  color: var(--accent);
+  min-height: 1.9rem;
+}
+
+#tooltip {
+  position: fixed;
+  z-index: 20;
+  max-width: min(22rem, calc(100vw - 1rem));
+  padding: 0.42rem 0.65rem;
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 16px var(--shadow);
+  color: var(--ink);
+  background: var(--surface);
+  font-size: 0.875rem;
+  pointer-events: none;
+}
+
+dialog {
+  width: min(34rem, calc(100% - 1.2rem));
+  max-height: 88dvh;
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 0.8rem;
+  background: var(--surface);
+  color: var(--ink);
+}
+
+dialog::backdrop {
+  background: #170f2b90;
+}
+
+dialog p {
+  margin-block: 0.45rem 0.75rem;
+}
+
+dialog dt {
+  color: var(--accent);
+  font-weight: 650;
+}
+
+dialog dd {
+  margin: 0 0 0.75rem;
+}
+
+dialog pre {
+  max-height: 40vh;
+  overflow: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+@media (width <= 33rem) {
+  .workspace {
+    gap: 0.55rem;
+  }
+
+  .footer button:first-of-type {
+    margin-inline-start: 0;
+  }
+
+  .editor-shell {
+    --gutter: 1.75rem;
+    --editor-pad: 0.55rem;
+  }
+
+  .card-heading,
+  .toolbar,
+  .metrics {
+    padding-inline: 0.55rem;
+  }
+
+  .metrics {
+    gap: 0.25rem 0.7rem;
+  }
+}

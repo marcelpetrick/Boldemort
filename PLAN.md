@@ -17,3 +17,6 @@
 
 - Vision intake complete. Both input files matched byte for byte. The root
   `vision.md` is the canonical copy.
+- Editor first pass complete. The browser workflow is running on Chromium and
+  Firefox. Next, wire the release checks and strengthen coverage across the
+  whole editor.

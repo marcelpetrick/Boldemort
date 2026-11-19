@@ -1,9 +1,70 @@
 # Boldemort
 
-Repository preparation is underway. Implementation starts when the product
-vision is available.
+[![Version 0.1.0](https://img.shields.io/badge/version-0.1.0-6241c2)](CHANGELOG.md)
+[![License GPLv3](https://img.shields.io/badge/license-GPLv3-blue)](LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-6-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Vite](https://img.shields.io/badge/Vite-8-646cff?logo=vite&logoColor=white)](https://vite.dev/)
+[![GFM](https://img.shields.io/badge/Markdown-GFM-24292f)](https://github.github.com/gfm/)
+[![Playwright](https://img.shields.io/badge/tested_with-Playwright-2ead33)](https://playwright.dev/)
+[![Languages](https://img.shields.io/badge/languages-English%20%7C%20Deutsch-6241c2)](#using-the-editor)
+[![Privacy](https://img.shields.io/badge/drafts-browser%20memory-26704d)](#using-the-editor)
 
-- [Implementation plan](PLAN.md)
-- [Repository instructions](AGENTS.md)
-- [Project decisions](DECISIONS.md)
-- [GNU General Public License v3](LICENSE)
+Boldemort is a one-editor writing tool that converts compatible Markdown
+formatting to copyable Unicode and back. It runs entirely in the browser.
+
+![The Boldemort editor with a sample Unicode draft and a LinkedIn length estimate](media/editor.png)
+
+[View the dark theme](media/editor-dark.png)
+
+## Using the editor
+
+1. Write or paste into the draft. Select text to format it, or toggle a style
+   at the caret to apply it to subsequent typing.
+2. Switch between **Markdown** and **Unicode** to edit either representation.
+3. Choose an **output format**, then use **Copy all** or **Export**. Copy and
+   download use the chosen format regardless of which view is open.
+
+The LinkedIn selector gives an advisory length estimate in UTF-16 code units
+for the chosen output. Reported and conservative limits are labeled. Word and
+sentence statistics use parsed text. Character count uses visible grapheme
+clusters when supported. A nonempty top-level Markdown block counts once.
+
+The top bar has English and German and follows the system theme unless you
+select Light or Dark. Hover or focus a control to see brief help. Keep the
+pointer or focus there for four seconds to expand it, or open **Help** to read
+the full explanations.
+
+The Unicode representation retains complex Markdown syntax such as links, code,
+tables and task lists literally. Mathematical letters, combining marks and
+Markdown formatting can be interpreted differently by external applications.
+Drafts live in the current tab. Export a copy to keep one.
+
+## Local development
+
+Requires Node.js 24 or later and npm.
+
+```sh
+npm ci
+npm run dev
+```
+
+```sh
+npx playwright install --with-deps chromium firefox webkit
+./localPipeline.sh
+```
+
+The pipeline checks formatting, TypeScript, CSS, HTML, Markdown, dependency
+inventory and audit results, then runs unit coverage, the production build,
+and Playwright against the GitHub Pages subpath. On a host without WebKit's
+system prerequisites, `./localPipeline.sh --project=chromium --project=firefox`
+runs the locally supported browsers. CI is intended to run all three engines.
+
+`npm run build` writes static files to `dist/`. Run `npm run preview` to serve
+the build locally. For the Pages subpath, run `node scripts/serve.mjs` after
+building, then open <http://127.0.0.1:4173/Boldemort/>.
+
+## Credits and license
+
+Credit to **Masapetric**. Developed with AI assistance. See the [GPLv3
+license](LICENSE), [dependency inventory](DEPENDENCIES.md), [implementation
+plan](PLAN.md), and [project vision](vision.md).
