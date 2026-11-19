@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 cd -- "$(dirname -- "${BASH_SOURCE[0]}")"
+npm ci
+npm exec -- playwright install chromium firefox webkit
 npm run format:check
 npm run lint
 npm run typecheck

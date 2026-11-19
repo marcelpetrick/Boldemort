@@ -25,7 +25,6 @@ jobs:
         with:
           node-version: 24
           cache: npm
-      - run: npm ci
       - run: ./localPipeline.sh
       - if: github.ref_type == 'tag'
         run: npm run mutation

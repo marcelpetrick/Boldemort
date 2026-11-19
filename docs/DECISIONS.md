@@ -26,5 +26,6 @@
   grapheme clusters.
 - Build a static artifact for GitHub Pages. Use separate test instrumentation
   and a copy of the source for mutation testing.
-- Provisional licensing choice is GPL-3.0-only pending owner confirmation for
-  the first public release. Masapetric is credited in the app and README.
+- The owner selected GPL-3.0-or-later. Credit Marcel Petrick
+  (<mail@marcelpetrick.it>) as the author in the app and README and acknowledge
+  AI assistance.

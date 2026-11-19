@@ -3,8 +3,8 @@
 [![CI](https://github.com/marcelpetrick/Boldemort/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/marcelpetrick/Boldemort/actions/workflows/ci.yml)
 [![GitHub Pages](https://github.com/marcelpetrick/Boldemort/actions/workflows/pages.yml/badge.svg)](https://github.com/marcelpetrick/Boldemort/actions/workflows/pages.yml)
 [![Release pipeline](https://github.com/marcelpetrick/Boldemort/actions/workflows/release.yml/badge.svg)](https://github.com/marcelpetrick/Boldemort/actions/workflows/release.yml)
-[![Version 0.1.6](https://img.shields.io/badge/version-0.1.6-6241c2)](docs/CHANGELOG.md)
-[![License GPLv3](https://img.shields.io/badge/license-GPLv3-blue)](LICENSE)
+[![Version 0.1.7](https://img.shields.io/badge/version-0.1.7-6241c2)](docs/CHANGELOG.md)
+[![License GPL v3 or later](https://img.shields.io/badge/license-GPLv3%20or%20later-blue.svg)](LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-6-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Vite](https://img.shields.io/badge/Vite-8-646cff?logo=vite&logoColor=white)](https://vite.dev/)
 [![GFM](https://img.shields.io/badge/Markdown-GFM-24292f)](https://github.github.com/gfm/)
@@ -19,12 +19,13 @@ formatting to copyable Unicode and back. It runs entirely in the browser.
 
 **[Try Boldemort on GitHub Pages](https://marcelpetrick.github.io/Boldemort/)**
 
-Public launch is pending GPL variant confirmation.
-
 **Author: Marcel Petrick <mail@marcelpetrick.it>**
 
-Credit to **Masapetric**. Developed with AI assistance. See the [GPLv3
-license](LICENSE), [dependency inventory](docs/DEPENDENCIES.md),
+**License: [GPL v3 or later](LICENSE).**
+
+**Developed with AI assistance.**
+
+See the [dependency inventory](docs/DEPENDENCIES.md),
 [implementation plan](docs/PLAN.md), and [project vision](vision.md).
 
 ![The Boldemort editor with a sample Unicode draft and a LinkedIn length estimate](media/editor.png)
@@ -73,12 +74,13 @@ npm run dev
 ```
 
 ```sh
-npx playwright install --with-deps chromium firefox webkit
 ./localPipeline.sh
 ```
 
-The pipeline checks formatting, TypeScript, CSS, HTML, Markdown, dependency
-inventory and audit results, then runs unit coverage, the production build,
+The pipeline installs the locked npm dependencies and Playwright browser
+binaries from a fresh checkout. It checks formatting, TypeScript, CSS, HTML,
+Markdown, the dependency inventory and audit results, then runs unit coverage,
+the production build,
 and Playwright against the GitHub Pages subpath. The coverage gate requires
 at least 98% line coverage across every application TypeScript module.
 Run `npm run mutation` for Stryker mutation testing of the conversion and
@@ -86,9 +88,20 @@ analysis core. It runs on a sandbox copy, and reports to `reports/mutation/`.
 Unit coverage is reported in `coverage/`. Browser instrumentation uses a
 separate build directory and is excluded from Pages and release artifacts.
 
-On a host without WebKit's
-system prerequisites, `./localPipeline.sh --project=chromium --project=firefox`
-runs the locally supported browsers. CI is intended to run all three engines.
+On supported Linux hosts, Playwright can install system libraries with
+`npx playwright install --with-deps chromium firefox webkit` after the npm
+dependencies are installed. Alternatively, run the full pipeline in the same
+Playwright container as CI.
+
+```sh
+docker run --rm --ipc=host --user "$(id -u):$(id -g)" \
+  --env npm_config_cache=/tmp/boldemort-npm-cache \
+  --volume "$PWD:/work" --workdir /work \
+  mcr.microsoft.com/playwright:v1.65.1-noble ./localPipeline.sh
+```
+
+Use `./localPipeline.sh --project=chromium --project=firefox` to select which
+engines run the production browser tests.
 
 `npm run build` writes static files to `dist/`. Run `npm run preview` to serve
 the build locally. For the Pages subpath, run `node scripts/serve.mjs` after
@@ -102,7 +115,7 @@ CI triggers Pages deployment. The Pages workflow can also be dispatched for
 the current tip of `main`.
 
 For a release, update the package version and changelog, verify the pipeline,
-then push a matching tag such as `v0.1.6` from `main`. The release workflow
+then push a matching tag such as `v0.1.7` from `main`. The release workflow
 reruns local verification, packages the static site with licensing information,
 and publishes a SHA-256 checksum alongside the archive. Dispatch the Release
 workflow on `main` to verify and download the archive from Actions without

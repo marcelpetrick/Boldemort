@@ -11,7 +11,6 @@
 6. Run static checks, tests and coverage, review for data loss and UX friction,
    capture a screenshot, and document usage and dependencies.
 7. Commit and push, then verify GitHub Actions and the published Pages site.
-   Track the vision's pre-release license confirmation separately.
 
 ## Progress
 
@@ -31,8 +30,10 @@
   task markers, and verified simple bullet conversion. Added scroll-aware
   diagnostics, hoverable long help, and bundled license notices.
 - Verified an article-length paste and follow-up edit in all three browsers.
-  Added release and Pages artifact dry runs. Public deployment is pending the
-  project owner's license variant confirmation specified in the vision.
+  Added release and Pages artifact dry runs while awaiting license confirmation.
 - Moved supporting docs into `docs/` and tool configuration into `config/`.
   Updated all pipeline and release paths. Added the author and Pages link
   near the top of the README and reviewed the reorganization against main.
+- Confirmed GPL-3.0-or-later and corrected the author credit to Marcel Petrick.
+  Added clean-checkout installation to the shared verification pipeline before
+  enabling public Pages deployment.

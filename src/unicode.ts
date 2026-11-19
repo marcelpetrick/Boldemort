@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 export const styles = ['bold', 'italic', 'underline', 'strike'] as const;
 export type Style = (typeof styles)[number];
 export type Mode = 'markdown' | 'unicode';

@@ -156,6 +156,8 @@ test('opens full help and keeps UTF-8 exports available', async ({ page }) => {
   await page.getByRole('button', { name: 'Help', exact: true }).click();
   const dialog = page.getByRole('dialog', { name: 'Help' });
   await expect(dialog).toContainText('Mathematical Unicode');
+  await expect(dialog).toContainText('Marcel Petrick <mail@marcelpetrick.it>');
+  await expect(dialog).toContainText('Built with AI assistance.');
   await expect(dialog).toContainText('Toggle underline.');
   await dialog.getByRole('button', { name: 'Close' }).click();
   await page.locator('#editor').fill('Ää');

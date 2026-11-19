@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 export const messages = {
   subtitle: ['Markdown & Unicode editor', 'Markdown- und Unicode-Editor'],
   language: ['Language', 'Sprache'],
@@ -48,8 +48,8 @@ export const messages = {
     'Den gesamten Entwurf leeren? Solange dieser Tab geöffnet bleibt, kannst du das rückgängig machen.',
   ],
   helpBody: [
-    'Keep the pointer or keyboard focus on a control for four seconds to see more. On touch screens, use this list. Mathematical Unicode may be read differently by screen readers. Credit: Masapetric. Built with AI assistance.',
-    'Lass den Zeiger oder den Tastaturfokus vier Sekunden auf einem Element, um mehr zu erfahren. Auf Touchscreens hilft diese Liste. Screenreader können mathematische Unicode-Zeichen anders vorlesen. Dank an Masapetric. Mit KI-Unterstützung entwickelt.',
+    'Keep the pointer or keyboard focus on a control for four seconds to see more. On touch screens, use this list. Mathematical Unicode may be read differently by screen readers. Author: Marcel Petrick <mail@marcelpetrick.it>. Built with AI assistance.',
+    'Lass den Zeiger oder den Tastaturfokus vier Sekunden auf einem Element, um mehr zu erfahren. Auf Touchscreens hilft diese Liste. Screenreader können mathematische Unicode-Zeichen anders vorlesen. Autor: Marcel Petrick <mail@marcelpetrick.it>. Mit KI-Unterstützung entwickelt.',
   ],
   clipboardTitle: ['Copy manually', 'Manuell kopieren'],
   clipboardManual: [
@@ -247,9 +247,9 @@ export const help = {
   ],
   version: [
     'Installed app version.',
-    'Boldemort is published under GPL version 3. See the repository for release history and dependencies.',
+    'Boldemort is published under GPL version 3 or later. See the repository for release history and dependencies.',
     'Installierte App-Version.',
-    'Boldemort steht unter GPL Version 3. Versionsverlauf und Abhängigkeiten stehen im Repository.',
+    'Boldemort steht unter GPL Version 3 oder höher. Versionsverlauf und Abhängigkeiten stehen im Repository.',
   ],
   help: [
     'Open the complete help list.',

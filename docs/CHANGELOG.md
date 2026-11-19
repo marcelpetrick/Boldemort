@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.7
+
+- Confirmed GPL v3 or later and corrected the author credit.
+- Made the local pipeline install dependencies from a fresh checkout.
+
 ## 0.1.6
 
 - Organized project documents and tool configuration into dedicated folders.

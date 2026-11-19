@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 import { explanation, type Help, type Locale } from './i18n.ts';
 
 export function installTooltips(tooltip: HTMLElement, locale: () => Locale) {

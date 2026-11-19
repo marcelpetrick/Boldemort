@@ -25,7 +25,7 @@
   minor bumps for significant compatible features.
 - Document runnable commands in the README. Include a real screenshot if the
   product has a UI. Keep credentials and private data out of commits.
-- Follow the repository's GPLv3 license and use appropriate source headers.
+- Follow the repository's GPL-3.0-or-later license and use appropriate source headers.
 
 ## Review and finish
 

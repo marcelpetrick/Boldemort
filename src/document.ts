@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 import { inspectMarkdown, project, type Projection } from './markdown.ts';
 import {
   decode,

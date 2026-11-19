@@ -7,8 +7,8 @@
 > **Last updated:** 2026-11-19  
 > **Status:** Ready to guide an implementation agent; unresolved product decisions remain explicitly identified.  
 > **Target:** Static GitHub Pages website  
-> **Requested license:** GNU General Public License v3  
-> **Requested credit:** Masapetric; acknowledge AI-generated/AI-assisted development
+> **Requested license:** GNU General Public License v3 or later\
+> **Requested credit:** Marcel Petrick <mail@marcelpetrick.it>. Acknowledge AI assistance.
 
 ---
 
@@ -71,7 +71,7 @@ This file consolidates the prior requirements notes, proposed acceptance tests, 
 | D-13 | DECIDED | Work comfortably at **800 × 600 CSS pixels**, use screen area efficiently, and reflow at browser zoom. |
 | D-14 | DECIDED | Include guidance about LinkedIn post, message, and article length and long text. |
 | D-15 | DECIDED | Implement as static HTML/CSS/JavaScript or compiled TypeScript deployable through GitHub Pages. |
-| D-16 | DECIDED | Display a product version; enumerate dependencies and versions; use GPL v3; credit **Masapetric** and AI generation/assistance. |
+| D-16 | DECIDED | Display a product version; enumerate dependencies and versions; use GPL v3 or later; credit **Marcel Petrick** and acknowledge AI assistance. |
 
 ### Out of scope / forbidden substitutions
 
@@ -396,8 +396,8 @@ The agent should treat the [GitHub Flavored Markdown specification](https://gith
 - **Asset paths:** use relative URLs or a correctly configured GitHub Pages base path; do not assume deployment at `/`.
 - **Dependencies:** enumerate **every direct and bundled runtime/build dependency**, exact versions, licenses, and purpose. Prefer minimal dependencies and no runtime CDN.
 - **Version:** display SemVer-like version (`0.1.0` initially is reasonable; exact release numbering TBD) and keep it synchronized in metadata/docs/UI.
-- **License:** provide complete GNU GPLv3 license file; whether the SPDX identifier is `GPL-3.0-only` or `GPL-3.0-or-later` remains **OPEN**. A conservative provisional choice is `GPL-3.0-only`, to be confirmed before publishing.
-- **Attribution:** include **Masapetric** prominently enough to be discoverable, and an accurate AI-assisted/AI-generated development disclosure. Do **not** invent Masapetric's legal role or claim copyright ownership without confirmation.
+- **License:** provide the complete GNU GPLv3 license file and use the confirmed SPDX identifier `GPL-3.0-or-later`.
+- **Attribution:** credit **Marcel Petrick** (<mail@marcelpetrick.it>) as author and disclose AI assistance.
 - **Code ownership:** generate original code and assets. Inspiration from an external Unicode editor does not grant permission to copy it.
 
 ### Suggested layout for the GitHub repository
@@ -489,7 +489,7 @@ The implementation agent should create automated tests wherever practical and th
 - [ ] A long (article-length) draft remains usable without an avoidable keystroke bottleneck.
 - [ ] No runtime outgoing requests are needed for content processing.
 - [ ] GitHub Pages loads every asset from the `/Boldemort/` subpath.
-- [ ] UI version matches README/changelog; license, Masapetric credit, AI disclosure, and dependency inventory are present.
+- [ ] UI version matches README/changelog; license, Marcel Petrick author credit, AI disclosure, and dependency inventory are present.
 
 ### Suggested automated test cases
 
@@ -512,8 +512,6 @@ These items have **not** been decided by the owner. The agent may start with the
 | P1 | What is the definitive limit counter convention? | Display graphemes and estimated UTF-16 units; use the actual selected copied output for warnings. |
 | P1 | Which GFM diagnostics are reliable enough? | High-confidence warnings only; avoid generic “invalid Markdown” claims. |
 | P1 | Export filename options and import/open existing files? | Manual export in Markdown/Unicode with simple filenames; import may be later. |
-| P1 | `GPL-3.0-only` or `GPL-3.0-or-later`? | Draft `GPL-3.0-only`, request owner confirmation before first public release. |
-| P1 | Masapetric's precise role and wording? | Credit name exactly as provided without guessing legal ownership. |
 | P2 | Optional preview, themes, detailed metrics, selected-text counts? | Keep release 1 compact; consider after core editing is robust. |
 | P2 | Save/clear confirmations and page-leave warning? | Provide explicit confirmation for destructive clear; no autosave or false recoverability. |
 | P2 | Keyboard shortcut scheme and diagnostics thresholds? | Use familiar nonconflicting shortcuts and conservative configurable warning levels. |
