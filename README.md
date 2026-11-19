@@ -3,7 +3,7 @@
 [![CI](https://github.com/marcelpetrick/Boldemort/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/marcelpetrick/Boldemort/actions/workflows/ci.yml)
 [![GitHub Pages](https://github.com/marcelpetrick/Boldemort/actions/workflows/pages.yml/badge.svg)](https://github.com/marcelpetrick/Boldemort/actions/workflows/pages.yml)
 [![Release pipeline](https://github.com/marcelpetrick/Boldemort/actions/workflows/release.yml/badge.svg)](https://github.com/marcelpetrick/Boldemort/actions/workflows/release.yml)
-[![Version 0.2.1](https://img.shields.io/badge/version-0.2.1-6241c2)](docs/CHANGELOG.md)
+[![Version 0.2.2](https://img.shields.io/badge/version-0.2.2-6241c2)](docs/CHANGELOG.md)
 [![License GPL v3 or later](https://img.shields.io/badge/license-GPLv3%20or%20later-blue.svg)](LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-6-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Vite](https://img.shields.io/badge/Vite-8-646cff?logo=vite&logoColor=white)](https://vite.dev/)
@@ -85,12 +85,13 @@ npm run dev
 The pipeline installs the locked npm dependencies and Playwright browser
 binaries from a fresh checkout. It checks formatting, TypeScript, CSS, HTML,
 Markdown, the dependency inventory and audit results, then runs unit coverage,
-the production build,
-and Playwright against the GitHub Pages subpath. The coverage gate requires
-at least 98% line coverage across every application TypeScript module.
+the production build, and Playwright against the GitHub Pages subpath. The
+coverage gate requires at least 98% line coverage across the application
+TypeScript modules.
 Run `npm run mutation` for Stryker mutation testing of the conversion and
 analysis core. It runs on a sandbox copy, and reports to `reports/mutation/`.
-Unit coverage is reported in `coverage/`. Browser instrumentation uses a
+ShellCheck and actionlint run when installed. Unit coverage is reported in
+`coverage/`. Browser instrumentation uses a
 separate build directory and is excluded from Pages and release artifacts.
 
 On supported Linux hosts, Playwright can install system libraries with
@@ -125,3 +126,23 @@ reruns local verification, packages the static site with licensing information,
 and publishes a SHA-256 checksum alongside the archive. Dispatch the Release
 workflow on `main` to verify and download the archive from Actions without
 creating a GitHub release.
+
+## History
+
+![Application line coverage and both mutation scores by version](media/coverage-history.png)
+
+![Tracked source and test lines by area and version](media/code-history.png)
+
+The coverage chart uses published CI measurements through v0.2.1. The data
+file records run IDs for each sample. The code chart counts physical lines
+in tracked app files and tests at each version through the same revision.
+It excludes dependencies, generated output, and documentation.
+
+Redraw both charts with Python and Matplotlib 3.11.2.
+
+```sh
+python3 scripts/history_charts.py
+```
+
+See the [coverage data](docs/coverage-history.csv) and
+[release history](docs/CHANGELOG.md).

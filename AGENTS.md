@@ -6,8 +6,8 @@
 2. Read [the plan](docs/PLAN.md), [the decisions](docs/DECISIONS.md), and
    [the README](README.md).
 3. Update the plan with acceptance scenarios and ordered deliverables before
-   changing product code. Wait for the vision before starting implementation.
-   Raise material conflicts between the vision and existing project decisions.
+   changing product code. Raise material conflicts between the vision and
+   existing project decisions.
 
 ## Implement and verify
 

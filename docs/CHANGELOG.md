@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.2
+
+- Fixed single-tilde toggling, unfinished typing spans, and fence warnings.
+- Added the product vision to the Markdown lint gate and documented ShellCheck.
+- Added coverage, mutation, and code history charts to the README.
+
 ## 0.2.1
 
 - Switched the Unicode editor font so short strikes overlay their letters.

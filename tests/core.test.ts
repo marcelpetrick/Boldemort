@@ -359,3 +359,28 @@ it('uses exact line marks for defaults, alternate styles and word gaps', () => {
   doc.switchTo('unicode');
   expect(doc.frame.text).toBe('a̳ ̳b̳');
 });
+
+it('removes single-tilde GFM strikethrough and keeps armed word gaps outside closing markers', () => {
+  expect(formatSelection(select('~word~'), 'strike')?.value).toBe('word');
+  expect(formatSelection(select('~word~'), 'bold')?.value).toBe('~~**word**~~');
+  const active = new Set(['bold'] as const);
+  expect(
+    formatTyping(select('**one**', 'markdown', 5, 5), ' ', active),
+  ).toEqual({ start: 7, end: 7, value: ' ' });
+  expect(
+    formatTyping(select('**one** ', 'markdown', 8, 8), 't', active),
+  ).toEqual({ start: 5, end: 8, value: ' t**', caret: 7 });
+});
+
+it('reports malformed fence closers while accepting correctly closed and nested fences', () => {
+  for (const invalid of ['```\ncode\n```~', '```\ncode\n    ```']) {
+    expect(analyze(invalid, 'en').warnings[0]?.key).toBe('fence');
+  }
+  for (const valid of [
+    '```\n    ```\n```',
+    '> ```\n> code\n> ```',
+    '```\n\n```',
+  ]) {
+    expect(analyze(valid, 'en').warnings).toEqual([]);
+  }
+});

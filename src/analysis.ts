@@ -49,10 +49,18 @@ export function analyze(source: string, locale: string) {
       const opener = /^[ \t]*([`~])\1{2,}/u.exec(raw)?.[0].trim();
       if (opener) {
         const lines = raw.trimEnd().split(/\r?\n/u);
-        const closer = /^[ \t>]*([`~]+)[ \t]*$/u.exec(lines.at(-1) ?? '')?.[1];
+        const closer = /^[ \t>]*(([`~])\2+)[ \t]*$/u.exec(
+          lines.at(-1) ?? '',
+        )?.[1];
+        // Parsed code includes a fence-looking final line only when it is code
+        // content. A real closer contributes its own source line.
+        const contentReachesEnd =
+          node.value !== '' &&
+          node.value.split(/\r?\n/u).length >= lines.length - 1;
         if (
           lines.length < 2 ||
           !closer ||
+          contentReachesEnd ||
           closer[0] !== opener[0] ||
           closer.length < opener.length
         )

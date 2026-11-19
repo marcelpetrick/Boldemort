@@ -47,3 +47,6 @@
 - Compared fonts against the actual Unicode output. Use the system UI font
   in Unicode mode so stroke overlays render through letters. Test the font
   switch and retain monospace in Markdown mode.
+- Reviewed published main and all tracked Markdown. Fixed Markdown edge
+  cases, ran ShellCheck directly, and added the vision to the lint gate.
+- Added two README charts from historical CI measurements and Git revisions.

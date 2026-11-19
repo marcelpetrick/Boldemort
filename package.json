@@ -1,6 +1,6 @@
 {
   "name": "boldemort",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "private": true,
   "type": "module",
   "license": "GPL-3.0-or-later",
@@ -8,7 +8,7 @@
     "dev": "vite --config config/vite.config.ts --host 127.0.0.1",
     "build": "vite build --config config/vite.config.ts",
     "preview": "vite preview --config config/vite.config.ts --host 127.0.0.1",
-    "lint": "eslint --config config/eslint.config.mjs . --max-warnings 0 && stylelint --config config/stylelint.config.mjs src/*.css && html-validate --config config/htmlvalidate.json index.html && markdownlint-cli2 README.md AGENTS.md \"docs/*.md\"",
+    "lint": "eslint --config config/eslint.config.mjs . --max-warnings 0 && stylelint --config config/stylelint.config.mjs src/*.css && html-validate --config config/htmlvalidate.json index.html && markdownlint-cli2 README.md AGENTS.md vision.md \"docs/*.md\"",
     "format": "prettier --config config/prettier.json --write index.html package.json \"src/**/*\" \"tests/**/*\" \"scripts/*.mjs\" \"config/**/*\" \".github/workflows/*.yml\"",
     "format:check": "prettier --config config/prettier.json --check index.html package.json \"src/**/*\" \"tests/**/*\" \"scripts/*.mjs\" \"config/**/*\" \".github/workflows/*.yml\"",
     "typecheck": "tsc --project config/tsconfig.json --noEmit",

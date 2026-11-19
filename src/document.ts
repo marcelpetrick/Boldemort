@@ -275,8 +275,8 @@ export function formatSelection(
     const active = new Set<Style>();
     if (raw.startsWith('<u>')) active.add('underline');
     const inner = raw.replace(/^<u>|<\/u>$/gu, '');
-    if (inner.startsWith('~~')) active.add('strike');
-    const flags = inner.replace(/^~~|~~$/gu, '');
+    if (inner.startsWith('~')) active.add('strike');
+    const flags = inner.replace(/^~{1,2}|~{1,2}$/gu, '');
     const marker = flags.match(/^[*_]{1,3}/u)?.[0].length ?? 0;
     if (marker > 1) active.add('bold');
     if (marker % 2) active.add('italic');
@@ -304,10 +304,10 @@ export function formatTyping(
 ): Replacement {
   const { text, start, end, mode } = frame;
   // Avoid parsing a long prose draft on each keystroke when it has no markup.
-  const { protectedRanges } =
+  const { changes, protectedRanges } =
     /[`~#<>[\]!*_|:]|^(?: {4}|\t)|^ {0,3}(?:[-+>]|\d+[.)])[ \t]/mu.test(text)
       ? inspectMarkdown(text)
-      : { protectedRanges: [] };
+      : { changes: [], protectedRanges: [] };
   if (
     protectedRanges.some((range) => start > range.start && start < range.end)
   ) {
@@ -326,7 +326,7 @@ export function formatTyping(
     start === end &&
     text.startsWith(suffix, end) &&
     text.lastIndexOf(prefix, start - 1) >= 0;
-  if (inside && /[\r\n]/u.test(input)) {
+  if (inside && !input.trim()) {
     return {
       start: end + suffix.length,
       end: end + suffix.length,
@@ -337,6 +337,28 @@ export function formatTyping(
   if (!input.trim()) return { start, end, value: input };
   const leading = input.match(/^\s*/u)![0];
   const trailing = input.match(/\s*$/u)![0];
+  if (start === end) {
+    const gap = /[ \t]+$/u.exec(text.slice(0, start))?.[0];
+    const previousEnd = start - (gap?.length ?? 0);
+    if (
+      gap &&
+      changes.some(
+        (part) =>
+          part.end === previousEnd &&
+          text.startsWith(prefix, part.start) &&
+          text.slice(previousEnd - suffix.length, previousEnd) === suffix,
+      )
+    ) {
+      const closing = previousEnd - suffix.length;
+      const body = gap + leading + input.trim();
+      return {
+        start: closing,
+        end,
+        value: body + suffix + trailing,
+        caret: closing + body.length,
+      };
+    }
+  }
   const value = leading + prefix + input.trim() + suffix + trailing;
   return {
     start,

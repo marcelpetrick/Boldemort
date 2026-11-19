@@ -355,3 +355,17 @@ test('copies the selected Unicode line variants and links to project and tests',
   await page.getByRole('button', { name: 'Unicode', exact: true }).click();
   await expect(draft).toHaveValue('a̳ ̳b̳');
 });
+
+test('keeps a typed space outside Markdown formatting when turning it off', async ({
+  page,
+}) => {
+  const draft = page.locator('#editor');
+  await page.getByRole('button', { name: 'Markdown', exact: true }).click();
+  const bold = page.getByRole('button', { name: 'Bold', exact: true });
+  await bold.click();
+  await draft.pressSequentially('one ');
+  await expect(draft).toHaveValue('**one** ');
+  await bold.click();
+  await draft.pressSequentially('two');
+  await expect(draft).toHaveValue('**one** two');
+});
