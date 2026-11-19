@@ -242,13 +242,21 @@ function editableGlyphs(ranges: Selection[], offset: number) {
   };
 }
 
+function unicodeProtection(text: string) {
+  // Plain paragraphs cannot contain any protected GFM syntax without one
+  // of these markers. A bare web address and an indented code line count too.
+  return /[!#*+<=>@[\]\\_`|~:-]|\bwww\.|^(?: {4}|\t)/imu.test(text)
+    ? inspectMarkdown(text).protectedRanges
+    : [];
+}
+
 export function randomSelectionActive({ text, start, end, mode }: Frame) {
   return (
     mode === 'unicode' &&
     start < end &&
     hasRandomFont(
       text.slice(start, end),
-      editableGlyphs(inspectMarkdown(text).protectedRanges, start),
+      editableGlyphs(unicodeProtection(text), start),
     )
   );
 }
@@ -340,16 +348,17 @@ export function formatSelection(
 ): Replacement | undefined {
   const { text, mode } = frame;
   let { start, end } = frame;
-  const analysis = inspectMarkdown(text);
   if (mode === 'unicode') {
-    for (const { segment, index } of graphemes(text)) {
-      if (index > end) break;
-      if (index < start && index + segment.length > start) start = index;
-      if (index < end && index + segment.length > end)
-        end = index + segment.length;
+    if (start > 0 || end < text.length) {
+      for (const { segment, index } of graphemes(text)) {
+        if (index > end) break;
+        if (index < start && index + segment.length > start) start = index;
+        if (index < end && index + segment.length > end)
+          end = index + segment.length;
+      }
     }
     const source = text.slice(start, end);
-    const protectedRanges = analysis.protectedRanges.filter(
+    const protectedRanges = unicodeProtection(text).filter(
       (range) => range.start < end && range.end > start,
     );
     const editable = editableGlyphs(protectedRanges, start);
@@ -363,6 +372,7 @@ export function formatSelection(
       : { start, end, value };
   }
   if (style === 'random') return;
+  const analysis = inspectMarkdown(text);
   const overlapsProtected = analysis.protectedRanges.some(
     (range) => range.start < end && range.end > start,
   );

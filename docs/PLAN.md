@@ -75,3 +75,5 @@
   production-equivalent workload. Record up to five measured bottlenecks,
   verify fixes against the same corpus, and run a timing guard in the shared
   local and CI pipeline.
+- Compare long-draft operations against the v0.4.0 profile. Keep formatting
+  and syntax-protection assertions in the benchmark as timing improves.

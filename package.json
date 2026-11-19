@@ -14,6 +14,7 @@
     "typecheck": "tsc --project config/tsconfig.json --noEmit",
     "test": "vitest run --config config/vitest.config.ts",
     "coverage": "vitest run --config config/vitest.config.ts --coverage",
+    "performance": "node scripts/performance.mjs",
     "e2e": "playwright test --config config/playwright.config.ts",
     "dependencies:check": "node scripts/dependencies.mjs --check",
     "coverage:browser": "vite build --config config/vite.config.ts --mode coverage && BOLD_COVERAGE=1 npm run e2e -- --project=chromium && node scripts/coverage.mjs",

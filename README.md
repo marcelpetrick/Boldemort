@@ -92,6 +92,9 @@ Markdown, the dependency inventory and audit results, then runs unit coverage,
 the production build, and Playwright against the GitHub Pages subpath. The
 coverage gate requires at least 98% line coverage across the application
 TypeScript modules.
+Run `npm run performance` to check the long-draft workloads and their output
+locally. The shared pipeline runs the same gate in GitHub Actions. See the
+[profiling results and budgets](docs/PERFORMANCE.md).
 Run `npm run mutation` for Stryker mutation testing of the conversion and
 analysis core. It runs on a sandbox copy, reports to `reports/mutation/`, and
 requires an overall mutation score of at least 80%.

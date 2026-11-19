@@ -133,6 +133,25 @@ describe('projected editing', () => {
 });
 
 describe('formatting boundaries', () => {
+  it('protects bare web and email autolinks in Unicode drafts', () => {
+    for (const link of ['www.example.com', 'sam@example.com']) {
+      const text = 'Contact ' + link;
+      expect(
+        formatSelection(draft(text, 0, text.length, 'unicode'), 'bold')?.value,
+      ).toBe('𝐂𝐨𝐧𝐭𝐚𝐜𝐭 ' + link);
+    }
+  });
+
+  it('keeps the original code points when a repeated toggle cancels out', () => {
+    expect(styleUnicode('A̲Ｂ̳C͟', ['underline', 'underline'], true)).toBe('A̲Ｂ̳C͟');
+    expect(styleUnicode('𝐀́', [], false)).toBe('𝐀́');
+  });
+
+  it('keeps the Unicode output valid at neighboring Markdown spans', () => {
+    const styled = formatSelection(draft('foo*bar*'), 'bold')?.value;
+    expect(convert(styled!, 'markdown')).toBe('𝐟𝐨𝐨𝒃𝒂𝒓');
+  });
+
   it('formats around protected Unicode spans with one global toggle', () => {
     const source = 'A `code` 𝐁 [link](https://example.com)';
     const result = formatSelection(

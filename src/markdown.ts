@@ -230,16 +230,19 @@ function unicodeChanges(source: string) {
       )
         next++;
       const following = glyphs[next];
+      const followingStyles =
+        following && (!range || following.index < range.start)
+          ? decode(following.segment).active
+          : undefined;
       if (
         following &&
-        (!range || following.index < range.start) &&
+        followingStyles &&
         styles.every(
-          (style) =>
-            decode(following.segment).active.has(style) === active.has(style),
+          (style) => followingStyles.has(style) === active.has(style),
         )
       ) {
         for (const space of glyphs.slice(position, next)) {
-          const blank = decode(space.segment);
+          const blank = space.index === index ? item : decode(space.segment);
           run += [...blank.active].every((style) => active.has(style))
             ? blank.base + blank.tail
             : space.segment;

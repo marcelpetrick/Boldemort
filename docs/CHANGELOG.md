@@ -5,6 +5,8 @@
 - Format eligible text across a whole draft and preserve protected Markdown
   syntax. Toggle selected random lettering back to plain Latin.
 - Put Help and Clear draft next to the editor and make warnings more visible.
+- Speed up whole-draft formatting and Unicode conversion. Add a shared
+  performance gate that checks both timing and results on long drafts.
 
 ## 0.3.3
 

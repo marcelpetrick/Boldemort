@@ -27,6 +27,7 @@ const randomFonts = [
   makeFont(0x1d670, 0x1d68a, 0x1d7f6),
   makeFont(0xff21, 0xff41, 0xff10),
 ];
+const randomGlyphs = new Set(randomFonts.flat());
 const reverse = new Map<string, [string, number]>();
 for (const [mask, glyphs] of maps.entries()) {
   for (const [index, glyph] of glyphs.entries())
@@ -39,26 +40,24 @@ for (const font of randomFonts) {
 
 type EditableGlyph = (start: number, end: number) => boolean;
 
-function randomFontGlyphs(text: string, editable?: EditableGlyph) {
-  return Array.from(graphemes(text), ({ segment, index }) => {
+function* randomFontGlyphs(text: string, editable?: EditableGlyph) {
+  for (const { segment, index } of graphemes(text)) {
     const [glyph = ''] = segment;
     const base = reverse.get(glyph)?.[0];
     const eligible =
       base !== undefined && (editable?.(index, index + segment.length) ?? true);
-    return { segment, glyph, base: eligible ? base : undefined };
-  });
+    yield { segment, glyph, base: eligible ? base : undefined };
+  }
 }
 
 export function hasRandomFont(text: string, editable?: EditableGlyph) {
-  const glyphs = randomFontGlyphs(text, editable).filter(
-    ({ base }) => base !== undefined,
-  );
-  return (
-    glyphs.length > 0 &&
-    glyphs.every(({ glyph }) =>
-      randomFonts.some((font) => font.includes(glyph)),
-    )
-  );
+  let found = false;
+  for (const { glyph, base } of randomFontGlyphs(text, editable)) {
+    if (base === undefined) continue;
+    if (!randomGlyphs.has(glyph)) return false;
+    found = true;
+  }
+  return found;
 }
 
 export function randomizeUnicode(
@@ -67,12 +66,11 @@ export function randomizeUnicode(
   editable?: EditableGlyph,
   toggle = false,
 ) {
-  const glyphs = randomFontGlyphs(text, editable);
+  const glyphs = [...randomFontGlyphs(text, editable)];
   const remove =
     toggle &&
     glyphs.every(
-      ({ glyph, base }) =>
-        base === undefined || randomFonts.some((font) => font.includes(glyph)),
+      ({ glyph, base }) => base === undefined || randomGlyphs.has(glyph),
     );
   return glyphs
     .map(({ segment, glyph, base }) => {
@@ -120,13 +118,15 @@ export function* graphemes(text: string): Iterable<Grapheme> {
     yield { segment: match[0], index: match.index };
 }
 export function decode(segment: string) {
-  const [glyph = '', ...rest] = Array.from(segment);
+  const glyph = segment.slice(
+    0,
+    (segment.codePointAt(0) ?? 0) > 0xffff ? 2 : 1,
+  );
   const [base, mask] = reverse.get(glyph) ?? [glyph, 0];
-  const eligible = acceptsLine.test(glyph);
-  const underline = eligible
-    ? rest.find((mark) => underlines.has(mark))
-    : undefined;
-  const strike = eligible ? rest.find((mark) => strikes.has(mark)) : undefined;
+  const tail = segment.slice(glyph.length);
+  const rest = tail && acceptsLine.test(glyph) ? [...tail] : undefined;
+  const underline = rest?.find((mark) => underlines.has(mark));
+  const strike = rest?.find((mark) => strikes.has(mark));
   const active = new Set<Style>();
   if (mask & 1) active.add('bold');
   if (mask & 2) active.add('italic');
@@ -137,11 +137,12 @@ export function decode(segment: string) {
     alternative: mask === 0 && base !== glyph ? glyph : undefined,
     underline,
     strike,
-    tail: rest
-      .filter(
-        (mark) => !eligible || (!underlines.has(mark) && !strikes.has(mark)),
-      )
-      .join(''),
+    tail:
+      underline || strike
+        ? rest!
+            .filter((mark) => !underlines.has(mark) && !strikes.has(mark))
+            .join('')
+        : tail,
     active,
   };
 }
@@ -178,35 +179,49 @@ export function styleUnicode(
   lineStyles: LineStyles = defaultLineStyles,
   editable?: EditableGlyph,
 ) {
+  if (!toggle) {
+    const requested = [...selected];
+    if (!requested.length) return text;
+    return Array.from(graphemes(text), ({ index, segment }) => {
+      if (editable && !editable(index, index + segment.length)) return segment;
+      const item = decode(segment);
+      const previousSize = item.active.size;
+      for (const style of requested) {
+        if (supports(item.base, style)) item.active.add(style);
+      }
+      return item.active.size === previousSize
+        ? segment
+        : encode(item, lineStyles);
+    }).join('');
+  }
   const glyphs = Array.from(graphemes(text), ({ segment, index }) => ({
     segment,
     item: decode(segment),
     editable: editable?.(index, index + segment.length) ?? true,
+    changed: 0,
   }));
   for (const style of selected) {
     const eligible = glyphs.filter(
       (entry) => entry.editable && supports(entry.item.base, style),
     );
     const remove =
-      toggle &&
       eligible
         .filter(({ item }) => !horizontalSpace.test(item.base))
         .every(({ item }) => item.active.has(style)) &&
       eligible.some(({ item }) => item.active.has(style));
-    for (const { item } of eligible) {
-      if (remove) item.active.delete(style);
-      else item.active.add(style);
+    const bit = 1 << styles.indexOf(style);
+    for (const entry of eligible) {
+      const { active } = entry.item;
+      if (active.has(style) === !remove) continue;
+      if (remove) active.delete(style);
+      else active.add(style);
+      entry.changed ^= bit;
     }
   }
   return glyphs
-    .map(({ segment, item }) => {
-      const original = decode(segment);
-      return styles.every(
-        (style) => original.active.has(style) === item.active.has(style),
-      )
-        ? segment
-        : encode(item, lineStyles);
-    })
+    .map(({ segment, item, changed }) =>
+      changed ? encode(item, lineStyles) : segment,
+    )
     .join('');
 }
 
