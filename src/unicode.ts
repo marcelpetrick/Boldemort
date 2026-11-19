@@ -77,7 +77,7 @@ export function* graphemes(text: string): Iterable<Grapheme> {
     return;
   }
   const clusters =
-    /(?:\p{Regional_Indicator}{1,2}|[^\u200d]\p{M}*(?:\p{Emoji_Modifier})?(?:\u200d[^\u200d]\p{M}*(?:\p{Emoji_Modifier})?)*)|[\s\S]/gu;
+    /\r\n|\p{Regional_Indicator}{1,2}\p{M}*|[^\u200d\r\n]\p{M}*(?:\p{Emoji_Modifier}\p{M}*)?(?:\u200d[^\u200d\r\n]\p{M}*(?:\p{Emoji_Modifier}\p{M}*)?)*|[\s\S]/gu;
   for (const match of text.matchAll(clusters))
     yield { segment: match[0], index: match.index };
 }

@@ -310,10 +310,10 @@ export function formatTyping(
 ): Replacement {
   const { text, start, end, mode } = frame;
   // Avoid parsing a long prose draft on each keystroke when it has no markup.
-  const { changes, protectedRanges } =
+  const { formattingRanges, protectedRanges } =
     /[`~#<>[\]!*_|:]|^(?: {4}|\t)|^ {0,3}(?:[-+>]|\d+[.)])[ \t]/mu.test(text)
       ? inspectMarkdown(text)
-      : { changes: [], protectedRanges: [] };
+      : { formattingRanges: [], protectedRanges: [] };
   if (
     protectedRanges.some((range) => start > range.start && start < range.end)
   ) {
@@ -330,10 +330,25 @@ export function formatTyping(
   const open = wrapMarkdown('\0', active).split('\0');
   const prefix = open[0]!;
   const suffix = open[1]!;
+  function matchesSpan(part: (typeof formattingRanges)[number]) {
+    const raw = text.slice(part.start, part.end);
+    if (!raw.startsWith(prefix) || !raw.endsWith(suffix)) return false;
+    // The delimiter run for ***bold italic*** also starts and ends with **.
+    // Only move the closing delimiter if its run matches the armed wrapper.
+    const marker = suffix[0];
+    const closing = raw.length - suffix.length;
+    return (
+      start >= part.start + prefix.length &&
+      (!marker ||
+        !'*~'.includes(marker) ||
+        (raw[prefix.length] !== marker && raw[closing - 1] !== marker))
+    );
+  }
   const inside =
     start === end &&
-    text.startsWith(suffix, end) &&
-    text.lastIndexOf(prefix, start - 1) >= 0;
+    formattingRanges.some(
+      (part) => part.end === end + suffix.length && matchesSpan(part),
+    );
   if (inside && !input.trim()) {
     return {
       start: end + suffix.length,
@@ -350,11 +365,8 @@ export function formatTyping(
     const previousEnd = start - (gap?.length ?? 0);
     if (
       gap &&
-      changes.some(
-        (part) =>
-          part.end === previousEnd &&
-          text.startsWith(prefix, part.start) &&
-          text.slice(previousEnd - suffix.length, previousEnd) === suffix,
+      formattingRanges.some(
+        (part) => part.end === previousEnd && matchesSpan(part),
       )
     ) {
       const closing = previousEnd - suffix.length;

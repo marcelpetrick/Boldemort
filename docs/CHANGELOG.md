@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.2
+
+- Preserve nearby Markdown styling when typing with an armed format. Keep
+  punctuation-only spans editable and move outside them when formatting ends.
+- Keep styled flags, skin-tone emoji, and CRLF together in the fallback
+  grapheme segmenter.
+- Extend regression tests for editing, undo grouping, and caret mapping.
+
 ## 0.3.1
 
 - Added regression coverage for projected editing, Markdown, Unicode, and

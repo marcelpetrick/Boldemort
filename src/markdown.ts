@@ -80,6 +80,7 @@ function renderInline(
 }
 type MarkdownAnalysis = {
   changes: Change[];
+  formattingRanges: Positioned[];
   protectedRanges: Positioned[];
   literal: boolean;
 };
@@ -88,6 +89,7 @@ export function inspectMarkdown(
   lineStyles = defaultLineStyles,
 ): MarkdownAnalysis {
   const changes: Change[] = [];
+  const formattingRanges: Positioned[] = [];
   const protectedRanges: Positioned[] = [];
   let literal = false;
   const visit = (nodes: Node[]) => {
@@ -108,6 +110,8 @@ export function inspectMarkdown(
             new Set(['underline']),
             lineStyles,
           );
+          if (value !== undefined)
+            formattingRanges.push({ start: range.start, end: span(end).end });
           if (value !== undefined && /\S/u.test(value)) {
             changes.push({ start: range.start, end: span(end).end, value });
             index = closing;
@@ -117,6 +121,7 @@ export function inspectMarkdown(
       }
       if (emphasis.has(node.type)) {
         const value = inline(node, source, new Set(), lineStyles);
+        if (value !== undefined) formattingRanges.push(range);
         if (
           value !== undefined &&
           value !==
@@ -154,7 +159,7 @@ export function inspectMarkdown(
     }
   };
   visit(parse(source).children);
-  return { changes, protectedRanges, literal };
+  return { changes, formattingRanges, protectedRanges, literal };
 }
 
 function unicodeChanges(source: string) {

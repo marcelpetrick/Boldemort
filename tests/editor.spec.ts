@@ -91,6 +91,20 @@ test('a reload opens a fresh draft', async ({ page }) => {
   await expect(draft).toHaveValue('');
 });
 
+test('armed bold preserves a previous bold-italic span', async ({ page }) => {
+  const editor = page.locator('#editor');
+  await page.getByRole('button', { name: 'Markdown', exact: true }).click();
+  await editor.fill('***one*** ');
+  await page.getByRole('button', { name: 'Bold', exact: true }).click();
+  await editor.pressSequentially('!two');
+  await expect(editor).toHaveValue('***one*** **!two**');
+  await editor.fill('');
+  await editor.pressSequentially('!');
+  await page.getByRole('button', { name: 'Bold', exact: true }).click();
+  await editor.pressSequentially('plain');
+  await expect(editor).toHaveValue('**!**plain');
+});
+
 test('keyboard formatting, protected syntax, bullets and native history events', async ({
   page,
 }) => {

@@ -56,3 +56,7 @@
 - Reviewed surviving mutants from the 72.59% baseline. Added regression tests
   for externally observable editing, conversion, and analysis behavior. Keep
   the same mutation scope and enforce an 80% overall minimum.
+- From the 85.62% baseline, reproduce and fix armed typing beside other
+  Markdown styles and Unicode line styling without `Intl.Segmenter`.
+  Verify compatible typing continuation, styled emoji round-trips, and undo
+  before rerunning mutation and the release checks.

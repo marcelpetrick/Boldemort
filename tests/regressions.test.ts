@@ -239,6 +239,8 @@ describe('formatting boundaries', () => {
 describe('conversion fidelity', () => {
   it.each([
     ['<u>`x`</u>', '<u>`x`</u>'],
+    ['<u>one</u> and <u>two</u>', 'o͟n͟e͟ and t͟w͟o͟'],
+    ['<u>one</u-extra> two</u>', '<u>one</u-extra> two</u>'],
     ['<u>unclosed', '<u>unclosed'],
     ['<span>text</span>', '<span>text</span>'],
     ['**😀** *2* __中__', '**😀** *2* __中__'],
@@ -260,6 +262,9 @@ describe('conversion fidelity', () => {
     ['𝐀。 𝑏', '**A**。 *b*'],
     ['•\t𝐀 then • 𝐁', '-\t**A** then • **B**'],
     ['𝐀 `𝐁` 𝐂', '**A** `𝐁` **C**'],
+    ['𝐀̲ ̵̲𝐁̲', '<u>**A ̵̲B**</u>'],
+    ['  • 𝐀\n   • 𝐁\n    • 𝐂', '  - **A**\n   - **B**\n    • **C**'],
+    ['- **A**\n\n`𝐁`\n\n𝐂', '- **A**\n\n`𝐁`\n\n**C**'],
   ])('preserves Unicode %j and its protected spans', (source, expected) => {
     expect(convert(source, 'unicode')).toBe(expected);
   });
@@ -321,6 +326,8 @@ describe('writing metrics and Unicode boundaries', () => {
     ]);
     expect(analyze('    ignored ~~~\n    text', 'en').warnings).toEqual([]);
     expect(analyze('~~~\n~~~', 'en').warnings).toEqual([]);
+    expect(analyze('> ~~~\n> text\n> ~~~~~', 'en').warnings).toEqual([]);
+    expect(analyze('~~~\n\n~~~', 'en').warnings).toEqual([]);
     expect(analyze('~~~\n```', 'en').warnings).toEqual([
       { line: 1, offset: 0, key: 'fence' },
     ]);
@@ -412,6 +419,7 @@ describe('adjacent markup and mixed script', () => {
       sentences: 2,
       median: 1,
     });
+    expect(analyze('ภาษาไทย', 'th')).toMatchObject({ words: 2 });
     vi.resetModules();
     vi.stubGlobal(
       'Intl',
@@ -422,8 +430,156 @@ describe('adjacent markup and mixed script', () => {
       expect(
         fallback('I don’t skip. Next?!   Two more words.', 'en'),
       ).toMatchObject({ words: 7, sentences: 3, median: 3 });
+      expect(
+        fallback('a is rock’n’roll.   It’s neat?!  Sure.', 'en'),
+      ).toMatchObject({
+        words: 6,
+        sentences: 3,
+        median: 2,
+      });
+      expect(fallback('😀 😀', 'en')).toMatchObject({
+        words: 0,
+        sentences: 0,
+      });
     } finally {
       vi.unstubAllGlobals();
+    }
+  });
+});
+
+describe('editing existing styles and emoji', () => {
+  it.each([
+    ['***one*** ', '***one*** **two**'],
+    ['<u>**one**</u> ', '<u>**one**</u> **two**'],
+    ['**one** ', '**one two**'],
+    ['**one_** ', '**one_ two**'],
+    ['**!** ', '**! two**'],
+    ['**one** and *other* ', '**one** and *other* **two**'],
+    ['~~one~~ ', '~~one~~ **two**'],
+  ])('protects existing Markdown delimiters after %j', (text, expected) => {
+    const point = text.length;
+    const change = formatTyping(
+      draft(text, point, point),
+      'two',
+      new Set(['bold']),
+    );
+    const result =
+      text.slice(0, change.start) + change.value + text.slice(change.end);
+    expect(result).toBe(expected);
+  });
+
+  it('continues typing after punctuation inside an armed wrapper', () => {
+    const text = '**!**';
+    const caret = text.length - 2;
+    expect(
+      formatTyping(draft(text, caret, caret), 'x', new Set(['bold'])),
+    ).toEqual({ start: caret, end: caret, value: 'x' });
+  });
+
+  it.each([
+    ['<u>one</u> ', ['underline'], '<u>one two</u>'],
+    ['~~***one***~~ ', ['bold', 'italic', 'strike'], '~~***one two***~~'],
+  ] as const)(
+    'extends the armed wrapper in %j across a space',
+    (text, active, expected) => {
+      const change = formatTyping(
+        draft(text, text.length, text.length),
+        'two',
+        new Set(active),
+      );
+      expect(text.slice(0, change.start) + change.value).toBe(expected);
+      expect(change.caret).toBe(expected.indexOf('two') + 3);
+    },
+  );
+
+  it('starts a new undo group when typing resumes after undo', () => {
+    const doc = new Document();
+    edit(doc, 'one', 3, 'insertText');
+    expect(doc.undo()).toBe(true);
+    edit(doc, 'two', 3, 'insertText');
+    expect(doc.canRedo).toBe(false);
+    expect(doc.undo()).toBe(true);
+    expect(doc.frame.text).toBe('');
+  });
+
+  it('snaps a caret at a tie to the previous Unicode grapheme boundary', () => {
+    const doc = new Document();
+    doc.switchTo('markdown');
+    doc.edit('**ABCD**', { start: 1, end: 7 });
+    doc.switchTo('unicode');
+    expect(doc.frame).toMatchObject({ text: '𝐀𝐁𝐂𝐃', start: 0, end: 6 });
+  });
+
+  it('retains both projected spellings when inserting at their shared boundary', () => {
+    const doc = markdownDraft('__a__<u>b</u>');
+    expect(doc.frame.text).toBe('𝐚b͟');
+    edit(doc, '𝐚!b͟', 3, 'insertText');
+    expect(doc.output('markdown')).toBe('__a__!<u>b</u>');
+    expect(doc.undo()).toBe(true);
+    expect(doc.output('markdown')).toBe('__a__<u>b</u>');
+    expect(doc.redo()).toBe(true);
+    edit(doc, '𝐚!?b͟', 4, 'insertText');
+    expect(doc.undo()).toBe(true);
+    expect(doc.output('markdown')).toBe('__a__!<u>b</u>');
+  });
+
+  it('preserves complete flag and emoji graphemes when native segmentation is unavailable', async () => {
+    vi.resetModules();
+    vi.stubGlobal(
+      'Intl',
+      Object.create(Intl, { Segmenter: { value: undefined } }),
+    );
+    try {
+      const { graphemes: fallback, styleUnicode: styleFallback } =
+        await import('../src/unicode.ts');
+      const source = '🇩🇪 👩🏽 👩🏽‍💻\r\n🇫🇷';
+      const styled = '🇩🇪͟ ͟👩🏽͟ ͟👩🏽‍💻͟\r\n🇫🇷͟';
+      expect(styleFallback(source, ['underline'])).toBe(styled);
+      expect(styleFallback(styled, ['underline'], true)).toBe(source);
+      expect([...fallback(styled)].map(({ segment }) => segment)).toEqual([
+        '🇩🇪͟',
+        ' ͟',
+        '👩🏽͟',
+        ' ͟',
+        '👩🏽‍💻͟',
+        '\r\n',
+        '🇫🇷͟',
+      ]);
+      expect([...fallback('🇦🇧🇩\r\nA')].map(({ segment }) => segment)).toEqual([
+        '🇦🇧',
+        '🇩',
+        '\r\n',
+        'A',
+      ]);
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it('keeps literal conversion styles through edits beside protected ranges', () => {
+    const initial = '__left__ `code` <u>right</u>';
+    const original = '𝐥𝐞𝐟𝐭 `code` r͟i͟g͟h͟t͟';
+    for (const location of [
+      0,
+      original.indexOf('`'),
+      original.lastIndexOf('`') + 1,
+      original.length,
+    ]) {
+      const doc = markdownDraft(initial);
+      expect(doc.output('unicode')).toBe(original);
+      const expected = new Map([
+        [0, '!__left__ `code` <u>right</u>'],
+        [original.indexOf('`'), '__left__ !`code` <u>right</u>'],
+        [original.lastIndexOf('`') + 1, '__left__ `code`! <u>right</u>'],
+        [original.length, '__left__ `code` <u>right</u>!'],
+      ]);
+      edit(doc, original.slice(0, location) + '!' + original.slice(location));
+      expect(doc.output('markdown')).toBe(expected.get(location));
+      doc.switchTo('unicode');
+      doc.undo();
+      expect(doc.output('markdown')).toBe(initial);
+      expect(doc.undo()).toBe(true);
+      expect(doc.frame.mode).toBe('markdown');
     }
   });
 });

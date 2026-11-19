@@ -256,7 +256,7 @@ function toggle(style: Style) {
     if (armed.has(style)) {
       // Leave any existing Markdown closing delimiters before continuing.
       if (frame.mode === 'markdown') {
-        const last = inspectMarkdown(frame.text).changes.find(
+        const last = inspectMarkdown(frame.text).formattingRanges.find(
           (part) => part.start < frame.end && part.end > frame.end,
         );
         if (
