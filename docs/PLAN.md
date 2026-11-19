@@ -53,3 +53,6 @@
 - Added Random font, the Bavarian theme, and an open overview above the draft.
   Verify glyph preservation, selection undo, typing toggle, theme accessibility,
   and localized labels before publishing.
+- Reviewed surviving mutants from the 72.59% baseline. Added regression tests
+  for externally observable editing, conversion, and analysis behavior. Keep
+  the same mutation scope and enforce an 80% overall minimum.

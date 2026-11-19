@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.1
+
+- Added regression coverage for projected editing, Markdown, Unicode, and
+  writing analysis. Raised the overall mutation score gate to 80%.
+
 ## 0.3.0
 
 - Added Random font in Unicode mode and a Bavarian blue-and-white theme.

@@ -3,7 +3,7 @@
 [![CI](https://github.com/marcelpetrick/Boldemort/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/marcelpetrick/Boldemort/actions/workflows/ci.yml)
 [![GitHub Pages](https://github.com/marcelpetrick/Boldemort/actions/workflows/pages.yml/badge.svg)](https://github.com/marcelpetrick/Boldemort/actions/workflows/pages.yml)
 [![Release pipeline](https://github.com/marcelpetrick/Boldemort/actions/workflows/release.yml/badge.svg)](https://github.com/marcelpetrick/Boldemort/actions/workflows/release.yml)
-[![Version 0.3.0](https://img.shields.io/badge/version-0.3.0-6241c2)](docs/CHANGELOG.md)
+[![Version 0.3.1](https://img.shields.io/badge/version-0.3.1-6241c2)](docs/CHANGELOG.md)
 [![License GPL v3 or later](https://img.shields.io/badge/license-GPLv3%20or%20later-blue.svg)](LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-6-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Vite](https://img.shields.io/badge/Vite-8-646cff?logo=vite&logoColor=white)](https://vite.dev/)
@@ -93,7 +93,8 @@ the production build, and Playwright against the GitHub Pages subpath. The
 coverage gate requires at least 98% line coverage across the application
 TypeScript modules.
 Run `npm run mutation` for Stryker mutation testing of the conversion and
-analysis core. It runs on a sandbox copy, and reports to `reports/mutation/`.
+analysis core. It runs on a sandbox copy, reports to `reports/mutation/`, and
+requires an overall mutation score of at least 80%.
 ShellCheck and actionlint run when installed. Unit coverage is reported in
 `coverage/`. Browser instrumentation uses a
 separate build directory and is excluded from Pages and release artifacts.
@@ -137,7 +138,7 @@ creating a GitHub release.
 
 ![Tracked source and test lines by area and version](media/code-history.png)
 
-The coverage chart uses published CI measurements through v0.2.1. The data
+The coverage chart uses published CI measurements through v0.3.0. The data
 file records run IDs for each sample. The code chart counts physical lines
 in tracked app files and tests at each version through the same revision.
 It excludes dependencies, generated output, and documentation.
