@@ -5,6 +5,7 @@ import {
   bulletLines,
   formatSelection,
   formatTyping,
+  randomSelectionActive,
   selectionStyles,
   type Replacement,
 } from './document.ts';
@@ -70,6 +71,13 @@ function setNotice(key?: Key, values?: Record<string, string>) {
   notice = key;
   noticeValues = values;
   hint.textContent = key ? t(key, values) : '';
+  hint.classList.toggle(
+    'warning',
+    key === 'protected' ||
+      key === 'literal' ||
+      key === 'preservedSyntax' ||
+      key === 'noFormatting',
+  );
 }
 function translate() {
   document.documentElement.lang = locale;
@@ -225,7 +233,15 @@ function renderControls() {
   }
   const unicode = doc.frame.mode === 'unicode';
   randomButton.setAttribute('aria-disabled', String(!unicode));
-  randomButton.setAttribute('aria-pressed', String(unicode && randomFont));
+  randomButton.setAttribute(
+    'aria-pressed',
+    String(
+      unicode &&
+        (doc.frame.start === doc.frame.end
+          ? randomFont
+          : randomSelectionActive(doc.frame)),
+    ),
+  );
   get('undo').setAttribute('aria-disabled', String(!doc.canUndo));
   get('redo').setAttribute('aria-disabled', String(!doc.canRedo));
 }
@@ -247,6 +263,18 @@ function replace(change: Replacement, selectResult: boolean, kind = '') {
   const end = change.caret ?? change.start + change.value.length;
   doc.edit(text, { start: selectResult ? change.start : end, end }, kind);
   renderEditor(true);
+}
+function applyFormatting(change: Replacement | undefined) {
+  if (!change) {
+    setNotice('protected');
+    return;
+  }
+  if (editor.value.slice(change.start, change.end) === change.value) {
+    setNotice('noFormatting');
+    return;
+  }
+  replace(change, true);
+  setNotice(change.preservedSyntax ? 'preservedSyntax' : undefined);
 }
 function toggle(style: Style) {
   doc.select(selection());
@@ -271,9 +299,7 @@ function toggle(style: Style) {
     renderEditor(true);
     return;
   }
-  const patch = formatSelection(doc.frame, style, doc.lineStyles);
-  if (patch) replace(patch, true);
-  else setNotice('protected');
+  applyFormatting(formatSelection(doc.frame, style, doc.lineStyles));
 }
 function history(direction: 'undo' | 'redo') {
   doc.select(selection());
@@ -400,9 +426,7 @@ randomButton.addEventListener('click', () => {
     renderEditor(true);
     return;
   }
-  const change = formatSelection(doc.frame, 'random', doc.lineStyles);
-  if (change) replace(change, true);
-  else setNotice('protected');
+  applyFormatting(formatSelection(doc.frame, 'random', doc.lineStyles));
 });
 get('undo').addEventListener('click', () => {
   history('undo');

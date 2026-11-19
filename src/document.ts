@@ -4,6 +4,7 @@ import {
   decode,
   defaultLineStyles,
   graphemes,
+  hasRandomFont,
   randomizeUnicode,
   styleUnicode,
   styles,
@@ -227,7 +228,110 @@ export class Document {
   }
 }
 
-export type Replacement = Selection & { value: string; caret?: number };
+export type Replacement = Selection & {
+  value: string;
+  caret?: number;
+  preservedSyntax?: boolean;
+};
+
+function editableGlyphs(ranges: Selection[], offset: number) {
+  let current = 0;
+  return (start: number, end: number) => {
+    while (ranges[current] && ranges[current]!.end <= start + offset) current++;
+    return !ranges[current] || ranges[current]!.start >= end + offset;
+  };
+}
+
+export function randomSelectionActive({ text, start, end, mode }: Frame) {
+  return (
+    mode === 'unicode' &&
+    start < end &&
+    hasRandomFont(
+      text.slice(start, end),
+      editableGlyphs(inspectMarkdown(text).protectedRanges, start),
+    )
+  );
+}
+
+function markdownStyles(raw: string) {
+  const active = new Set<Style>();
+  if (raw.startsWith('<u>')) active.add('underline');
+  const inner = raw.replace(/^<u>|<\/u>$/gu, '');
+  if (inner.startsWith('~')) active.add('strike');
+  const marker =
+    inner.replace(/^~{1,2}/u, '').match(/^[*_]{1,3}/u)?.[0].length ?? 0;
+  if (marker > 1) active.add('bold');
+  if (marker % 2) active.add('italic');
+  return active;
+}
+
+function formatMarkdownDraft(
+  text: string,
+  style: Style,
+  analysis: ReturnType<typeof inspectMarkdown>,
+): Replacement | undefined {
+  const spans = [];
+  for (const range of analysis.plainRanges) {
+    for (const line of text
+      .slice(range.start, range.end)
+      .matchAll(/[^\r\n]+/gu)) {
+      const raw = line[0];
+      const body = raw.trim();
+      if (!body || /[*_~<>\\]/u.test(body)) continue;
+      if (
+        (style === 'bold' || style === 'italic') &&
+        !/[\p{L}\p{N}]/u.test(body)
+      )
+        continue;
+      const start = range.start + line.index + raw.indexOf(body);
+      spans.push({
+        start,
+        end: start + body.length,
+        body,
+        active: new Set<Style>(),
+      });
+    }
+  }
+  for (const range of analysis.changes) {
+    const raw = text.slice(range.start, range.end);
+    const active = markdownStyles(raw);
+    if (!active.size) continue;
+    const body = raw
+      .replace(/^<u>|<\/u>$/gu, '')
+      .replace(/^[*_~]+|[*_~]+$/gu, '');
+    if (!body || /[*_~<>\r\n]/u.test(body)) continue;
+    spans.push({ ...range, body, active });
+  }
+  if (!spans.length) return;
+  const remove = spans.every(({ active }) => active.has(style));
+  spans.sort((a, b) => a.start - b.start);
+  const edits: typeof spans = [];
+  for (const span of spans) {
+    if (remove) span.active.delete(style);
+    else span.active.add(style);
+    const previous = edits.at(-1);
+    if (
+      previous?.end === span.start &&
+      styles.every((key) => previous.active.has(key) === span.active.has(key))
+    ) {
+      previous.body += span.body;
+      previous.end = span.end;
+    } else edits.push(span);
+  }
+  let offset = 0;
+  let value = '';
+  for (const edit of edits) {
+    value +=
+      text.slice(offset, edit.start) + wrapMarkdown(edit.body, edit.active);
+    offset = edit.end;
+  }
+  return {
+    start: 0,
+    end: text.length,
+    value: value + text.slice(offset),
+    preservedSyntax: analysis.literal,
+  };
+}
 
 export function formatSelection(
   frame: Frame,
@@ -237,12 +341,6 @@ export function formatSelection(
   const { text, mode } = frame;
   let { start, end } = frame;
   const analysis = inspectMarkdown(text);
-  if (
-    analysis.protectedRanges.some(
-      (range) => range.start < end && range.end > start,
-    )
-  )
-    return;
   if (mode === 'unicode') {
     for (const { segment, index } of graphemes(text)) {
       if (index > end) break;
@@ -250,16 +348,38 @@ export function formatSelection(
       if (index < end && index + segment.length > end)
         end = index + segment.length;
     }
-    return {
-      start,
-      end,
-      value:
-        style === 'random'
-          ? randomizeUnicode(text.slice(start, end))
-          : styleUnicode(text.slice(start, end), [style], true, lineStyles),
-    };
+    const source = text.slice(start, end);
+    const protectedRanges = analysis.protectedRanges.filter(
+      (range) => range.start < end && range.end > start,
+    );
+    const editable = editableGlyphs(protectedRanges, start);
+    const value =
+      style === 'random'
+        ? randomizeUnicode(source, Math.random, editable, true)
+        : styleUnicode(source, [style], true, lineStyles, editable);
+    if (protectedRanges.length && source === value) return;
+    return protectedRanges.length
+      ? { start, end, value, preservedSyntax: true }
+      : { start, end, value };
   }
   if (style === 'random') return;
+  const overlapsProtected = analysis.protectedRanges.some(
+    (range) => range.start < end && range.end > start,
+  );
+  if (
+    start === 0 &&
+    end === text.length &&
+    (overlapsProtected ||
+      /[\r\n]/u.test(text) ||
+      (analysis.formattingRanges.some(
+        (part) => part.start > start || part.end < end,
+      ) &&
+        !analysis.formattingRanges.some(
+          (part) => part.start === start && part.end === end,
+        )))
+  )
+    return formatMarkdownDraft(text, style, analysis);
+  if (overlapsProtected) return;
   const selection = text.slice(start, end);
   if (!selection.trim()) return;
   const left = selection.length - selection.trimStart().length;
@@ -277,14 +397,7 @@ export function formatSelection(
     const bodyStart = containing.start + raw.indexOf(body);
     if (start > bodyStart || end < bodyStart + body.length) return;
     if (start < containing.start || end > containing.end) return;
-    const active = new Set<Style>();
-    if (raw.startsWith('<u>')) active.add('underline');
-    const inner = raw.replace(/^<u>|<\/u>$/gu, '');
-    if (inner.startsWith('~')) active.add('strike');
-    const flags = inner.replace(/^~{1,2}|~{1,2}$/gu, '');
-    const marker = flags.match(/^[*_]{1,3}/u)?.[0].length ?? 0;
-    if (marker > 1) active.add('bold');
-    if (marker % 2) active.add('italic');
+    const active = markdownStyles(raw);
     // Rewriting a heavily nested span to a single style would discard its
     // internal delimiters. Leave that selection untouched.
     if (/[*_~<>]/u.test(body)) return;

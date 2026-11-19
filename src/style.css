@@ -13,6 +13,7 @@
   --on-solid: light-dark(#fff, #241544);
   --accent-bg: light-dark(#eee8ff, #342652);
   --warning: light-dark(#82430c, #ffbd79);
+  --warning-bg: light-dark(#fff2df, #382716);
   --shadow: light-dark(#27145510, #0005);
 
   font:
@@ -419,13 +420,14 @@ button[aria-pressed='true'] {
 }
 
 #limit[data-state='near'],
-#limit[data-state='over'],
-.hint {
+#limit[data-state='over'] {
   color: var(--warning);
+  font-weight: 700;
 }
 
 .notices {
   color: var(--quiet);
+  padding: 0.55rem 0.8rem;
 }
 
 .hint:empty,
@@ -436,6 +438,22 @@ button[aria-pressed='true'] {
 .notices summary {
   cursor: pointer;
   width: fit-content;
+}
+
+.hint.warning,
+#literal-notice,
+.notices summary {
+  color: var(--warning);
+  font-weight: 700;
+}
+
+.hint.warning,
+#literal-notice {
+  margin: 0 0 0.35rem;
+  padding: 0.45rem 0.65rem;
+  border-inline-start: 0.25rem solid var(--warning);
+  border-radius: 0.25rem;
+  background: var(--warning-bg);
 }
 
 .notices ul {
@@ -452,8 +470,12 @@ button[aria-pressed='true'] {
   flex-wrap: wrap;
 }
 
-.footer button:first-of-type {
-  margin-inline-start: auto;
+.draft-tools {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.25rem;
+  padding-inline: 0.55rem;
 }
 
 .quiet {
@@ -529,10 +551,6 @@ dialog pre {
 @media (width <= 33rem) {
   .workspace {
     gap: 0.55rem;
-  }
-
-  .footer button:first-of-type {
-    margin-inline-start: 0;
   }
 
   .editor-shell {

@@ -6,6 +6,7 @@ import {
   bulletLines,
   formatSelection,
   formatTyping,
+  randomSelectionActive,
   selectionStyles,
   type Frame,
 } from '../src/document.ts';
@@ -132,6 +133,44 @@ describe('projected editing', () => {
 });
 
 describe('formatting boundaries', () => {
+  it('formats around protected Unicode spans with one global toggle', () => {
+    const source = 'A `code` 𝐁 [link](https://example.com)';
+    const result = formatSelection(
+      draft(source, 0, source.length, 'unicode'),
+      'bold',
+    );
+    expect(result).toEqual({
+      start: 0,
+      end: source.length,
+      value: '𝐀 `code` 𝐁 [link](https://example.com)',
+      preservedSyntax: true,
+    });
+    const styled = result!.value;
+    expect(
+      formatSelection(draft(styled, 0, styled.length, 'unicode'), 'bold')
+        ?.value,
+    ).toBe('A `code` B [link](https://example.com)');
+  });
+
+  it('detects and removes random lettering without changing marks or protected source', () => {
+    const source = '𝖠́ Ｂ͟ `𝟤` 👩🏽‍💻';
+    const frame = draft(source, 0, source.length, 'unicode');
+    expect(randomSelectionActive(frame)).toBe(true);
+    expect(formatSelection(frame, 'random')?.value).toBe('Á B͟ `𝟤` 👩🏽‍💻');
+    expect(randomSelectionActive(draft('𝖠 B', 0, 4, 'unicode'))).toBe(false);
+    expect(randomSelectionActive(draft('`𝟤`', 0, 4, 'unicode'))).toBe(false);
+  });
+
+  it('toggles multiline Markdown without touching code or already styled nesting', () => {
+    const source = '**First** and second.\n\n- Item one\n- Item two\n\n`code`';
+    const styled =
+      '**First** **and second.**\n\n- **Item one**\n- **Item two**\n\n`code`';
+    expect(formatSelection(draft(source), 'bold')?.value).toBe(styled);
+    expect(formatSelection(draft(styled), 'bold')?.value).toBe(
+      'First and second.\n\n- Item one\n- Item two\n\n`code`',
+    );
+  });
+
   it('formats prose touching protected code while rejecting overlapping or partial ranges', () => {
     expect(formatSelection(draft('`x`A', 3, 4), 'bold')).toEqual({
       start: 3,

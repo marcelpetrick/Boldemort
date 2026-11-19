@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.0
+
+- Format eligible text across a whole draft and preserve protected Markdown
+  syntax. Toggle selected random lettering back to plain Latin.
+- Put Help and Clear draft next to the editor and make warnings more visible.
+
 ## 0.3.3
 
 - Continue armed Bold inside nested Markdown formatting and at the start of

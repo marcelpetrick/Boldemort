@@ -37,18 +37,56 @@ for (const font of randomFonts) {
     reverse.set(glyph, [plain[index]!, 0]);
 }
 
-export function randomizeUnicode(text: string, random = Math.random) {
-  return Array.from(graphemes(text), ({ segment }) => {
+type EditableGlyph = (start: number, end: number) => boolean;
+
+function randomFontGlyphs(text: string, editable?: EditableGlyph) {
+  return Array.from(graphemes(text), ({ segment, index }) => {
     const [glyph = ''] = segment;
     const base = reverse.get(glyph)?.[0];
-    if (base === undefined) return segment;
-    const index = plain.indexOf(base);
-    const choices = randomFonts
-      .map((font) => font[index]!)
-      .filter((value) => value !== glyph);
-    const replacement = choices[Math.floor(random() * choices.length)]!;
-    return replacement + segment.slice(glyph.length);
-  }).join('');
+    const eligible =
+      base !== undefined && (editable?.(index, index + segment.length) ?? true);
+    return { segment, glyph, base: eligible ? base : undefined };
+  });
+}
+
+export function hasRandomFont(text: string, editable?: EditableGlyph) {
+  const glyphs = randomFontGlyphs(text, editable).filter(
+    ({ base }) => base !== undefined,
+  );
+  return (
+    glyphs.length > 0 &&
+    glyphs.every(({ glyph }) =>
+      randomFonts.some((font) => font.includes(glyph)),
+    )
+  );
+}
+
+export function randomizeUnicode(
+  text: string,
+  random = Math.random,
+  editable?: EditableGlyph,
+  toggle = false,
+) {
+  const glyphs = randomFontGlyphs(text, editable);
+  const remove =
+    toggle &&
+    glyphs.every(
+      ({ glyph, base }) =>
+        base === undefined || randomFonts.some((font) => font.includes(glyph)),
+    );
+  return glyphs
+    .map(({ segment, glyph, base }) => {
+      if (base === undefined) return segment;
+      const tail = segment.slice(glyph.length);
+      if (remove) return base + tail;
+      const index = plain.indexOf(base);
+      const choices = randomFonts
+        .map((font) => font[index]!)
+        .filter((value) => value !== glyph);
+      const replacement = choices[Math.floor(random() * choices.length)]!;
+      return replacement + tail;
+    })
+    .join('');
 }
 
 export const lineMarks = {
@@ -138,13 +176,17 @@ export function styleUnicode(
   selected: Iterable<Style>,
   toggle = false,
   lineStyles: LineStyles = defaultLineStyles,
+  editable?: EditableGlyph,
 ) {
-  const glyphs = Array.from(graphemes(text), ({ segment }) => ({
+  const glyphs = Array.from(graphemes(text), ({ segment, index }) => ({
     segment,
     item: decode(segment),
+    editable: editable?.(index, index + segment.length) ?? true,
   }));
   for (const style of selected) {
-    const eligible = glyphs.filter(({ item }) => supports(item.base, style));
+    const eligible = glyphs.filter(
+      (entry) => entry.editable && supports(entry.item.base, style),
+    );
     const remove =
       toggle &&
       eligible

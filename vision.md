@@ -350,8 +350,9 @@ grapheme clusters and combining sequences so marks attach to whole characters.
 - Put the overview beneath the headline and before the draft, open on first
   load. Keep the introductory paragraph and three bullets in English and German.
 - In Unicode mode, Random font remaps Latin letters and digits independently
-  to copyable Unicode alphabets. With a selection it applies once and is
-  undoable. With an empty selection it toggles random styles for new typing.
+  to copyable Unicode alphabets. Click again on randomized text to restore
+  Latin letters and digits. Both actions are undoable. With an empty selection
+  it toggles random styles for new typing.
 - Preserve original character order, punctuation, accents, emoji, line marks,
   and code spans. Copy the produced code points, and preserve them literally
   when switching to Markdown. The control is unavailable in Markdown mode.
@@ -400,6 +401,10 @@ grapheme clusters and combining sequences so marks attach to whole characters.
   user may be halfway through a construct.
 - Format toggles must not alter content in fenced code blocks, inline code,
   URLs, or raw HTML attributes as though those regions were ordinary prose.
+- Selecting the whole draft should format eligible text in one action.
+  Preserve protected source and show a noticeable message when it is skipped.
+- Keep Help and Clear draft next to the editor controls. Make warnings
+  prominent and give readers a concrete action when one is available.
 - If selecting across Markdown structural nodes cannot be transformed safely,
   issue a contextual hint rather than mangling the document.
 - Handle newline insertion in lists conservatively; automatic continuation is a

@@ -96,8 +96,16 @@ export const messages = {
     'Komplexes Markdown bleibt in der Unicode-Ausgabe als Quelltext erhalten.',
   ],
   protected: [
-    'This selection crosses or contains Markdown syntax. Select a complete emphasis span or plain text.',
-    'Die Auswahl berührt Markdown-Syntax. Wähle eine vollständige Hervorhebung oder reinen Text.',
+    'Formatting was skipped to protect Markdown syntax. Select plain text or a complete styled span.',
+    'Zum Schutz der Markdown-Syntax wurde die Formatierung übersprungen. Wähle reinen Text oder einen vollständig formatierten Abschnitt.',
+  ],
+  preservedSyntax: [
+    'Text was formatted. Protected Markdown syntax, code, and links were kept as written.',
+    'Text wurde formatiert. Geschützte Markdown-Syntax, Code und Links wurden beibehalten.',
+  ],
+  noFormatting: [
+    'This style does not change the selected characters. Try selecting letters or digits, or use underline or strikethrough.',
+    'Dieser Stil ändert die ausgewählten Zeichen nicht. Wähle Buchstaben oder Ziffern oder nutze Unterstreichen oder Durchstreichen.',
   ],
   units: ['UTF-16 units in {format}', 'UTF-16-Einheiten in {format}'],
   remaining: ['{count} remaining', 'Noch {count} frei'],
@@ -130,9 +138,9 @@ export type Locale = 'en' | 'de';
 export const help = {
   randomFont: [
     'Mix copyable Unicode styles.',
-    'In Unicode mode, mix the letters and digits in your selection, or switch it on for new typing. Underlines, strike marks, accents, and other characters stay intact. Use Undo to restore a selection.',
+    'Click to mix the selected letters and digits. Click again to restore plain Latin letters and digits. Without a selection, this toggles random styles for new typing. Accents and line marks stay intact.',
     'Kopierbare Unicode-Stile mischen.',
-    'Mische im Unicode-Modus die Buchstaben und Ziffern der Auswahl oder schalte den Stil für neue Eingaben ein. Unterstreichungen, Durchstreichungen, Akzente und andere Zeichen bleiben erhalten. Nutze Rückgängig, um die Auswahl wiederherzustellen.',
+    'Mische die ausgewählten Buchstaben und Ziffern. Ein weiterer Klick stellt normale lateinische Buchstaben und Ziffern wieder her. Ohne Auswahl schaltest du den Stil für neue Eingaben um. Akzente und Striche bleiben erhalten.',
   ],
   project: [
     'View the GitHub project.',

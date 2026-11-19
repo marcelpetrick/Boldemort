@@ -123,16 +123,15 @@ describe('toolbar and document history', () => {
     expect(
       formatSelection(select('**word**', 'markdown', 2, 4), 'italic'),
     ).toBeUndefined();
-    for (const text of [
-      '`word`',
-      '# title',
-      '  ',
-      'some\nwords',
-      'word^*',
-      '**word** beside',
-    ]) {
+    for (const text of ['`word`', '# title', '  ', 'word^*']) {
       expect(formatSelection(select(text), 'bold')).toBeUndefined();
     }
+    expect(formatSelection(select('some\nwords'), 'bold')?.value).toBe(
+      '**some**\n**words**',
+    );
+    expect(formatSelection(select('**word** beside'), 'bold')?.value).toBe(
+      '**word** **beside**',
+    );
     expect(formatSelection(select('𝐀B', 'unicode'), 'bold')?.value).toBe('𝐀𝐁');
     expect(
       formatSelection(select('a👩🏽‍💻b', 'unicode', 2, 3), 'underline')?.value,

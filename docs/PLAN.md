@@ -64,3 +64,14 @@
   editor. Verify armed Bold at a nested closing delimiter and immediately
   before a bold opener in both Markdown and Unicode. Preserve the previous
   bold-italic and punctuation checks, then run the release gates.
+- Verify Ctrl+A formatting on multiline drafts with protected syntax. Apply
+  formatting to eligible text in one action and make Random font toggle
+  selected lettering back to Latin while preserving Unicode line marks.
+- Move Help and Clear draft to the editor controls. Make warnings and errors
+  easier to notice and act on in both languages. Verify the placement and
+  message states in browser tests, review the changes, then record a short
+  editor demonstration under `media/` and publish the verified build.
+- Profile long-draft selection, formatting, conversion, and analysis on a
+  production-equivalent workload. Record up to five measured bottlenecks,
+  verify fixes against the same corpus, and run a timing guard in the shared
+  local and CI pipeline.

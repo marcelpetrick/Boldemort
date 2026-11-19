@@ -13,6 +13,8 @@ them.
 | One private browser editor for Markdown and copyable Unicode | Switch modes, copy exact Unicode, and export UTF-8 in browser tests. |
 | Line styles based on published Unicode examples | Check all six exact marks, styled spaces, toggle-off, older variants, and unchanged round-trips. |
 | Random font in Unicode mode | Test exact seeded glyphs, code protection, undo, armed typing, preserved text and combining marks, and Markdown round-trips. |
+| Whole-draft formatting and reversible Random font | Use Ctrl+A on multiline drafts with code and links, apply Bold and Random font, and verify a second click restores plain text where eligible. |
+| Visible editor actions and warnings | Find Help and Clear draft next to the editor. Verify that skipped Markdown syntax is explained beside the draft. |
 | Light, Dark, System, and Bavarian | Change the theme in browser tests and check Bavarian contrast with axe. |
 | English and German and staged tooltips | Check language switching and the transition from brief help to expanded help at four seconds. |
 | Overview before the editor | Verify the introduction is open by default and above the draft with a paragraph and three bullets explaining LinkedIn and plain-text email use. |

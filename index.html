@@ -183,6 +183,26 @@
             </button>
           </div>
         </div>
+        <div class="draft-tools">
+          <button
+            type="button"
+            id="help"
+            class="quiet"
+            data-i="help"
+            data-help="help"
+          >
+            Help
+          </button>
+          <button
+            type="button"
+            id="clear"
+            class="quiet"
+            data-i="clear"
+            data-help="clear"
+          >
+            Clear draft
+          </button>
+        </div>
         <div class="line-options" role="group" data-name="lineStyles">
           <select
             id="underline-style"
@@ -229,6 +249,17 @@
             dir="auto"
           ></textarea>
         </div>
+        <div class="notices">
+          <p id="literal-notice" data-i="literal" hidden></p>
+          <p id="hint" class="hint" role="status"></p>
+          <details id="diagnostics" hidden>
+            <summary data-help="diagnostics">
+              <span data-i="diagnostics"></span>
+              <span id="warning-count"></span>
+            </summary>
+            <ul id="warning-list"></ul>
+          </details>
+        </div>
         <div class="metrics" role="group" data-name="metrics">
           <div class="metric" data-help="words" tabindex="0">
             <span data-i="words"></span><strong id="words">0</strong>
@@ -271,16 +302,6 @@
           <a id="limit-source" data-i="source" data-help="source" hidden></a>
         </div>
       </section>
-      <div class="notices">
-        <p id="literal-notice" data-i="literal" hidden></p>
-        <p id="hint" class="hint" role="status"></p>
-        <details id="diagnostics" hidden>
-          <summary data-help="diagnostics">
-            <span data-i="diagnostics"></span> <span id="warning-count"></span>
-          </summary>
-          <ul id="warning-list"></ul>
-        </details>
-      </div>
       <footer class="footer">
         <span id="version" tabindex="0" data-help="version"></span>
         <span data-i="privacy"></span>
@@ -303,24 +324,6 @@
           data-help="tests"
           >CI and test results</a
         >
-        <button
-          type="button"
-          id="help"
-          class="quiet"
-          data-i="help"
-          data-help="help"
-        >
-          Help
-        </button>
-        <button
-          type="button"
-          id="clear"
-          class="quiet"
-          data-i="clear"
-          data-help="clear"
-        >
-          Clear draft
-        </button>
       </footer>
     </main>
 

@@ -81,6 +81,7 @@ function renderInline(
 type MarkdownAnalysis = {
   changes: Change[];
   formattingRanges: Positioned[];
+  plainRanges: Positioned[];
   protectedRanges: Positioned[];
   literal: boolean;
 };
@@ -90,6 +91,7 @@ export function inspectMarkdown(
 ): MarkdownAnalysis {
   const changes: Change[] = [];
   const formattingRanges: Positioned[] = [];
+  const plainRanges: Positioned[] = [];
   const protectedRanges: Positioned[] = [];
   let literal = false;
   function recordFormatting(range: Positioned, children: Node[]) {
@@ -159,14 +161,17 @@ export function inspectMarkdown(
         }
       } else if (node.type === 'paragraph') {
         visit(node.children);
-      } else if (node.type !== 'text' && node.type !== 'break') {
+      } else if (node.type === 'text') {
+        if (source.slice(range.start, range.end) === node.value)
+          plainRanges.push(range);
+      } else if (node.type !== 'break') {
         literal = true;
         protectedRanges.push(range);
       }
     }
   };
   visit(parse(source).children);
-  return { changes, formattingRanges, protectedRanges, literal };
+  return { changes, formattingRanges, plainRanges, protectedRanges, literal };
 }
 
 function unicodeChanges(source: string) {

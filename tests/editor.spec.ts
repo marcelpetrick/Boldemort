@@ -91,6 +91,54 @@ test('a reload opens a fresh draft', async ({ page }) => {
   await expect(draft).toHaveValue('');
 });
 
+test('formats an entire mixed draft and toggles randomized text back to Latin', async ({
+  page,
+}) => {
+  await page.evaluate(() => {
+    Math.random = () => 0;
+  });
+  const editor = page.locator('#editor');
+  const random = page.getByRole('button', { name: 'Random font' });
+  const bold = page.getByRole('button', { name: 'Bold', exact: true });
+  const source = 'Ab͟\n\n`Code` 2';
+  await editor.fill(source);
+  await editor.press('Control+a');
+  await random.click();
+  await expect(editor).toHaveValue('𝖠𝖻͟\n\n`Code` 𝟤');
+  await expect(random).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByRole('status')).toContainText(
+    'Protected Markdown syntax',
+  );
+  await expect(page.getByRole('status')).toHaveCSS('font-weight', '700');
+  await random.click();
+  await expect(editor).toHaveValue(source);
+  await expect(random).toHaveAttribute('aria-pressed', 'false');
+  await bold.click();
+  await expect(editor).toHaveValue('𝐀𝐛͟\n\n`Code` 𝟐');
+  await bold.click();
+  await expect(editor).toHaveValue(source);
+  await page.getByRole('button', { name: 'Markdown', exact: true }).click();
+  await editor.fill(
+    'First paragraph.\n\n`code` and [link](https://example.com).',
+  );
+  await editor.press('Control+a');
+  await bold.click();
+  await expect(editor).toHaveValue(
+    '**First paragraph.**\n\n`code` **and** [link](https://example.com).',
+  );
+  await bold.click();
+  await expect(editor).toHaveValue(
+    'First paragraph.\n\n`code` and [link](https://example.com).',
+  );
+  const tools = page.locator('.draft-tools');
+  await expect(
+    tools.getByRole('button', { name: 'Help', exact: true }),
+  ).toBeVisible();
+  await expect(
+    tools.getByRole('button', { name: 'Clear draft', exact: true }),
+  ).toBeVisible();
+});
+
 test('armed bold preserves a previous bold-italic span', async ({ page }) => {
   const editor = page.locator('#editor');
   await page.getByRole('button', { name: 'Markdown', exact: true }).click();
