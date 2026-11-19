@@ -30,3 +30,6 @@
 - Self-review tightened source-aware round-trips, preserved literal code and
   task markers, and verified simple bullet conversion. Added scroll-aware
   diagnostics, hoverable long help, and bundled license notices.
+- Verified an article-length paste and follow-up edit in all three browsers.
+  Added release and Pages artifact dry runs. Public deployment is pending the
+  project owner's license variant confirmation specified in the vision.

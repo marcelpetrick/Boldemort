@@ -14,7 +14,18 @@ if (!changelog.split('\n').includes('## ' + metadata.version)) {
 await mkdir('release', { recursive: true });
 await cp('DEPENDENCIES.md', 'dist/DEPENDENCIES.md');
 const filename = 'Boldemort-' + tag + '.tar.gz';
-execFileSync('tar', ['-czf', 'release/' + filename, '-C', 'dist', '.']);
+execFileSync('tar', [
+  '--sort=name',
+  '--mtime=@0',
+  '--owner=0',
+  '--group=0',
+  '--numeric-owner',
+  '-czf',
+  'release/' + filename,
+  '-C',
+  'dist',
+  '.',
+]);
 const buffer = await readFile('release/' + filename);
 await writeFile(
   'release/' + filename + '.sha256',

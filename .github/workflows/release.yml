@@ -1,5 +1,6 @@
 name: Release
 on:
+  workflow_dispatch:
   push:
     tags: ['v*']
 permissions:
@@ -9,6 +10,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   verify:
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     container:
@@ -25,14 +27,25 @@ jobs:
           cache: npm
       - run: npm ci
       - run: ./localPipeline.sh
-      - run: npm run mutation
-      - run: node scripts/release.mjs "$GITHUB_REF_NAME"
+      - if: github.ref_type == 'tag'
+        run: npm run mutation
+      - name: Verify the version and package the site
+        run: |
+          if [[ "$GITHUB_REF_TYPE" == tag ]]; then
+            tag="$GITHUB_REF_NAME"
+          else
+            tag="v$(node -p "require('./package.json').version")"
+          fi
+          node scripts/release.mjs "$tag"
+          (cd release && sha256sum -c ./*.sha256)
+        shell: bash
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: release-package
           path: release/
           if-no-files-found: error
   publish:
+    if: github.ref_type == 'tag'
     needs: verify
     runs-on: ubuntu-24.04
     timeout-minutes: 10
@@ -47,8 +60,18 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          if gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-            gh release upload "$GITHUB_REF_NAME" release/* --repo "$GITHUB_REPOSITORY" --clobber
+          if existing=$(gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name'); then
+            downloaded=$(mktemp -d)
+            for asset in release/*; do
+              name=${asset##*/}
+              if [[ $'\n'${existing}$'\n' == *$'\n'"${name}"$'\n'* ]]; then
+                gh release download "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --pattern "$name" --dir "$downloaded"
+                cmp "$asset" "$downloaded/$name"
+              else
+                gh release upload "$GITHUB_REF_NAME" "$asset" --repo "$GITHUB_REPOSITORY"
+              fi
+            done
           else
             gh release create "$GITHUB_REF_NAME" release/* --repo "$GITHUB_REPOSITORY" --verify-tag --generate-notes
           fi
+        shell: bash

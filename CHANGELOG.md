@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.5
+
+- Added GitHub Actions dry runs for Pages artifacts and release packages.
+- Made release archives reproducible and verified existing assets on reruns.
+
 ## 0.1.4
 
 - Improved round-trips after edits, code protection, and unordered bullets.
