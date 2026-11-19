@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.3
+
+- Run browser checks as the Playwright image user on GitHub-hosted runners.
+
 ## 0.1.2
 
 - Enforced 98% application line coverage with unit and browser instrumentation.

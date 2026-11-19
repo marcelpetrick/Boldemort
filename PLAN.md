@@ -25,3 +25,5 @@
 - Added a 98% combined line coverage gate for every application module and
   sandboxed mutation testing for conversion, editing, and writing analysis.
   Regression tests exercise offline use, long drafts, and clipboard fallback.
+- The first remote mutation job passed. Fixed the Firefox launch environment
+  for the browser job by matching the GitHub runner's user inside the container.

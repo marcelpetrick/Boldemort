@@ -3,7 +3,7 @@
 [![CI](https://github.com/marcelpetrick/Boldemort/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/marcelpetrick/Boldemort/actions/workflows/ci.yml)
 [![GitHub Pages](https://github.com/marcelpetrick/Boldemort/actions/workflows/pages.yml/badge.svg)](https://github.com/marcelpetrick/Boldemort/actions/workflows/pages.yml)
 [![Release pipeline](https://github.com/marcelpetrick/Boldemort/actions/workflows/release.yml/badge.svg)](https://github.com/marcelpetrick/Boldemort/actions/workflows/release.yml)
-[![Version 0.1.2](https://img.shields.io/badge/version-0.1.2-6241c2)](CHANGELOG.md)
+[![Version 0.1.3](https://img.shields.io/badge/version-0.1.3-6241c2)](CHANGELOG.md)
 [![License GPLv3](https://img.shields.io/badge/license-GPLv3-blue)](LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-6-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Vite](https://img.shields.io/badge/Vite-8-646cff?logo=vite&logoColor=white)](https://vite.dev/)
@@ -84,7 +84,7 @@ CI triggers Pages deployment. The Pages workflow can also be dispatched for
 the current tip of `main`.
 
 For a release, update the package version and changelog, verify the pipeline,
-then push a matching tag such as `v0.1.2` from `main`. The release workflow
+then push a matching tag such as `v0.1.3` from `main`. The release workflow
 reruns local verification, packages the static site with licensing information,
 and publishes a SHA-256 checksum alongside the archive.
 
