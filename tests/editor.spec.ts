@@ -91,6 +91,41 @@ test('a reload opens a fresh draft', async ({ page }) => {
   await expect(draft).toHaveValue('');
 });
 
+test('keeps the same words selected when switching between editor modes', async ({
+  page,
+}) => {
+  const editor = page.locator('#editor');
+  const markdown = page.getByRole('button', { name: 'Markdown', exact: true });
+  await markdown.click();
+  await editor.fill('**Hello world**');
+  await editor.evaluate((element) =>
+    (element as HTMLTextAreaElement).setSelectionRange(2, 7),
+  );
+  await page.getByRole('button', { name: 'Unicode', exact: true }).click();
+  const selected = () =>
+    editor.evaluate((element) => {
+      const input = element as HTMLTextAreaElement;
+      return input.value.slice(input.selectionStart, input.selectionEnd);
+    });
+  await expect.poll(selected).toBe('𝐇𝐞𝐥𝐥𝐨');
+  await markdown.click();
+  await expect.poll(selected).toBe('Hello');
+});
+
+test('keeps literal punctuation and reports the whole Markdown selection as bold', async ({
+  page,
+}) => {
+  const editor = page.locator('#editor');
+  const bold = page.getByRole('button', { name: 'Bold', exact: true });
+  await page.getByRole('button', { name: 'Markdown', exact: true }).click();
+  await editor.fill('**word_**\n\n**second**');
+  await editor.press('Control+a');
+  await expect(bold).toHaveAttribute('aria-pressed', 'true');
+  await bold.click();
+  await expect(editor).toHaveValue('word_\n\nsecond');
+  await expect(bold).toHaveAttribute('aria-pressed', 'false');
+});
+
 test('formats an entire mixed draft and toggles randomized text back to Latin', async ({
   page,
 }) => {

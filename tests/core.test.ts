@@ -4,9 +4,11 @@ import {
   bulletLines,
   formatSelection,
   formatTyping,
-  selectionStyles,
+  selectionFormatting,
+  type Frame,
 } from '../src/document.ts';
 import { convert, inspectMarkdown, parse, project } from '../src/markdown.ts';
+import { mapProjectionSelection } from '../src/selection.ts';
 import {
   graphemes,
   defaultLineStyles,
@@ -19,6 +21,8 @@ import {
 } from '../src/unicode.ts';
 import { analyze, limits, measureLimit } from '../src/analysis.ts';
 import { explanation, help, localize, messages } from '../src/i18n.ts';
+
+const selectionStyles = (frame: Frame) => selectionFormatting(frame).active;
 
 const select = (
   text: string,
@@ -288,6 +292,77 @@ it('keeps caret mapping and intact Unicode while changing projected chunks', () 
   doc.switchTo('markdown');
   expect(doc.frame.end).toBe(doc.frame.text.length);
 });
+
+it.each([
+  ['**Hello world**', 'Hello', '𝐇𝐞𝐥𝐥𝐨'],
+  ['~~**one *two* three**~~', 'two', '𝒕̵𝒘̵𝒐̵'],
+  ['***A_***', '_', '_'],
+  ['**👩🏽‍💻 A**', '👩🏽‍💻', '👩🏽‍💻'],
+])(
+  'preserves the selected content in %s across both views',
+  (markdown, selected, unicode) => {
+    const doc = new Document();
+    doc.switchTo('markdown');
+    const start = markdown.indexOf(selected);
+    doc.edit(markdown, { start, end: start + selected.length });
+    const selection = () =>
+      doc.frame.text.slice(doc.frame.start, doc.frame.end);
+    doc.switchTo('unicode');
+    expect(selection()).toBe(unicode);
+    doc.switchTo('markdown');
+    expect(selection()).toBe(selected);
+  },
+);
+
+it('maps a Unicode selection to its escaped Markdown punctuation and back', () => {
+  const doc = new Document();
+  doc.edit('a͟*͟b͟', { start: 2, end: 4 });
+  doc.switchTo('markdown');
+  expect(doc.frame).toMatchObject({ text: '<u>a\\*b</u>', start: 4, end: 6 });
+  doc.switchTo('unicode');
+  expect(doc.frame).toMatchObject({ text: 'a͟*͟b͟', start: 2, end: 4 });
+});
+
+it('collapses a partial Unicode glyph selection at a nested delimiter boundary', () => {
+  const doc = new Document();
+  doc.switchTo('markdown');
+  const text = '<u>~~**A*B* C**~~</u>';
+  doc.edit(text, { start: 0, end: 0 });
+  doc.switchTo('unicode');
+  const start = doc.frame.text.indexOf('𝑩');
+  doc.select({ start, end: start + 1 });
+  doc.switchTo('markdown');
+  expect(doc.frame).toMatchObject({
+    text,
+    start: text.indexOf('B'),
+    end: text.indexOf('B'),
+  });
+});
+
+it.each([
+  [
+    { markdown: '`abc`', unicode: 'abc' },
+    { start: 2, end: 4 },
+    { start: 1, end: 2 },
+  ],
+  [
+    { markdown: '**X**', unicode: '🙂' },
+    { start: 2, end: 4 },
+    { start: 0, end: 2 },
+  ],
+  [
+    { markdown: '<u>&copy;</u>', unicode: '©' },
+    { start: 2, end: 10 },
+    { start: 0, end: 1 },
+  ],
+])(
+  'falls back to safe grapheme boundaries when a projection cannot be aligned',
+  (piece, selection, expected) => {
+    expect(
+      mapProjectionSelection([piece], 'markdown', 'unicode', selection),
+    ).toEqual(expected);
+  },
+);
 
 it('reparses context around edits while retaining recognized source mappings', () => {
   const doc = new Document();

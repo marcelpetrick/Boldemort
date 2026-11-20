@@ -88,3 +88,13 @@
 - Re-record both LinkedIn GIFs in Light mode with clear contrasts between
   selected and untouched text. Remove the promotional label above the
   formatting demo and verify its mixed-bold clipboard output.
+- Review the changes since v0.3.3 and trace the editor's current behavior.
+  Reproduce any loss of literal punctuation, markup protection gaps, and
+  other verified failures before fixing them.
+- Verify that removing inline styling cannot turn ordinary text into a
+  heading or list. Preserve selected characters across both editor modes.
+- Share the parsed protection ranges for both toolbar indicators so selecting
+  text in a long draft does not trigger two Markdown parses.
+- Review every tracked Markdown document for stale guidance and plain
+  English. Add Mermaid C4 views of the current architecture, then verify the
+  release with the shared pipeline.

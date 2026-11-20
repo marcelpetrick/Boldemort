@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.4.1
+
+- Keep the same text selected when switching between Markdown and Unicode.
+- Preserve literal punctuation, link text, and list markers during formatting.
+- Show the correct toolbar state for a fully styled draft.
+- Refresh the documentation and add Mermaid C4 architecture diagrams.
+
 ## 0.4.0
 
 - Format eligible text across a whole draft and preserve protected Markdown

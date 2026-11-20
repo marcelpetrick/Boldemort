@@ -81,6 +81,9 @@ function renderInline(
 type MarkdownAnalysis = {
   changes: Change[];
   formattingRanges: Positioned[];
+  delimiterRanges: Positioned[];
+  simpleFormats: (Positioned & { body: Positioned; active: Set<Style> })[];
+  complexFormatting: boolean;
   plainRanges: Positioned[];
   protectedRanges: Positioned[];
   literal: boolean;
@@ -91,15 +94,48 @@ export function inspectMarkdown(
 ): MarkdownAnalysis {
   const changes: Change[] = [];
   const formattingRanges: Positioned[] = [];
+  const delimiterRanges: Positioned[] = [];
+  const simpleFormats: MarkdownAnalysis['simpleFormats'] = [];
+  let complexFormatting = false;
   const plainRanges: Positioned[] = [];
   const protectedRanges: Positioned[] = [];
   let literal = false;
   function recordFormatting(range: Positioned, children: Node[]) {
     formattingRanges.push(range);
+    const first = children[0];
+    const last = children.at(-1);
+    if (first && last) {
+      delimiterRanges.push(
+        { start: range.start, end: span(first).start },
+        { start: span(last).end, end: range.end },
+      );
+    }
     for (const child of children) {
       if (emphasis.has(child.type) && 'children' in child)
         recordFormatting(span(child), child.children);
     }
+  }
+  function recordSimpleFormat(
+    range: Positioned,
+    children: Node[],
+    outer: Style,
+  ) {
+    // A single chain of wrappers can be rewritten without flattening mixed
+    // styles. The parser's leaf offsets exclude delimiters, including when
+    // the literal body begins or ends with the same punctuation.
+    const active = new Set([outer]);
+    while (children.length === 1) {
+      const child = children[0]!;
+      if (child.type === 'text') {
+        simpleFormats.push({ ...range, body: span(child), active });
+        return;
+      }
+      const style = emphasis.get(child.type);
+      if (!style || !('children' in child)) break;
+      active.add(style);
+      children = child.children;
+    }
+    complexFormatting = true;
   }
   const visit = (nodes: Node[]) => {
     for (let index = 0; index < nodes.length; index++) {
@@ -122,13 +158,16 @@ export function inspectMarkdown(
           if (value !== undefined)
             recordFormatting({ start: range.start, end: span(end).end }, body);
           if (value !== undefined && /\S/u.test(value)) {
-            changes.push({ start: range.start, end: span(end).end, value });
+            const format = { start: range.start, end: span(end).end };
+            recordSimpleFormat(format, body, 'underline');
+            changes.push({ ...format, value });
             index = closing;
             continue;
           }
         }
       }
-      if (emphasis.has(node.type) && 'children' in node) {
+      const style = emphasis.get(node.type);
+      if (style && 'children' in node) {
         const value = inline(node, source, new Set(), lineStyles);
         if (value !== undefined) recordFormatting(range, node.children);
         if (
@@ -138,6 +177,7 @@ export function inspectMarkdown(
               .slice(range.start, range.end)
               .replace(/^[*~_]+|[*~_]+$/gu, '')
         ) {
+          recordSimpleFormat(range, node.children, style);
           changes.push({ ...range, value });
           continue;
         }
@@ -155,8 +195,15 @@ export function inspectMarkdown(
       ) {
         for (const item of node.children) {
           const { start } = span(item);
-          changes.push({ start, end: start + 1, value: '•' });
           const paragraph = item.children[0];
+          delimiterRanges.push({
+            start,
+            end:
+              paragraph?.type === 'paragraph'
+                ? span(paragraph).start
+                : start + 1,
+          });
+          changes.push({ start, end: start + 1, value: '•' });
           if (paragraph?.type === 'paragraph') visit(paragraph.children);
         }
       } else if (node.type === 'paragraph') {
@@ -171,7 +218,16 @@ export function inspectMarkdown(
     }
   };
   visit(parse(source).children);
-  return { changes, formattingRanges, plainRanges, protectedRanges, literal };
+  return {
+    changes,
+    formattingRanges,
+    delimiterRanges,
+    simpleFormats,
+    complexFormatting,
+    plainRanges,
+    protectedRanges,
+    literal,
+  };
 }
 
 function unicodeChanges(source: string) {

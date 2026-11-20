@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import { performance } from 'node:perf_hooks';
 import { analyze } from '../src/analysis.ts';
-import { formatSelection, randomSelectionActive } from '../src/document.ts';
+import { formatSelection, selectionFormatting } from '../src/document.ts';
 import { convert } from '../src/markdown.ts';
 import { randomizeUnicode, styleUnicode } from '../src/unicode.ts';
 
@@ -35,7 +35,7 @@ const samples = [
     run: () => {
       const frame = fullSelection(randomized);
       return [
-        randomSelectionActive(frame),
+        selectionFormatting(frame).random,
         formatSelection(frame, 'random')?.value,
       ];
     },

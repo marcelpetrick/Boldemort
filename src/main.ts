@@ -5,8 +5,7 @@ import {
   bulletLines,
   formatSelection,
   formatTyping,
-  randomSelectionActive,
-  selectionStyles,
+  selectionFormatting,
   type Replacement,
 } from './document.ts';
 import { analyze, limits, measureLimit, type Warning } from './analysis.ts';
@@ -218,8 +217,7 @@ function renderControls() {
       'aria-pressed',
       String(button.dataset.mode === doc.frame.mode),
     );
-  const selected =
-    doc.frame.end - doc.frame.start < 10_000 ? selectionStyles(doc.frame) : [];
+  const selected = selectionFormatting(doc.frame);
   for (const button of formats) {
     const style = button.dataset.style as Style;
     button.setAttribute(
@@ -227,7 +225,7 @@ function renderControls() {
       String(
         doc.frame.start === doc.frame.end
           ? armed.has(style)
-          : selected.includes(style),
+          : selected.active.includes(style),
       ),
     );
   }
@@ -237,9 +235,7 @@ function renderControls() {
     'aria-pressed',
     String(
       unicode &&
-        (doc.frame.start === doc.frame.end
-          ? randomFont
-          : randomSelectionActive(doc.frame)),
+        (doc.frame.start === doc.frame.end ? randomFont : selected.random),
     ),
   );
   get('undo').setAttribute('aria-disabled', String(!doc.canUndo));

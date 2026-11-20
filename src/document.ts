@@ -1,5 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-import { inspectMarkdown, project, type Projection } from './markdown.ts';
+import {
+  inspectMarkdown,
+  parse,
+  project,
+  type Projection,
+} from './markdown.ts';
+import { mapProjectionSelection } from './selection.ts';
 import {
   activeUnicodeStyles,
   defaultLineStyles,
@@ -171,43 +177,12 @@ export class Document {
     const before = this.#state;
     if (before.mode === mode) return;
     const pieces = this.#projection();
-    function map(position: number) {
-      let input = 0;
-      let output = 0;
-      for (const piece of pieces) {
-        const oldLength = piece[before.mode].length;
-        const newLength = piece[mode].length;
-        const local = position - input;
-        if (local <= oldLength) {
-          // Interpolate only at grapheme boundaries in transformed spans.
-          if (piece[before.mode] === piece[mode]) return output + local;
-          const boundaries = [...graphemes(piece[mode])]
-            .map(({ index }) => index)
-            .concat(newLength);
-          const estimate = (newLength * local) / oldLength;
-          return (
-            output +
-            boundaries.reduce(
-              (best, next) =>
-                Math.abs(next - estimate) < Math.abs(best - estimate)
-                  ? next
-                  : best,
-              0,
-            )
-          );
-        }
-        input += oldLength;
-        output += newLength;
-      }
-      return output;
-    }
     this.#record('');
     this.#state = {
       mode,
       pieces,
       text: pieces.map((piece) => piece[mode]).join(''),
-      start: map(before.start),
-      end: map(before.end),
+      ...mapProjectionSelection(pieces, before.mode, mode, before),
     };
   }
   undo() {
@@ -243,43 +218,32 @@ function editableGlyphs(ranges: Selection[], offset: number) {
 }
 
 function unicodeProtection(text: string) {
-  // Check inline markers, bare web addresses, and block patterns before
-  // skipping the GFM parse for a plain Unicode draft.
-  return /[!#*+<=>@[\]\\_`|~:-]|\bwww\.|^(?: {4}| {0,3}\t| {0,3}\d{1,9}[.)](?:[ \t]|$))/imu.test(
-    text,
-  )
-    ? inspectMarkdown(text).protectedRanges
-    : [];
-}
-
-export function randomSelectionActive({ text, start, end, mode }: Frame) {
-  return (
-    mode === 'unicode' &&
-    start < end &&
-    hasRandomFont(
-      text.slice(start, end),
-      editableGlyphs(unicodeProtection(text), start),
-    )
+  if (!mayContainMarkup(text)) return [];
+  const { protectedRanges, delimiterRanges } = inspectMarkdown(text);
+  // The plain-text editor also treats a leading Unicode bullet as a list
+  // marker. Adding a line mark to it would prevent the reverse conversion.
+  const bullets = Array.from(text.matchAll(/^ {0,3}•[ \t]+/gmu), (match) => ({
+    start: match.index,
+    end: match.index + match[0].length,
+  }));
+  return [...protectedRanges, ...delimiterRanges, ...bullets].sort(
+    (a, b) => a.start - b.start,
   );
 }
 
-function markdownStyles(raw: string) {
-  const active = new Set<Style>();
-  if (raw.startsWith('<u>')) active.add('underline');
-  const inner = raw.replace(/^<u>|<\/u>$/gu, '');
-  if (inner.startsWith('~')) active.add('strike');
-  const marker =
-    inner.replace(/^~{1,2}/u, '').match(/^[*_]{1,3}/u)?.[0].length ?? 0;
-  if (marker > 1) active.add('bold');
-  if (marker % 2) active.add('italic');
-  return active;
+function mayContainMarkup(text: string) {
+  // Check inline markers, bare web addresses, and block patterns before
+  // skipping the GFM parse for a plain Unicode draft.
+  return /[!#*+<=>@[\]\\_`|~:•-]|\bwww\.|^(?: {4}| {0,3}\t| {0,3}\d{1,9}[.)](?:[ \t]|$))/imu.test(
+    text,
+  );
 }
 
-function formatMarkdownDraft(
+function markdownDraftSpans(
   text: string,
   style: Style,
   analysis: ReturnType<typeof inspectMarkdown>,
-): Replacement | undefined {
+) {
   const spans = [];
   for (const range of analysis.plainRanges) {
     for (const line of text
@@ -302,23 +266,45 @@ function formatMarkdownDraft(
       });
     }
   }
-  for (const range of analysis.changes) {
-    const raw = text.slice(range.start, range.end);
-    const active = markdownStyles(raw);
-    if (!active.size) continue;
-    const body = raw
-      .replace(/^<u>|<\/u>$/gu, '')
-      .replace(/^[*_~]+|[*_~]+$/gu, '');
-    if (!body || /[*_~<>\r\n]/u.test(body)) continue;
-    spans.push({ ...range, body, active });
+  for (const { start, end, body: content, active } of analysis.simpleFormats) {
+    const body = text.slice(content.start, content.end);
+    if (/[\r\n]/u.test(body)) continue;
+    spans.push({ start, end, body, active: new Set(active) });
   }
+  return spans;
+}
+
+function exposesMarkdownBlock(text: string, start: number, body: string) {
+  const lineStart = start === 0 ? 0 : text.lastIndexOf('\n', start - 1) + 1;
+  const prefix = text.slice(lineStart, start);
+  return (
+    /^[ \t]*(?:(?:[-+*]|\d{1,9}[.)]|>)[ \t]*)*$/u.test(prefix) &&
+    /^(?:[#>*+[\x60_~-]|\d{1,9}[.)])/u.test(body) &&
+    parse(body).children[0]?.type !== 'paragraph'
+  );
+}
+
+function formatMarkdownDraft(
+  text: string,
+  style: Style,
+  analysis: ReturnType<typeof inspectMarkdown>,
+): Replacement | undefined {
+  const spans = markdownDraftSpans(text, style, analysis);
   if (!spans.length) return;
   const remove = spans.every(({ active }) => active.has(style));
   spans.sort((a, b) => a.start - b.start);
   const edits: typeof spans = [];
+  let preservedSyntax = analysis.literal || analysis.complexFormatting;
   for (const span of spans) {
     if (remove) span.active.delete(style);
     else span.active.add(style);
+    if (
+      !span.active.size &&
+      exposesMarkdownBlock(text, span.start, span.body)
+    ) {
+      preservedSyntax = true;
+      continue;
+    }
     const previous = edits.at(-1);
     if (
       previous?.end === span.start &&
@@ -328,6 +314,7 @@ function formatMarkdownDraft(
       previous.end = span.end;
     } else edits.push(span);
   }
+  if (!edits.length) return;
   let offset = 0;
   let value = '';
   for (const edit of edits) {
@@ -339,8 +326,24 @@ function formatMarkdownDraft(
     start: 0,
     end: text.length,
     value: value + text.slice(offset),
-    preservedSyntax: analysis.literal,
+    preservedSyntax,
   };
+}
+
+function usesMarkdownBatch(
+  { text, start, end }: Frame,
+  analysis: ReturnType<typeof inspectMarkdown>,
+) {
+  return (
+    start === 0 &&
+    end === text.length &&
+    (analysis.protectedRanges.length > 0 ||
+      /[\r\n]/u.test(text) ||
+      (analysis.formattingRanges.length > 0 &&
+        !analysis.formattingRanges.some(
+          (part) => part.start === 0 && part.end === end,
+        )))
+  );
 }
 
 export function formatSelection(
@@ -378,18 +381,7 @@ export function formatSelection(
   const overlapsProtected = analysis.protectedRanges.some(
     (range) => range.start < end && range.end > start,
   );
-  if (
-    start === 0 &&
-    end === text.length &&
-    (overlapsProtected ||
-      /[\r\n]/u.test(text) ||
-      (analysis.formattingRanges.some(
-        (part) => part.start > start || part.end < end,
-      ) &&
-        !analysis.formattingRanges.some(
-          (part) => part.start === start && part.end === end,
-        )))
-  )
+  if (usesMarkdownBatch(frame, analysis))
     return formatMarkdownDraft(text, style, analysis);
   if (overlapsProtected) return;
   const selection = text.slice(start, end);
@@ -402,19 +394,17 @@ export function formatSelection(
     (part) => part.start < end && part.end > start,
   );
   if (containing) {
-    const raw = text.slice(containing.start, containing.end);
-    const body = raw
-      .replace(/^<u>|<\/u>$/gu, '')
-      .replace(/^[*_~]+|[*_~]+$/gu, '');
-    const bodyStart = containing.start + raw.indexOf(body);
-    if (start > bodyStart || end < bodyStart + body.length) return;
+    const format = analysis.simpleFormats.find(
+      (part) => part.start === containing.start && part.end === containing.end,
+    );
+    if (!format || start > format.body.start || end < format.body.end) return;
     if (start < containing.start || end > containing.end) return;
-    const active = markdownStyles(raw);
-    // Rewriting a heavily nested span to a single style would discard its
-    // internal delimiters. Leave that selection untouched.
-    if (/[*_~<>]/u.test(body)) return;
+    const body = text.slice(format.body.start, format.body.end);
+    const active = new Set(format.active);
     if (active.has(style)) active.delete(style);
     else active.add(style);
+    if (!active.size && exposesMarkdownBlock(text, containing.start, body))
+      return;
     return {
       start: containing.start,
       end: containing.end,
@@ -435,13 +425,10 @@ export function formatTyping(
 ): Replacement {
   const { text, start, end, mode } = frame;
   // Avoid parsing a long prose draft on each keystroke when it has no markup.
-  const { formattingRanges, protectedRanges } =
-    /[`~#<>[\]!*_|:]|^(?: {4}|\t)|^ {0,3}(?:[-+>]|\d+[.)])[ \t]/mu.test(text)
-      ? inspectMarkdown(text)
-      : { formattingRanges: [], protectedRanges: [] };
-  if (
-    protectedRanges.some((range) => start > range.start && start < range.end)
-  ) {
+  const { formattingRanges, protectedRanges } = mayContainMarkup(text)
+    ? inspectMarkdown(text)
+    : { formattingRanges: [], protectedRanges: [] };
+  if (protectedRanges.some((range) => range.start < end && range.end > start)) {
     return { start, end, value: input };
   }
   if (mode === 'unicode') {
@@ -567,18 +554,28 @@ export function bulletLines(frame: Frame): Replacement {
   return { start, end, value };
 }
 
-export function selectionStyles(frame: Frame) {
-  const selected = frame.text.slice(frame.start, frame.end);
-  if (!selected) return [];
-  if (frame.mode === 'markdown') {
-    const part = inspectMarkdown(frame.text).changes.find(
-      ({ start, end }) => start <= frame.start && end >= frame.end,
-    );
-    if (!part) return [];
-    return activeUnicodeStyles(part.value);
-  }
-  return activeUnicodeStyles(
-    selected,
-    editableGlyphs(unicodeProtection(frame.text), frame.start),
+function markdownSelectionStyles(frame: Frame) {
+  const analysis = inspectMarkdown(frame.text);
+  if (usesMarkdownBatch(frame, analysis))
+    return styles.filter((style) => {
+      const spans = markdownDraftSpans(frame.text, style, analysis);
+      return spans.length > 0 && spans.every(({ active }) => active.has(style));
+    });
+  const part = analysis.changes.find(
+    ({ start, end }) => start <= frame.start && end >= frame.end,
   );
+  return part ? activeUnicodeStyles(part.value) : [];
+}
+
+export function selectionFormatting(frame: Frame) {
+  const { text, start, end, mode } = frame;
+  if (start === end) return { active: [], random: false };
+  if (mode === 'markdown')
+    return { active: markdownSelectionStyles(frame), random: false };
+  const selected = text.slice(start, end);
+  const protection = unicodeProtection(text);
+  return {
+    active: activeUnicodeStyles(selected, editableGlyphs(protection, start)),
+    random: hasRandomFont(selected, editableGlyphs(protection, start)),
+  };
 }

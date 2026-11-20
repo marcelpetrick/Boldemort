@@ -6,8 +6,7 @@ import {
   bulletLines,
   formatSelection,
   formatTyping,
-  randomSelectionActive,
-  selectionStyles,
+  selectionFormatting,
   type Frame,
 } from '../src/document.ts';
 import { convert, inspectMarkdown, project } from '../src/markdown.ts';
@@ -18,6 +17,8 @@ import {
   randomizeUnicode,
   styleUnicode,
 } from '../src/unicode.ts';
+
+const selectionStyles = (frame: Frame) => selectionFormatting(frame).active;
 
 function draft(
   text: string,
@@ -76,8 +77,8 @@ describe('projected editing', () => {
     doc.switchTo('unicode');
     expect(doc.frame).toMatchObject({
       text: 'x 𝐖𝐨𝐫𝐝 and 𝑧',
-      start: 4,
-      end: 8,
+      start: 2,
+      end: 10,
     });
     doc.select({ start: 15, end: 17 });
     doc.switchTo('markdown');
@@ -133,6 +134,57 @@ describe('projected editing', () => {
 });
 
 describe('formatting boundaries', () => {
+  it('keeps literal characters inside Markdown formatting when toggling it', () => {
+    expect(formatSelection(draft('**word_**'), 'bold')?.value).toBe('word_');
+    expect(formatSelection(draft('**a!**\n**next_**'), 'bold')?.value).toBe(
+      'a!\nnext_',
+    );
+  });
+
+  it('will not expose literal heading or list markers when removing Bold', () => {
+    expect(formatSelection(draft('**# Heading**'), 'bold')).toBeUndefined();
+    expect(
+      formatSelection(draft('**- item**\n\n**Other**'), 'bold'),
+    ).toMatchObject({
+      value: '**- item**\n\nOther',
+      preservedSyntax: true,
+    });
+  });
+
+  it('reports mixed inline styling that the whole-draft command leaves intact', () => {
+    expect(
+      formatSelection(draft('**one _two_**\n\nPlain'), 'italic'),
+    ).toMatchObject({
+      value: '**one _two_**\n\n*Plain*',
+      preservedSyntax: true,
+    });
+  });
+
+  it('keeps Markdown delimiters intact when styling their text in Unicode', () => {
+    const text = '**world**\n\n- item\n\n• item';
+    expect(
+      formatSelection(draft(text, 0, text.length, 'unicode'), 'underline')
+        ?.value,
+    ).toBe('**w͟o͟r͟l͟d͟**\n\n- i͟t͟e͟m͟\n\n• i͟t͟e͟m͟');
+  });
+
+  it('reports Bold active across multiple Markdown spans with protected code', () => {
+    const text = '**First**\n\n**Second** and `code`';
+    expect(selectionStyles(draft(text))).toEqual([]);
+    const allBold = '**First**\n\n**Second** **and** `code`';
+    expect(selectionStyles(draft(allBold))).toEqual(['bold']);
+  });
+
+  it('uses the same markup protection for armed typing and selection formatting', () => {
+    const active = new Set(['bold'] as const);
+    const url = 'Open www.example.com';
+    expect(formatTyping(draft(url, 12, 12, 'unicode'), 'x', active).value).toBe(
+      'x',
+    );
+    const code = 'A `code` B';
+    expect(formatTyping(draft(code, 0, 4), 'x', active).value).toBe('x');
+  });
+
   it('protects bare web and email autolinks in Unicode drafts', () => {
     for (const link of ['www.example.com', 'sam@example.com']) {
       const text = 'Contact ' + link;
@@ -187,10 +239,14 @@ describe('formatting boundaries', () => {
   it('detects and removes random lettering without changing marks or protected source', () => {
     const source = '𝖠́ Ｂ͟ `𝟤` 👩🏽‍💻';
     const frame = draft(source, 0, source.length, 'unicode');
-    expect(randomSelectionActive(frame)).toBe(true);
+    expect(selectionFormatting(frame).random).toBe(true);
     expect(formatSelection(frame, 'random')?.value).toBe('Á B͟ `𝟤` 👩🏽‍💻');
-    expect(randomSelectionActive(draft('𝖠 B', 0, 4, 'unicode'))).toBe(false);
-    expect(randomSelectionActive(draft('`𝟤`', 0, 4, 'unicode'))).toBe(false);
+    expect(selectionFormatting(draft('𝖠 B', 0, 4, 'unicode')).random).toBe(
+      false,
+    );
+    expect(selectionFormatting(draft('`𝟤`', 0, 4, 'unicode')).random).toBe(
+      false,
+    );
   });
 
   it('toggles multiline Markdown without touching code or already styled nesting', () => {
@@ -609,12 +665,15 @@ describe('editing existing styles and emoji', () => {
     expect(doc.frame.text).toBe('');
   });
 
-  it('snaps a caret at a tie to the previous Unicode grapheme boundary', () => {
+  it('maps a selection through markup delimiters and snaps a split grapheme to its start', () => {
     const doc = new Document();
     doc.switchTo('markdown');
     doc.edit('**ABCD**', { start: 1, end: 7 });
     doc.switchTo('unicode');
-    expect(doc.frame).toMatchObject({ text: '𝐀𝐁𝐂𝐃', start: 0, end: 6 });
+    expect(doc.frame).toMatchObject({ text: '𝐀𝐁𝐂𝐃', start: 0, end: 8 });
+    doc.select({ start: 3, end: 3 });
+    doc.switchTo('markdown');
+    expect(doc.frame).toMatchObject({ text: '**ABCD**', start: 3, end: 3 });
   });
 
   it('retains both projected spellings when inserting at their shared boundary', () => {
