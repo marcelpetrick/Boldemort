@@ -14,8 +14,9 @@
 [![Languages](https://img.shields.io/badge/languages-English%20%7C%20Deutsch-6241c2)](#using-the-editor)
 [![Privacy](https://img.shields.io/badge/drafts-browser%20memory-26704d)](#using-the-editor)
 
-Boldemort is a one-editor writing tool that converts compatible Markdown
-formatting to copyable Unicode and back. It runs entirely in the browser.
+Give a LinkedIn post or plain-text email a little emphasis. Write in Markdown,
+switch to copyable Unicode, and keep editing in the same draft. Boldemort
+processes your text in the browser without sending it to a server.
 
 **[Try Boldemort on GitHub Pages](https://marcelpetrick.github.io/Boldemort/)**
 
@@ -24,10 +25,6 @@ formatting to copyable Unicode and back. It runs entirely in the browser.
 **License: [GPL v3 or later](LICENSE).**
 
 **Developed with AI assistance.**
-
-See the [requirements](docs/REQUIREMENTS.md),
-[dependency inventory](docs/DEPENDENCIES.md), [implementation plan](docs/PLAN.md),
-and [project vision](vision.md).
 
 ![The Boldemort editor with a sample Unicode draft and a LinkedIn length estimate](media/editor.png)
 
@@ -40,44 +37,43 @@ and [project vision](vision.md).
 ## Using the editor
 
 1. Write or paste into the draft. Select text to format it, or toggle a style
-   at the caret to apply it to subsequent typing.
+   with no selection to format what you type next.
 2. Switch between **Markdown** and **Unicode** to edit either representation.
-3. Choose an **output format**, then use **Copy all** or **Export**. Copy and
-   download use the chosen format regardless of which view is open.
+3. Choose Markdown or Unicode in the output picker, then use **Copy all** or
+   **Export**. The picker controls what you copy or download.
 
 The Unicode line controls default to short strikethrough and double macron
-underline. Choose long or tilde strikethrough, low line, or double underline
-as needed. Existing text keeps its original marks. The exact marks may render
-differently across fonts and platforms.
+underline. Choose a different line to use on new formatting. Existing text
+keeps its marks. Fonts and apps may display the lines differently.
 
-The LinkedIn selector gives an advisory length estimate in UTF-16 code units
-for the chosen output. Reported and conservative limits are labeled. Word and
-sentence statistics use parsed text. Character count uses visible grapheme
-clusters when supported. A nonempty top-level Markdown block counts once.
+Choose a LinkedIn destination for an estimated length limit. The estimate uses
+UTF-16 code units, so one visible character may count as more than one unit.
+The writing stats count words and sentences in the text and count each
+nonempty top-level Markdown block as one paragraph.
 
 In Unicode mode, **Random font** mixes Unicode alphabets in a selection or
 toggles mixed lettering for new typing. Click again on the randomized selection
 to restore plain Latin letters and digits. Select all to format across the
 draft while preserving protected Markdown and code.
 
-The top bar has English and German and follows the system theme unless you
-select Light, Dark, or Bavarian. Hover or focus a control for brief help.
-Keep the pointer or focus there for four seconds to expand it, or open
-**Help** to read the full explanations.
+Choose English or German and a theme in the top bar. Hover or focus a control
+for a short hint. It expands after four seconds. Open **Help** by the editor to
+read the full explanations.
 
-The Unicode representation retains complex Markdown syntax such as links, code,
-tables and task lists literally. Simple unordered lists switch between
-Markdown markers and Unicode bullets. Edits in the other view preserve source
-spellings when the same conversion span is still recognized. Browser text
-input normalizes line endings to LF. Mathematical letters, combining marks
-and Markdown can be interpreted differently by external applications.
+Links, code, tables, and task lists keep their original Markdown when you
+switch to Unicode. Simple unordered lists become Unicode bullets. After an
+edit in the other view, the editor keeps the original Markdown spelling where
+it still recognizes the same span. Browser text input uses LF line endings.
 Drafts live in the current tab. Export a copy to keep one.
 
 ## Repository layout
 
-- [Application source](src/) and [browser and unit tests](tests/)
-- [Tool configuration](config/) and [maintenance scripts](scripts/)
-- [Project documentation](docs/) and [editor screenshots](media/)
+- [Architecture and diagrams](docs/ARCHITECTURE.md), [product vision](vision.md),
+  and [implementation plan](docs/PLAN.md)
+- [Application source](src/), [tests](tests/), [tool configuration](config/), and
+  [maintenance scripts](scripts/)
+- [Requirements and checks](docs/REQUIREMENTS.md),
+  [dependency inventory](docs/DEPENDENCIES.md), and [editor media](media/)
 
 ## Local development
 
@@ -92,21 +88,15 @@ npm run dev
 ./localPipeline.sh
 ```
 
-The pipeline installs the locked npm dependencies and Playwright browser
-binaries from a fresh checkout. It checks formatting, TypeScript, CSS, HTML,
-Markdown, the dependency inventory and audit results, then runs unit coverage,
-the production build, and Playwright against the GitHub Pages subpath. The
-coverage gate requires at least 98% line coverage across the application
-TypeScript modules.
-Run `npm run performance` to check the long-draft workloads and their output
-locally. The shared pipeline runs the same gate in GitHub Actions. See the
-[profiling results and budgets](docs/PERFORMANCE.md).
-Run `npm run mutation` for Stryker mutation testing of the conversion and
-analysis core. It runs on a sandbox copy, reports to `reports/mutation/`, and
-requires an overall mutation score of at least 80%.
-ShellCheck and actionlint run when installed. Unit coverage is reported in
-`coverage/`. Browser instrumentation uses a
-separate build directory and is excluded from Pages and release artifacts.
+The shared local and GitHub Actions pipeline installs the locked dependencies
+and Playwright browsers. It checks source, documentation, dependencies, and
+long-draft performance, builds the site, and tests it at the Pages subpath.
+Combined unit and browser line coverage must reach 98%. The pipeline also
+runs ShellCheck and actionlint when installed.
+
+- Run `npm run performance` for the [long-draft checks](docs/PERFORMANCE.md).
+- Run `npm run mutation` to test the conversion and analysis core in a sandbox.
+  The minimum score is 80%, and reports go to `reports/mutation/`.
 
 On supported Linux hosts, Playwright can install system libraries with
 `npx playwright install --with-deps chromium firefox webkit` after the npm
@@ -147,10 +137,8 @@ creating a GitHub release.
 
 ![Tracked source and test lines by area and version](media/code-history.png)
 
-The coverage chart uses published CI measurements through v0.3.1. The data
-file records run IDs for each sample. The code chart counts physical lines
-in tracked app files and tests at each version through the same revision.
-It excludes dependencies, generated output, and documentation.
+The charts run through the last recorded v0.4.0 build. The coverage chart
+uses CI results. The code chart counts lines in tracked app files and tests.
 
 Redraw both charts with Python and Matplotlib 3.11.2.
 

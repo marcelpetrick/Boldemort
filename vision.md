@@ -1,41 +1,27 @@
-# Boldemort — Product Vision and Implementation Brief
+# Boldemort product vision
 
 <!-- markdownlint-configure-file { "MD013": { "tables": false } } -->
 
-> **Project:** Boldemort\
-> **GitHub repository name:** `Boldemort` (exact capitalization)\
-> **Canonical document:** `vision.md` at the repository root\
-> **Document version:** 1.0-draft\
-> **Last updated:** 2026-11-19\
-> **Status:** Ready to guide an implementation agent; unresolved product
-> decisions remain explicitly identified.\
-> **Target:** Static GitHub Pages website\
-> **Requested license:** GNU General Public License v3 or later\
-> **Requested credit:** Marcel Petrick <mail@marcelpetrick.it>. Acknowledge AI
-> assistance.
+This is the product brief for [Boldemort](https://marcelpetrick.github.io/Boldemort/).
+The project uses GPL-3.0-or-later and credits Marcel Petrick
+(<mail@marcelpetrick.it>) and AI assistance.
 
 ---
 
 ## 1. Vision
 
-**Boldemort is a compact, dependable plain-text writing tool that lets people
-compose once, switch between Markdown notation and copyable Unicode styling, and
-publish attractive text in applications such as LinkedIn.** It should feel as
-straightforward as a small word processor without becoming one. The user writes
-into a single, real text-editing area, selects text or activates a style for
-subsequent typing, and copies the desired output. All editing, conversion,
-diagnostics, and statistics run locally in the browser.
+**Write one draft. Add emphasis. Copy it as Markdown or styled Unicode.**
+Boldemort helps people write LinkedIn posts and plain-text messages.
+Select text to style it or turn on a style before typing. The browser handles
+editing, conversion, writing stats, and hints.
 
-The name is **Boldemort**, a play on “bold” and “Voldemort.” The repository is
-also **`Boldemort`**, not `Boldemot`, `Boldemort-editor`, or any other
-variation. Use **Boldemort** consistently in the page title, branding,
-repository URL, docs, package metadata, file references, and GitHub Pages
-instructions. This is an independent original tool, not a copied implementation
-or branding of the website that inspired the idea.
+Use **Boldemort** in the UI and docs and `Boldemort` in the repository and
+GitHub Pages paths. The name plays on “bold” and “Voldemort.”
 
 ### What success looks like
 
-1. Open `https://<username>.github.io/Boldemort/` without an account or backend.
+1. Open [Boldemort](https://marcelpetrick.github.io/Boldemort/) without an
+   account.
 2. Enter or paste ordinary text into one familiar editor.
 3. Use **Bold**, _Italic_, Underline, and Strikethrough either on a selection or
    on future typing.
@@ -75,20 +61,15 @@ or branding of the website that inspired the idea.
 
 ## 2. Scope, source of truth, and decision status
 
-This file consolidates the prior requirements notes, proposed acceptance tests,
-platform-limit research, and the owner's latest answers. It is intended to be
-the **single product brief** used by a coding agent. The older requirements
-files are historical working notes; where they conflict with this document,
-**this document wins**.
+Use this file for product requirements and acceptance tests. The
+[decisions](docs/DECISIONS.md) describe current defaults, and the
+[implementation plan](docs/PLAN.md) tracks the work.
 
 **Decision labels:**
 
-- **DECIDED** — explicitly requested or answered by the project owner; implement
-  as stated.
-- **TARGET** — derived quality or architecture criterion needed to deliver the
-  stated vision; the agent may implement with reasonable judgment.
-- **OPEN** — not yet decided; use a conservative default only where instructed,
-  document the assumption, and do not misrepresent it as an owner decision.
+- **DECIDED** — a requirement the owner approved.
+- **TARGET** — a design or quality goal that leaves room for judgment.
+- **OPEN** — a future decision. Use a conservative default where documented.
 
 ### Explicitly decided requirements
 
@@ -140,10 +121,8 @@ Markdown to operate the toolbar.
 1. Visit Boldemort; a readable blank editor is focused or ready to focus.
 2. Start typing; line breaks and ordinary characters are never unexpectedly
    transformed.
-3. Select `Hello world`, press **B**, and see `𝗛𝗲𝗹𝗹𝗼 𝘄𝗼𝗿𝗹𝗱` (illustrative
-   Unicode sans-serif bold glyphs) **or the selected, documented mathematical
-   bold alphabet**. Actual alphabet choice is a small open implementation
-   detail; both are real Unicode characters.
+3. Select `Hello world`, press **B**, and see `𝐇𝐞𝐥𝐥𝐨 𝐰𝐨𝐫𝐥𝐝` using
+   mathematical bold serif letters.
 4. Select the styled phrase and press **B** again to restore `Hello world`
    without changing punctuation or adjacent text.
 5. Place the caret with no selection, press _I_, and type; the ensuing supported
@@ -157,9 +136,8 @@ Markdown to operate the toolbar.
    counterpart are represented conservatively (see §5).
 9. See words, characters, paragraphs, sentence averages/median, and a selected
    LinkedIn limit update as editing continues.
-10. Choose **Copy Markdown** or **Copy Unicode** and paste the result into
-    another application.
-11. Choose **Save/Export** to write a local `.md` or `.txt` file explicitly.
+10. Pick **Markdown** or **Unicode** as the output, then use **Copy all**.
+11. Use **Export** to download a local `.md` or `.txt` file.
 
 ### Important alternate journeys
 
@@ -172,34 +150,19 @@ Markdown to operate the toolbar.
 - Navigate and format using only keyboard controls.
 - Enlarge browser zoom to 200% or 400%; content, controls, copy, and export
   remain reachable.
-- Attempt to navigate away with unsaved changes; at most provide an honest,
-  browser-supported unsaved-work warning, not fictional autosave or guaranteed
-  recovery.
+- Export the draft if you want to keep it after leaving the page.
 
 ## 4. Interface and layout specification
 
-### Baseline visual arrangement
+### Page layout
 
-```text
-┌─────────────────────────────────────────────────────────────────┐
-│ Boldemort                              [Markdown | Unicode] v0.x │
-├─────────────────────────────────────────────────────────────────┤
-│ [B] [I] [U] [S] [•] [↶] [↷]    [Destination ▾] [Copy ▾] [Save] │
-├─────────────────────────────────────────────────────────────────┤
-│  ! │ This is one editable, scrolling plain-text document.      │
-│    │                                                            │
-│    │ A gutter marker can identify a likely issue on this line.  │
-│    │                                                            │
-│    │ The writing surface gets most of the available height.     │
-│    │                                                            │
-├─────────────────────────────────────────────────────────────────┤
-│ Words 123 · Chars 650 · ¶ 3 · Avg 12.3 · Median 11 · 650/3000  │
-└─────────────────────────────────────────────────────────────────┘
-```
-
-This is a **wireframe, not a pixel-perfect design order**. The user wants a
-familiar text processor arrangement: controls above, writing beneath, important
-metrics available without stealing the viewport.
+1. Header with the name, language, and theme.
+2. A short overview that readers can collapse.
+3. The draft card with editing modes, formatting, copy and export, and Help
+   and Clear draft. Leave most of the card for the editor. Put writing stats
+   below the draft.
+4. LinkedIn length guidance and a footer with version, author, and project
+   links.
 
 ### Layout rules
 
@@ -233,11 +196,9 @@ metrics available without stealing the viewport.
 
 ### Visual appearance
 
-**TARGET:** clean typography, comfortable line height, visible text selection,
-subtle separations between header/toolbar/editor/status, and light visual
-density. The editor offers light, dark, Bavarian, and system themes; let the
-implementation agent choose an accessible neutral default and document the
-choice.
+Use clear type, comfortable line spacing, and visible text selection. Offer
+Light, Dark, Bavarian, and System. Start with System and keep toolbar controls
+easy to see in each theme.
 
 ## 5. Document architecture and mode conversion
 
@@ -491,13 +452,12 @@ with a small high-precision rule set rather than issue misleading warnings.
 
 ## 8. Live writing statistics
 
-**DECIDED visible metrics:** word count; total character count; paragraph count;
-average words per sentence; median words per sentence. Update on typing, paste,
-format toggles, undo/redo, and mode switching. Present the main numbers in a
-compact footer/status bar with helpful tooltips for definitions. Sentence count
-is a useful supporting metric in a details popover (**TARGET**).
+Show words, characters, paragraphs, average words per sentence, and median
+words per sentence. Update after typing, paste, formatting, undo, redo, and
+mode switching. Keep the metrics below the draft with short explanations.
+A separate sentence count is a future option.
 
-### Counting model (proposed default; not yet owner-approved)
+### Counting defaults
 
 1. **Human-readable writing statistics** (words, paragraphs, sentences, average
    and median) are computed on **content text**, not Markdown delimiters or
@@ -512,8 +472,8 @@ is a useful supporting metric in a details popover (**TARGET**).
    output** (Markdown or Unicode), not from the visible-editor representation
    alone. Show the metric assumption (e.g., UTF-16 code units) and note that
    LinkedIn's exact counting rules are not guaranteed.
-4. **Paragraph:** a contiguous block of text separated by one or more blank
-   lines; headings/list items may need a documented policy when in GFM mode.
+4. **Paragraph:** count each top-level Markdown block with visible text once.
+   For example, a list with visible text counts as one block.
 5. **Words:** Unicode-aware word segmentation when supported; punctuation/emoji
    handling needs tests. Use `Intl.Segmenter` for word and sentence segmentation
    where practical, with graceful fallback.
@@ -536,29 +496,26 @@ is a useful supporting metric in a details popover (**TARGET**).
 | `One. Two three four.`           |     4 |          1 | `[1,3]`               |       2 |      2 |
 | `One. Two three. Four five six.` |     6 |          1 | `[1,2,3]`             |       2 |      2 |
 
-**OPEN:** whether selections show their own statistics, whether Markdown raw
-markup counts in a secondary raw counter, and the exact paragraph/list-item
-conventions. Keep the initial main figures consistent and documented.
+**OPEN:** statistics for a selection and a separate raw Markdown counter.
 
 ## 9. LinkedIn destinations, text length, and long drafts
 
-**DECIDED:** help users understand applicable maximum lengths for posts,
-messages, and articles. The tool should optionally expose a small **destination
-preset** selector, give `used / maximum` and `remaining`, and warn when
-approaching/exceeding a limit. **TARGET default:** warnings do not block typing
-or truncate the draft.
+Show estimated limits for LinkedIn posts, messages, and articles. For each
+preset, show how much is used and how much is left. Warn near the limit and
+after it is exceeded. Keep typing, copying, and exporting available.
 
-### Research baseline (researched 2026-11-18; reverify when implementing)
+### Presets in Boldemort
 
-| Destination                          |          Provisional limit | Reliability / note                                                                                  |
-| ------------------------------------ | -------------------------: | --------------------------------------------------------------------------------------------------- |
-| LinkedIn feed post                   |       **3,000** characters | LinkedIn Help, official.                                                                            |
-| LinkedIn article body                |     **125,000** characters | LinkedIn Help, official; older guides may differ.                                                   |
-| Ordinary direct message              |       **8,000** characters | Reported by third parties, not confirmed in official Help used for this draft.                      |
-| LinkedIn InMail message body         | **1,900–2,000** characters | Official Help sources conflict; show a caveat and use a conservative warning threshold if included. |
-| InMail subject                       |         **200** characters | LinkedIn Help.                                                                                      |
-| Personalized connection-request note |         **200** characters | LinkedIn Help; limits can vary by account/context.                                                  |
-| Sponsored Message Ad                 |       **8,000** characters | Official marketing-ad context only; do not confuse with regular messages.                           |
+The [preset configuration](src/analysis.ts) records the source and review
+date for each estimate. Future changes should check those sources first.
+
+| Destination | Estimated limit in UTF-16 units | Label shown |
+| --- | ---: | --- |
+| Feed post | 3,000 | LinkedIn guidance |
+| Article | 125,000 | LinkedIn guidance |
+| Direct message | 8,000 | Reported limit |
+| InMail body | 1,900 | Conservative estimate |
+| Connection note | 200 | LinkedIn guidance |
 
 ### Reference sources
 
@@ -581,9 +538,8 @@ or truncate the draft.
   UI or accessible tooltip.
 - Keep limits in a single configuration source with descriptive field name,
   units, source URL, and last-reviewed date.
-- Use an advisory approach: an early warning near the limit and an explicit
-  `over by N` warning after crossing it. Thresholds are **OPEN**; a first
-  implementation can choose 90% warning and document it.
+- Warn at 90% of the estimate. Show how many units are over the limit when
+  the output exceeds it.
 - Never silently trim text, automatically split posts, or prevent copying
   without consent.
 - Compute the displayed limit against the **chosen clipboard representation**.
@@ -596,19 +552,15 @@ or truncate the draft.
 - Provide internal scrolling and adequate performance for article-length texts.
   The editor itself should not impose a small hard character cap.
 
-**OPEN:** final preset list, precise target counting algorithm (LinkedIn Help
-does not fully specify it), warning threshold, and whether InMail variants need
-multiple profiles. The agent can implement a configurable conservative baseline
-and label it guidance.
+**OPEN:** exact LinkedIn counting rules, additional presets, and whether
+InMail needs more than one profile.
 
 ## 10. Copy, paste, file operations, and document lifecycle
 
 ### Clipboard
 
-- Provide explicit **Copy Markdown** and **Copy Unicode** options, perhaps under
-  one small Copy menu. The user must be able to choose either regardless of the
-  active editor mode.
-- **Copy All** refers to the entire document, not only the selected text.
+- Let the user pick **Markdown** or **Unicode** as output in either editing
+  mode. **Copy all** copies the whole draft.
   Ordinary Ctrl/Cmd+C must still copy the current selection using normal browser
   behavior unless explicitly extended.
 - Copy the **exact selected output representation** as `text/plain`. HTML-rich
@@ -623,24 +575,22 @@ and label it guidance.
 
 ### Manual save/export — DECIDED
 
-- Provide **Save/Export**, with `.md` for Markdown output and `.txt` for Unicode
-  or plain-text output. If a browser supports the File System Access API, it can
-  optionally offer a native save dialog, but ordinary downloadable Blob files
-  must work in modern browsers without special permissions.
+- Provide **Export** with a `.md` download for Markdown and a `.txt` download
+  for Unicode. A native save dialog is optional. The download must work in
+  modern browsers without special permissions.
 - Export is **manual only**. No automatic draft persistence or automatic saving
   to localStorage, IndexedDB, cloud, or server should be introduced.
 - Filenames should be safe and predictable, e.g., `boldemort-draft.md` /
   `boldemort-draft.txt` (or an explicitly entered name).
 - Use UTF-8 and preserve line breaks. Respect whether the user exports Markdown
   or Unicode rather than relying on the current display mode.
-- Provide a deliberate New/Clear action with confirmation when content might be
-  lost (**TARGET**).
+- Confirm before clearing the draft. The user can undo Clear draft in the same
+  tab.
 - **OPEN:** import/open existing `.txt`/`.md` files, multiple drafts/tabs, and
   precise unsaved-changes indicators. A minimal one-document implementation is
   acceptable initially.
-- **Unsaved work warning:** `beforeunload` is browser-dependent and not
-  guaranteed (especially on mobile). Do not claim drafts are recoverable after
-  closing without a save.
+- Export is how the user keeps a draft when leaving. Any future browser
+  departure warning would be advisory because browser support varies.
 
 ### Paste and external compatibility
 
@@ -713,8 +663,8 @@ and label it guidance.
 - **Dependencies:** enumerate **every direct and bundled runtime/build
   dependency**, exact versions, licenses, and purpose. Prefer minimal
   dependencies and no runtime CDN.
-- **Version:** display SemVer-like version (`0.1.0` initially is reasonable;
-  exact release numbering TBD) and keep it synchronized in metadata/docs/UI.
+- **Version:** use semantic versioning. Keep the version in sync across the
+  package, editor, README, and changelog.
 - **License:** provide the complete GNU GPLv3 license file and use the confirmed
   SPDX identifier `GPL-3.0-or-later`.
 - **Attribution:** credit **Marcel Petrick** (<mail@marcelpetrick.it>) as author
@@ -722,57 +672,32 @@ and label it guidance.
 - **Code ownership:** generate original code and assets. Inspiration from an
   external Unicode editor does not grant permission to copy it.
 
-### Suggested layout for the GitHub repository
+### Repository layout
 
-```text
-Boldemort/
-├── vision.md                     # this document: product source of truth
-├── README.md                     # what it does, how to run/deploy
-├── LICENSE                       # complete GNU GPLv3 text
-├── CHANGELOG.md                  # user-visible release changes
-├── DEPENDENCIES.md               # versions, licenses, and usage
-├── index.html                    # app entry point (or build output)
-├── src/                          # only if using a build tool
-│   ├── editor.*
-│   ├── conversion.*
-│   ├── markdown.*
-│   ├── statistics.*
-│   ├── diagnostics.*
-│   └── limits.*
-├── styles/ or style.css
-├── tests/                        # unit, integration, browser tests
-├── .nojekyll                      # if required by chosen Pages layout
-└── .github/workflows/            # optional Pages build/test deployment
-```
+- `index.html` and `src/` hold the editor.
+- `tests/`, `config/`, and [localPipeline.sh](localPipeline.sh) hold the checks.
+- `scripts/` holds build and maintenance tools.
+- `docs/` holds the [architecture](docs/ARCHITECTURE.md),
+  [changelog](docs/CHANGELOG.md), and [dependency inventory](docs/DEPENDENCIES.md).
+- `.github/workflows/` holds CI, Pages deployment, and release workflows.
 
-This is a **suggestion**; a small no-build project can instead use a handful of
-root-level files. Avoid needless infrastructure. If compiling TypeScript or
-bundling a GFM parser, commit the lockfile and use reproducible builds.
+Commit the lockfile and keep builds reproducible.
 
 ### GitHub Pages deployment requirement
 
-The deployed application must work from:
-
-`https://<github-user-or-org>.github.io/Boldemort/`
+The application must work at the
+[GitHub Pages address](https://marcelpetrick.github.io/Boldemort/) and serve
+assets from the `/Boldemort/` subpath.
 
 No page route, stylesheet, module import, Web Worker, or asset may silently fail
 because of incorrect root-relative paths. README instructions must cover setup,
 build (if any), local preview/test commands, GitHub Pages publishing, license,
 and dependency disclosure.
 
-### Earlier prototype status
-
-There is an older prototype generated under the misspelled project name
-**Boldemot**. It is **reference material only**. It may be inspected for
-reusable ideas and original code, but it is **not** accepted as the Boldemort
-implementation: its editing modes, auto-saving behavior, formatting model, and
-branding do not reflect the latest decisions. Never silently replace the
-approved decisions with its behavior.
-
 ## 13. Quality assurance and acceptance tests
 
-The implementation agent should create automated tests wherever practical and
-then perform manual browser checks. Important examples follow.
+Use these examples when testing a change. The checkboxes are a reusable
+checklist for verification.
 
 ### A. Text editing and styling
 
@@ -821,10 +746,10 @@ then perform manual browser checks. Important examples follow.
 
 ### C. Clipboard, files, stats, and limits
 
-- [ ] **Copy Markdown** produces Markdown no matter which mode is currently
-      being edited.
-- [ ] **Copy Unicode** produces supported Unicode styling no matter which mode
-      is currently being edited.
+- [ ] **Copy all** with Markdown selected outputs Markdown in either editor
+      mode.
+- [ ] **Copy all** with Unicode selected outputs supported Unicode styling in
+      either editor mode.
 - [ ] Copy is plain text, not CSS/HTML styling, and does not mutate the working
       document.
 - [ ] Clipboard failure leaves the user's text intact and is explained
@@ -874,126 +799,29 @@ clipboard behavior (mocked or permission-aware), zoom/reflow, focus, and file
 export. A test suite passing on pure conversion logic alone does **not**
 constitute a complete editor acceptance test.
 
-## 14. Open product decisions and provisional implementation policy
+## 14. Open product decisions
 
-These items have **not** been decided by the owner. The agent may start with the
-foundation now, but should not represent these provisional answers as approved
-or silently create irreversible behavior.
+The [decisions](docs/DECISIONS.md) describe the defaults in use. Keep these
+follow-up questions open until the owner chooses a different behavior.
 
-| Priority | Open question                                                                     | Conservative default for development                                                                         |
-| -------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| P0       | What to do when converting complex GFM constructs to Unicode?                     | Keep unsupported source Markdown literal, preserve metadata/source, show nonblocking explanation.            |
-| P0       | How strict should byte-exact round-tripping be after edits in the alternate mode? | Guarantee no content loss; preserve original source when possible; test and document normalization/fallback. |
-| P0       | Which mathematical bold variant (serif vs sans-serif)?                            | Pick one consistent reversible mapping; make choice easy to change after review.                             |
-| P0       | Precise behavior for partially mixed selections and format combinations?          | All-target → remove; mixed/partially styled → apply; preserve other styles.                                  |
-| P1       | Unicode representation of nested bullets, numbered lists, task lists?             | Preserve structure/literal syntax rather than flattening ambiguously.                                        |
-| P1       | Which LinkedIn presets in initial visible menu?                                   | General, Post, Direct Message, Article, InMail, Connection Note; label uncertain values.                     |
-| P1       | What is the definitive limit counter convention?                                  | Display graphemes and estimated UTF-16 units; use the actual selected copied output for warnings.            |
-| P1       | Which GFM diagnostics are reliable enough?                                        | High-confidence warnings only; avoid generic “invalid Markdown” claims.                                      |
-| P1       | Export filename options and import/open existing files?                           | Manual export in Markdown/Unicode with simple filenames; import may be later.                                |
-| P2       | Optional preview, detailed metrics, selected-text counts?                         | Keep release 1 compact; consider after core editing is robust.                                               |
-| P2       | Save/clear confirmations and page-leave warning?                                  | Provide explicit confirmation for destructive clear; no autosave or false recoverability.                    |
-| P2       | Keyboard shortcut scheme and diagnostics thresholds?                              | Use familiar nonconflicting shortcuts and conservative configurable warning levels.                          |
+| Area | Open question | Current or conservative behavior |
+| --- | --- | --- |
+| Conversion | How much original spelling can survive after editing the alternate view? | Preserve the source where the parser can still identify it. |
+| Complex Markdown | Should more list types or other structures have a Unicode rendering? | Keep the original Markdown for unsupported structures. |
+| Unicode emphasis | Should the editor offer other alphabets or rules for mixed selections? | Keep mathematical serif emphasis and the current selection toggle. |
+| LinkedIn | Are more presets needed, and how does LinkedIn count characters? | Show an estimated count based on the selected output. |
+| Diagnostics | Which additional hints are reliable and useful? | Keep warnings advisory and use high-confidence checks. |
+| File workflow | Should the editor open files or manage more than one draft? | Keep one draft in the tab and offer manual export. |
+| Extra controls | Should readers get a preview, selection metrics, or more shortcuts? | Keep the editor compact. |
+| Draft lifecycle | Should the app warn before leaving the page? | Confirm Clear draft and rely on export for keeping drafts. |
 
-**Do not resurrect settled questions.** The seven answered decisions in §2 (one
-editor, future typing, mathematical italic, `<u>` underline, full GFM,
-selectable copy representation, manual export) are closed unless the owner
-explicitly changes them.
+## 15. Maintenance and release
 
-## 15. Implementation execution plan for the coding agent
-
-The next agent should begin **only after reading this complete `vision.md`**.
-The task is to implement Boldemort, not to produce another set of generic
-requirements or switch the concept to rich text. Work in small, verifiable
-increments; report choices that are provisional.
-
-### Phase 0 — Establish the project
-
-- Create/initialize repository **`Boldemort`** and place this file at
-  `vision.md` in its root.
-- Choose a minimal static application structure and local build strategy (if
-  needed).
-- Add licensing, version metadata, README, dependency inventory, and tests
-  scaffold.
-- Document open assumptions in README or an explicit decisions section without
-  blocking implementation of settled features.
-- Do not migrate the old Boldemot prototype blindly; inspect it only as a
-  reference.
-
-### Phase 1 — Implement the editing foundation
-
-- Build the single plain-text editor, mode switch, toolbar, selections, focus,
-  keyboard shortcuts, and undo/redo.
-- Implement tested Unicode maps and reverse maps with exact supported-character
-  definitions.
-- Support the agreed no-selection future-typing behavior; cover both modes.
-- Write automated selection/toggle/round-trip tests before adding elaborate
-  visuals.
-
-### Phase 2 — Full Markdown and safe conversion
-
-- Integrate a pinned, compatible GFM parser where necessary; keep all assets
-  local.
-- Preserve source structure and metadata; ensure GFM constructs not
-  representable as Unicode are safe.
-- Build automatic Markdown ↔ Unicode switching with well-defined
-  lossy/unsupported cases.
-- Add list helpers while preserving valid Markdown indentation/structure.
-- Make Copy Markdown and Copy Unicode work independently of the active mode.
-
-### Phase 3 — Writing assistance
-
-- Implement five statistics plus tested sentence mean/median.
-- Add LinkedIn destinations, documented count assumptions, and nonblocking limit
-  warnings.
-- Add high-confidence parsing diagnostics with line markers and a useful
-  accessible explanation.
-- Implement manual `.md`/`.txt` export, clear confirmation, and clipboard
-  failure feedback.
-
-### Phase 4 — Quality, packaging, and publishing
-
-- Tune layout at 800 × 600 and browser zoom 200%/400%; prioritize the editor
-  area.
-- Check keyboard access, screen-reader labels, IME, mobile, undo/redo,
-  clipboard, and long-text performance.
-- Run unit and browser interaction tests; fix regressions rather than merely
-  documenting them.
-- Verify the GitHub Pages subpath `/<repo>/` and deployable static assets.
-- Confirm credits, version, dependencies, and GPLv3 inclusion before publishing.
-- Record unavoidable limitations and unresolved owner choices transparently.
-
-### Definition of done for initial release
-
-A first release is ready when the core workflows in §3 are implemented, critical
-conversion/selection tests pass, no known silent-loss cases remain, the app
-works at 800 × 600 and zoomed layouts, both copy formats and manual export work,
-the requested metrics and reliable warnings are visible, and the repository can
-be published to GitHub Pages without a backend. Open P0 conversion questions
-must be resolved in code with conservative behavior **and clearly disclosed**,
-not ignored.
-
-### Agent behavioral instructions
-
-1. **Use this document as the source of truth.** Do not overwrite it with a
-   shorter generic PRD.
-2. **Implement; do not re-collect settled requirements.** Ask for a decision
-   only if a genuine blocker makes data preservation or other non-negotiable
-   behavior impossible.
-3. **Do not substitute rich text, WYSIWYG, CSS font styling, or a pair of
-   independent editors.**
-4. **Never trade away user text for a prettier conversion.** Warn, preserve, and
-   test.
-5. **Keep code readable and dependencies transparent.** Prefer tested primitives
-   and documented limitations to overengineering.
-6. **Preserve the exact Boldemort branding and repository name.**
-7. **Treat unapproved defaults as provisional.** Do not hard-code them so deeply
-   that later decisions require rewriting the product.
-8. **Report progress with working code, tests, and specific unresolved
-   choices**, not generic assertions of completion.
-9. **Do not claim the website has been deployed unless deployment has actually
-   succeeded.**
-10. **Do not copy third-party source code from the inspiration site.**
+Follow [AGENTS.md](AGENTS.md) and record work in the
+[implementation plan](docs/PLAN.md). Start with the behavior in this brief
+and keep new defaults easy to change. Build in small steps, then test the
+normal editor workflows, unsupported conversion cases, and the Pages build.
+Report the checks that ran, known limitations, and deployment status.
 
 ## 16. Definition of success
 
@@ -1012,6 +840,8 @@ useful formatted text.
 
 ### Document change history
 
+- **2026-11-20:** updated the examples, navigation, presets, and maintenance
+  guidance to match the running editor.
 - **2026-11-19 — `vision.md` 1.0-draft:** consolidated the previous requirements
   drafts; incorporated all seven answered design decisions; fixed the canonical
   project and repository name to **Boldemort**; added agent implementation

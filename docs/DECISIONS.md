@@ -1,34 +1,34 @@
-# Project decisions
+# How Boldemort works
 
-## Repository preparation
+The [product vision](../vision.md) sets the requirements. The
+[implementation plan](PLAN.md) records the work in order.
 
-- Use the product vision as the source for acceptance scenarios and scope. Keep
-  the work sequence in [PLAN.md](PLAN.md).
-- Use the [DarkFactory workflow](https://github.com/marcelpetrick/DarkFactory)
-  for implementation and delivery. Adopt its GPLv3 and verification defaults.
-- Choose the runtime, dependencies, test tools, and packaging after reading
-  the vision. Record consequential choices here with their rationale and
-  tradeoffs when they are made.
+## Editor and output
 
-## Implementation
+- One textarea shows the same draft in Markdown or Unicode. The browser keeps
+  the draft and editing history in memory for the current tab.
+- The GFM parser records where elements begin and end in the Markdown source.
+  Simple unordered lists become Unicode bullets. Nested lists, task lists,
+  and other complex structures keep their original Markdown. After editing,
+  the parser reads the whole draft so changed syntax can affect nearby text.
+  The editor reuses the original spelling for conversion spans it still
+  recognizes.
+- Regular Unicode styling uses mathematical serif letters. The default line
+  marks are short strikethrough and double macron below. Changing a line style
+  affects new formatting. Pasted text and unchanged round-trips keep their
+  original marks.
+- English and German are available with System, Light, Dark, and Bavarian
+  themes. Settings last for the current tab. The Help dialog makes the full
+  tooltips available on touch devices.
+- LinkedIn estimates use UTF-16 units from the selected output. The app warns
+  at 90% and labels the source of each limit. Writing statistics use the
+  parsed content, and the visible character count uses Unicode graphemes.
 
-- Use a static TypeScript application with Vite and a source-positioned GFM
-  parser. A single textarea displays one logical draft. The draft is in memory.
-- Use mathematical serif letters, with a lookup for italic h. Map simple
-  unordered bullets and keep nested lists, tasks, and other complex GFM
-  literal. Reuse original spellings for intact conversion spans. Reparse
-  edited content as a whole to respect new Markdown syntax.
-- Use English and German and system, light, and dark themes. All choices last
-  for the current tab. The Help dialog makes long contextual help available
-  on touch devices.
-- Use UTF-16 units for LinkedIn estimates, warn at 90%, and label reported or
-  conservative limits. Main writing statistics use parsed text and visible
-  grapheme clusters.
-- Build a static artifact for GitHub Pages. Use separate test instrumentation
-  and a copy of the source for mutation testing.
-- The owner selected GPL-3.0-or-later. Credit Marcel Petrick
-  (<mail@marcelpetrick.it>) as the author in the app and README and acknowledge
-  AI assistance.
-- Use short strikethrough and double macron below as the default Unicode line
-  marks. New formatting follows the chosen variant. Pasted text and unchanged
-  round-trips preserve their original marks.
+## Build and delivery
+
+- Vite builds the TypeScript editor as a static site for GitHub Pages. Browser
+  coverage uses a separate build, and mutation testing uses a sandbox copy.
+- The project follows the
+  [DarkFactory workflow](https://github.com/marcelpetrick/DarkFactory) and uses
+  GPL-3.0-or-later. The app and README credit Marcel Petrick
+  (<mail@marcelpetrick.it>) and disclose AI assistance.

@@ -98,3 +98,5 @@
 - Review every tracked Markdown document for stale guidance and plain
   English. Add Mermaid C4 views of the current architecture, then verify the
   release with the shared pipeline.
+- Render all five architecture diagrams, check local document links, and
+  refresh screenshots from the v0.4.1 build and charts from published CI.
