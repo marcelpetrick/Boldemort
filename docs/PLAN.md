@@ -12,6 +12,18 @@
    capture a screenshot, and document usage and dependencies.
 7. Commit and push, then verify GitHub Actions and the published Pages site.
 
+## 0.4.2 dependency and release checks
+
+1. Check exact package pins and CI tool versions against upstream registries.
+   Update compatible stable releases and regenerate the lockfile and inventory.
+2. Run the shared pipeline and sandboxed mutation tests. Confirm the editor
+   still round-trips Markdown and Unicode, copies and exports both formats,
+   and runs offline on Chromium, Firefox, and WebKit. Require at least 98% line
+   coverage and an 80% mutation score.
+3. Check that the editor, README, changelog, and package agree on version 0.4.2.
+   Verify the archive and checksum, push the reviewed commit to `main`, then
+   verify CI, the tagged GitHub release, and the deployed Pages version.
+
 ## Progress
 
 - Vision intake complete. Both input files matched byte for byte. The root

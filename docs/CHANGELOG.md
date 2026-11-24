@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.2
+
+- Update Markdown and CSS lint tooling and the TypeScript ESLint integration.
+- Pin CI and release builds to Node.js 24.22.3.
+
 ## 0.4.1
 
 - Keep the same text selected when switching between Markdown and Unicode.

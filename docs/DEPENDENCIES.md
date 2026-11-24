@@ -165,16 +165,16 @@ optional packages for other platforms.
 | @types/node | 26.6.6 | MIT | Direct development | Node type definitions for tooling. |
 | @types/unist | 2.0.11 | MIT | Transitive development | Dependency of a package listed here. |
 | @types/unist | 3.0.3 | MIT | Transitive runtime | Dependency of a package listed here. |
-| @typescript-eslint/eslint-plugin | 8.73.0 | MIT | Transitive development | Dependency of a package listed here. |
-| @typescript-eslint/parser | 8.73.0 | MIT | Transitive development | Dependency of a package listed here. |
-| @typescript-eslint/project-service | 8.73.0 | MIT | Transitive development | Dependency of a package listed here. |
-| @typescript-eslint/scope-manager | 8.73.0 | MIT | Transitive development | Dependency of a package listed here. |
-| @typescript-eslint/tsconfig-utils | 8.73.0 | MIT | Transitive development | Dependency of a package listed here. |
-| @typescript-eslint/type-utils | 8.73.0 | MIT | Transitive development | Dependency of a package listed here. |
-| @typescript-eslint/types | 8.73.0 | MIT | Transitive development | Dependency of a package listed here. |
-| @typescript-eslint/typescript-estree | 8.73.0 | MIT | Transitive development | Dependency of a package listed here. |
-| @typescript-eslint/utils | 8.73.0 | MIT | Transitive development | Dependency of a package listed here. |
-| @typescript-eslint/visitor-keys | 8.73.0 | MIT | Transitive development | Dependency of a package listed here. |
+| @typescript-eslint/eslint-plugin | 8.74.0 | MIT | Transitive development | Dependency of a package listed here. |
+| @typescript-eslint/parser | 8.74.0 | MIT | Transitive development | Dependency of a package listed here. |
+| @typescript-eslint/project-service | 8.74.0 | MIT | Transitive development | Dependency of a package listed here. |
+| @typescript-eslint/scope-manager | 8.74.0 | MIT | Transitive development | Dependency of a package listed here. |
+| @typescript-eslint/tsconfig-utils | 8.74.0 | MIT | Transitive development | Dependency of a package listed here. |
+| @typescript-eslint/type-utils | 8.74.0 | MIT | Transitive development | Dependency of a package listed here. |
+| @typescript-eslint/types | 8.74.0 | MIT | Transitive development | Dependency of a package listed here. |
+| @typescript-eslint/typescript-estree | 8.74.0 | MIT | Transitive development | Dependency of a package listed here. |
+| @typescript-eslint/utils | 8.74.0 | MIT | Transitive development | Dependency of a package listed here. |
+| @typescript-eslint/visitor-keys | 8.74.0 | MIT | Transitive development | Dependency of a package listed here. |
 | @vitest/coverage-v8 | 5.1.1 | MIT | Direct development | Unit test coverage. |
 | @vitest/istanbul-lib-coverage | 2.1.0 | MIT | Transitive development | Dependency of a package listed here. |
 | @vitest/istanbul-lib-report | 2.1.0 | MIT | Transitive development | Dependency of a package listed here. |
@@ -351,8 +351,8 @@ optional packages for other platforms.
 | magicast | 0.5.5 | MIT | Transitive development | Dependency of a package listed here. |
 | markdown-it | 15.0.3 | MIT | Transitive development | Dependency of a package listed here. |
 | markdown-table | 3.1.0 | MIT | Transitive runtime | Dependency of a package listed here. |
-| markdownlint | 0.42.1 | MIT | Transitive development | Dependency of a package listed here. |
-| markdownlint-cli2 | 0.24.1 | MIT | Direct development | Markdown style and structure lint. |
+| markdownlint | 0.42.2 | MIT | Transitive development | Dependency of a package listed here. |
+| markdownlint-cli2 | 0.24.2 | MIT | Direct development | Markdown style and structure lint. |
 | markdownlint-cli2-formatter-default | 0.0.6 | MIT | Transitive development | Dependency of a package listed here. |
 | math-intrinsics | 1.1.0 | MIT | Transitive development | Dependency of a package listed here. |
 | mdast-util-find-and-replace | 3.0.4 | MIT | Transitive runtime | Dependency of a package listed here. |
@@ -474,9 +474,9 @@ optional packages for other platforms.
 | string-width | 8.3.0 | MIT | Transitive development | Dependency of a package listed here. |
 | strip-ansi | 7.2.0 | MIT | Transitive development | Dependency of a package listed here. |
 | strip-final-newline | 4.0.0 | MIT | Transitive development | Dependency of a package listed here. |
-| stylelint | 18.0.0 | MIT | Direct development | CSS static linting. |
+| stylelint | 18.1.0 | MIT | Direct development | CSS static linting. |
 | stylelint-config-recommended | 19.0.0 | MIT | Transitive development | Dependency of a package listed here. |
-| stylelint-config-standard | 41.0.0 | MIT | Direct development | Standard CSS lint rules. |
+| stylelint-config-standard | 41.1.0 | MIT | Direct development | Standard CSS lint rules. |
 | test-exclude | 8.0.0 | ISC | Transitive development | Dependency of a package listed here. |
 | tinybench | 6.2.4 | MIT | Transitive development | Dependency of a package listed here. |
 | tinyexec | 1.3.1 | MIT | Transitive development | Dependency of a package listed here. |
@@ -491,7 +491,7 @@ optional packages for other platforms.
 | typed-inject | 5.0.0 | Apache-2.0 | Transitive development | Dependency of a package listed here. |
 | typed-rest-client | 2.3.1 | MIT | Transitive development | Dependency of a package listed here. |
 | typescript | 6.0.3 | Apache-2.0 | Direct development | TypeScript static type checking. |
-| typescript-eslint | 8.73.0 | MIT | Direct development | TypeScript rules and parser for ESLint. |
+| typescript-eslint | 8.74.0 | MIT | Direct development | TypeScript rules and parser for ESLint. |
 | uc.micro | 3.0.0 | MIT | Transitive development | Dependency of a package listed here. |
 | underscore | 1.13.8 | MIT | Transitive development | Dependency of a package listed here. |
 | undici-types | 8.9.0 | MIT | Transitive development | Dependency of a package listed here. |

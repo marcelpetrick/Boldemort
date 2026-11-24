@@ -28,6 +28,9 @@ The [product vision](../vision.md) sets the requirements. The
 
 - Vite builds the TypeScript editor as a static site for GitHub Pages. Browser
   coverage uses a separate build, and mutation testing uses a sandbox copy.
+- CI uses the Node.js 24 LTS line and pins an exact patch version. TypeScript
+  stays at 6.0.3 while the TypeScript ESLint peer range requires a version
+  below 6.1.
 - The project follows the
   [DarkFactory workflow](https://github.com/marcelpetrick/DarkFactory) and uses
   GPL-3.0-or-later. The app and README credit Marcel Petrick
