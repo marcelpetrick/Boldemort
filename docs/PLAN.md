@@ -24,6 +24,17 @@
    Verify the archive and checksum, push the reviewed commit to `main`, then
    verify CI, the tagged GitHub release, and the deployed Pages version.
 
+## 0.4.3 nested list formatting
+
+1. Reproduce the reported refusal: Bold on an item inside a nested agenda
+   list reports protected Markdown syntax in both editor modes.
+2. Keep only list markers literal for nested, ordered, and multi-line lists.
+   Keep task lists protected. Cover selection, whole-draft formatting, and
+   Markdown and Unicode round-trips in unit and browser tests.
+3. Update outdated exact pins except TypeScript, which the TypeScript ESLint
+   peer range still holds at 6.0.3. Run the shared pipeline and mutation
+   tests, bump to 0.4.3, and commit for review.
+
 ## Progress
 
 - Vision intake complete. Both input files matched byte for byte. The root

@@ -137,6 +137,24 @@ export function inspectMarkdown(
     }
     complexFormatting = true;
   }
+  // Nested, ordered, and multi-line lists keep their literal markers, but
+  // the text inside each item stays formattable.
+  const visitLiteralList = (list: import('mdast').List) => {
+    for (const item of list.children) {
+      const { start, end } = span(item);
+      const first = item.children[0];
+      delimiterRanges.push({ start, end: first ? span(first).start : end });
+      for (const child of item.children) {
+        if (child.type === 'paragraph') visit(child.children);
+        else if (
+          child.type === 'list' &&
+          child.children.every((nested) => nested.checked == null)
+        )
+          visitLiteralList(child);
+        else visit([child]);
+      }
+    }
+  };
   const visit = (nodes: Node[]) => {
     for (let index = 0; index < nodes.length; index++) {
       const node = nodes[index]!;
@@ -206,6 +224,12 @@ export function inspectMarkdown(
           changes.push({ start, end: start + 1, value: '•' });
           if (paragraph?.type === 'paragraph') visit(paragraph.children);
         }
+      } else if (
+        node.type === 'list' &&
+        node.children.every((item) => item.checked == null)
+      ) {
+        literal = true;
+        visitLiteralList(node);
       } else if (node.type === 'paragraph') {
         visit(node.children);
       } else if (node.type === 'text') {

@@ -112,6 +112,35 @@ test('keeps the same words selected when switching between editor modes', async 
   await expect.poll(selected).toBe('Hello');
 });
 
+test('formats text inside nested list items in both modes', async ({
+  page,
+}) => {
+  const editor = page.locator('#editor');
+  const bold = page.getByRole('button', { name: 'Bold', exact: true });
+  const select = (start: number, end: number) =>
+    editor.evaluate(
+      (element, [from, to]) =>
+        (element as HTMLTextAreaElement).setSelectionRange(from!, to!),
+      [start, end],
+    );
+  await page.getByRole('button', { name: 'Markdown', exact: true }).click();
+  const draft = '- Agenda\n    - Andre Braun\n- Coffee';
+  await editor.fill(draft);
+  await select(15, 26);
+  await bold.click();
+  await expect(editor).toHaveValue('- Agenda\n    - **Andre Braun**\n- Coffee');
+  await expect(page.getByText('Formatting was skipped')).toBeHidden();
+  await page.getByRole('button', { name: 'Unicode', exact: true }).click();
+  await expect(editor).toHaveValue('- Agenda\n    - 𝐀𝐧𝐝𝐫𝐞 𝐁𝐫𝐚𝐮𝐧\n- Coffee');
+  await select(2, 8);
+  await bold.click();
+  await expect(editor).toHaveValue('- 𝐀𝐠𝐞𝐧𝐝𝐚\n    - 𝐀𝐧𝐝𝐫𝐞 𝐁𝐫𝐚𝐮𝐧\n- Coffee');
+  await page.getByRole('button', { name: 'Markdown', exact: true }).click();
+  await expect(editor).toHaveValue(
+    '- **Agenda**\n    - **Andre Braun**\n- Coffee',
+  );
+});
+
 test('keeps literal punctuation and reports the whole Markdown selection as bold', async ({
   page,
 }) => {

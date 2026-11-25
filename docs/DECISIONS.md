@@ -9,7 +9,9 @@ The [product vision](../vision.md) sets the requirements. The
   the draft and editing history in memory for the current tab.
 - The GFM parser records where elements begin and end in the Markdown source.
   Simple unordered lists become Unicode bullets. Nested lists, task lists,
-  and other complex structures keep their original Markdown. After editing,
+  and other complex structures keep their original Markdown. Nested,
+  ordered, and multi-line lists keep only their markers literal, so their
+  item text can still be formatted. Task lists stay fully protected. After editing,
   the parser reads the whole draft so changed syntax can affect nearby text.
   The editor reuses the original spelling for conversion spans it still
   recognizes.

@@ -194,13 +194,17 @@ describe('formatting boundaries', () => {
     }
   });
 
-  it.each(['1. item', '1) item', ' \tcode'])(
+  it.each([
+    ['1. item', '1. 𝐢𝐭𝐞𝐦'],
+    ['1) item', '1) 𝐢𝐭𝐞𝐦'],
+    [' \tcode', ' \tcode'],
+  ])(
     'preserves protected structure without inline markers: %j',
-    (structure) => {
+    (structure, expected) => {
       const text = 'Intro\n\n' + structure;
       expect(
         formatSelection(draft(text, 0, text.length, 'unicode'), 'bold')?.value,
-      ).toBe('𝐈𝐧𝐭𝐫𝐨\n\n' + structure);
+      ).toBe('𝐈𝐧𝐭𝐫𝐨\n\n' + expected);
     },
   );
 
@@ -311,7 +315,9 @@ describe('formatting boundaries', () => {
 
   it('starts or extends typing spans only when compatible with surrounding markup', () => {
     const bold = new Set(['bold'] as const);
-    expect(formatTyping(draft('10. item', 6, 6), 'x', bold).value).toBe('x');
+    expect(formatTyping(draft('10. item', 6, 6), 'x', bold).value).toBe(
+      '**x**',
+    );
     expect(formatTyping(draft('- item', 4, 4), 'x', bold).value).toBe('**x**');
     expect(formatTyping(draft('    text', 6, 6), 'x', bold).value).toBe('x');
     expect(formatTyping(draft('`x`A', 0, 0), 'b', bold).value).toBe('**b**');

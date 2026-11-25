@@ -396,6 +396,44 @@ it('reparses context around edits while retaining recognized source mappings', (
   );
 });
 
+it('formats item text inside nested and ordered lists while keeping markers literal', () => {
+  const nested = '- Agenda\n    - Andre Braun\n- Coffee';
+  expect(convert(nested, 'markdown')).toBe(nested);
+  const inner = nested.indexOf('Andre');
+  expect(
+    formatSelection(
+      select(nested, 'markdown', inner, inner + 'Andre Braun'.length),
+      'bold',
+    )?.value,
+  ).toBe('**Andre Braun**');
+  const unicode = '- Agenda\n    - Andre Braun\n- Coffee';
+  const bold = formatSelection(
+    select(unicode, 'unicode', inner, inner + 'Andre Braun'.length),
+    'bold',
+  );
+  expect(bold?.value).toBe('𝐀𝐧𝐝𝐫𝐞 𝐁𝐫𝐚𝐮𝐧');
+  expect(convert('- 𝐀𝐠𝐞𝐧𝐝𝐚\n    - 𝐀𝐧𝐝𝐫𝐞', 'unicode')).toBe(
+    '- **Agenda**\n    - **Andre**',
+  );
+  expect(convert('- **Agenda**\n    - *Andre*', 'markdown')).toBe(
+    '- 𝐀𝐠𝐞𝐧𝐝𝐚\n    - 𝐴𝑛𝑑𝑟𝑒',
+  );
+  expect(convert('1. **One**\n2. Two', 'markdown')).toBe('1. 𝐎𝐧𝐞\n2. Two');
+  const all = formatSelection(
+    select(nested, 'markdown', 0, nested.length),
+    'bold',
+  );
+  expect(all?.value).toBe('- **Agenda**\n    - **Andre Braun**\n- **Coffee**');
+  const markers = formatSelection(
+    select(nested, 'unicode', 0, nested.length),
+    'bold',
+  );
+  expect(markers?.value).toBe('- 𝐀𝐠𝐞𝐧𝐝𝐚\n    - 𝐀𝐧𝐝𝐫𝐞 𝐁𝐫𝐚𝐮𝐧\n- 𝐂𝐨𝐟𝐟𝐞𝐞');
+  expect(
+    formatSelection(select('- [ ] Task\n  - sub', 'markdown', 6, 10), 'bold'),
+  ).toBeUndefined();
+});
+
 it('matches the expected mathematical glyph values at alphabet boundaries', () => {
   expect(styleUnicode('AZaz09', ['bold'])).toBe('𝐀𝐙𝐚𝐳𝟎𝟗');
   expect(styleUnicode('AZahz09', ['italic'])).toBe('𝐴𝑍𝑎ℎ𝑧09');
