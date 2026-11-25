@@ -35,6 +35,16 @@
    peer range still holds at 6.0.3. Run the shared pipeline and mutation
    tests, bump to 0.4.3, and commit for review.
 
+## 0.4.4 keyboard shortcuts
+
+1. Add underline, strikethrough, and bullet shortcuts in both editor modes.
+   Keep native shortcuts outside the draft and skip mode and copy shortcuts
+   that collide with browser developer tools.
+2. Show shortcuts in the short hints in English and German, and declare them
+   with `aria-keyshortcuts`. Cover them in browser tests on all engines.
+3. Run the shared pipeline and mutation tests, bump to 0.4.4, push, and
+   verify CI, the release, and Pages.
+
 ## Progress
 
 - Vision intake complete. Both input files matched byte for byte. The root

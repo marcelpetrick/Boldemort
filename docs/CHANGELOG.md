@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.4.4
+
+- Add Ctrl or Cmd+U for underline, Ctrl or Cmd+Shift+X for strikethrough,
+  and Ctrl or Cmd+Shift+8 for bullets.
+- Show each shortcut in the toolbar hints and expose it to assistive
+  technology.
+
 ## 0.4.3
 
 - Format text inside nested, ordered, and multi-line list items. Their list

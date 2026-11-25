@@ -250,6 +250,40 @@ for (const { label, text, caret, markdown, unicode } of [
   });
 }
 
+test('offers underline, strikethrough and bullet shortcuts in both modes', async ({
+  page,
+}) => {
+  const editor = page.locator('#editor');
+  const markdown = page.getByRole('button', { name: 'Markdown', exact: true });
+  await markdown.click();
+  await editor.fill('one two\nthree');
+  await editor.evaluate((element) =>
+    (element as HTMLTextAreaElement).setSelectionRange(0, 3),
+  );
+  await editor.press('Control+u');
+  await expect(editor).toHaveValue('<u>one</u> two\nthree');
+  await editor.evaluate((element) =>
+    (element as HTMLTextAreaElement).setSelectionRange(11, 14),
+  );
+  await editor.press('Control+Shift+X');
+  await expect(editor).toHaveValue('<u>one</u> ~~two~~\nthree');
+  await editor.press('Control+a');
+  await editor.press('Control+Shift+Digit8');
+  await expect(editor).toHaveValue('- <u>one</u> ~~two~~\n- three');
+  await page.getByRole('button', { name: 'Unicode', exact: true }).click();
+  await editor.evaluate((element) =>
+    (element as HTMLTextAreaElement).setSelectionRange(2, 3),
+  );
+  await editor.press('Control+u');
+  await editor.press('Control+u');
+  await page.getByRole('button', { name: 'Markdown', exact: true }).click();
+  await expect(editor).toHaveValue('- <u>one</u> ~~two~~\n- three');
+  expect(page.context().pages()).toHaveLength(1);
+  await expect(
+    page.getByRole('button', { name: 'Strikethrough', exact: true }),
+  ).toHaveAttribute('aria-keyshortcuts', 'Control+Shift+X Meta+Shift+X');
+});
+
 test('keyboard formatting, protected syntax, bullets and native history events', async ({
   page,
 }) => {
@@ -317,7 +351,7 @@ test('opens full help and keeps UTF-8 exports available', async ({ page }) => {
   await expect(dialog).toContainText('Mathematical Unicode');
   await expect(dialog).toContainText('Marcel Petrick <mail@marcelpetrick.it>');
   await expect(dialog).toContainText('Built with AI assistance.');
-  await expect(dialog).toContainText('Toggle underline.');
+  await expect(dialog).toContainText('Toggle underline (Ctrl+U).');
   await dialog.getByRole('button', { name: 'Close' }).click();
   await page.locator('#editor').fill('Ää');
   const pending = page.waitForEvent('download');
@@ -401,9 +435,9 @@ test('staged help, localization, dark theme, responsive reflow and accessibility
   await page
     .getByRole('button', { name: 'Bold', exact: true })
     .hover({ force: true });
-  await expect(page.getByRole('tooltip')).toHaveText('Toggle bold.');
+  await expect(page.getByRole('tooltip')).toHaveText('Toggle bold (Ctrl+B).');
   await page.clock.runFor(3999);
-  await expect(page.getByRole('tooltip')).toHaveText('Toggle bold.');
+  await expect(page.getByRole('tooltip')).toHaveText('Toggle bold (Ctrl+B).');
   await page.clock.runFor(1);
   await expect(page.getByRole('tooltip')).toContainText('Ctrl');
   await page.getByRole('tooltip').hover({ force: true });
@@ -412,7 +446,7 @@ test('staged help, localization, dark theme, responsive reflow and accessibility
   await expect(page.getByRole('tooltip')).toBeHidden();
   await page.clock.resume();
   await page.getByRole('button', { name: 'Italic', exact: true }).hover();
-  await expect(page.getByRole('tooltip')).toHaveText('Toggle italic.');
+  await expect(page.getByRole('tooltip')).toHaveText('Toggle italic (Ctrl+I).');
   await page.locator('#language').selectOption('de');
   await expect(
     page.getByRole('textbox', { name: 'Dein Entwurf' }),

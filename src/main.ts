@@ -379,9 +379,18 @@ editor.addEventListener('keydown', (event) => {
   if (event.isComposing || (!event.ctrlKey && !event.metaKey) || event.altKey)
     return;
   const key = event.key.toLowerCase();
-  if (key === 'b' || key === 'i') {
+  // Match Word and Google Docs. Bullets use the physical 8 key so the
+  // shortcut also works on layouts where Shift+8 is not an asterisk.
+  const style = event.shiftKey
+    ? ({ x: 'strike' } as const)[key]
+    : ({ b: 'bold', i: 'italic', u: 'underline' } as const)[key];
+  if (style) {
     event.preventDefault();
-    toggle(key === 'b' ? 'bold' : 'italic');
+    toggle(style);
+  }
+  if (event.shiftKey && event.code === 'Digit8') {
+    event.preventDefault();
+    toggleBullets();
   }
   if (key === 'z' || key === 'y') {
     event.preventDefault();
@@ -406,13 +415,14 @@ for (const button of modes)
     );
     renderEditor(true);
   });
-get('bullets').addEventListener('click', () => {
+function toggleBullets() {
   doc.select(selection());
   replace(
     bulletLines(doc.frame),
     editor.selectionStart !== editor.selectionEnd,
   );
-});
+}
+get('bullets').addEventListener('click', toggleBullets);
 randomButton.addEventListener('click', () => {
   if (doc.frame.mode !== 'unicode') return;
   doc.select(selection());

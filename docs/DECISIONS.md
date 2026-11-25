@@ -19,6 +19,12 @@ The [product vision](../vision.md) sets the requirements. The
   marks are short strikethrough and double macron below. Changing a line style
   affects new formatting. Pasted text and unchanged round-trips keep their
   original marks.
+- Formatting shortcuts follow Word and Google Docs: Ctrl or Cmd with B, I,
+  U, Shift+X for strikethrough, and Shift+8 for bullets. They apply only
+  while the draft has focus, so Ctrl+U opens page source everywhere else.
+  The bullet shortcut uses the physical 8 key to work on German layouts.
+  Mode switching and Copy all have no shortcut because the obvious keys
+  belong to browser developer tools.
 - English and German are available with System, Light, Dark, and Bavarian
   themes. Settings last for the current tab. The Help dialog makes the full
   tooltips available on touch devices.

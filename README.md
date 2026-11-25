@@ -3,7 +3,7 @@
 [![CI](https://github.com/marcelpetrick/Boldemort/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/marcelpetrick/Boldemort/actions/workflows/ci.yml)
 [![GitHub Pages](https://github.com/marcelpetrick/Boldemort/actions/workflows/pages.yml/badge.svg)](https://github.com/marcelpetrick/Boldemort/actions/workflows/pages.yml)
 [![Release pipeline](https://github.com/marcelpetrick/Boldemort/actions/workflows/release.yml/badge.svg)](https://github.com/marcelpetrick/Boldemort/actions/workflows/release.yml)
-[![Version 0.4.3](https://img.shields.io/badge/version-0.4.3-6241c2)](docs/CHANGELOG.md)
+[![Version 0.4.4](https://img.shields.io/badge/version-0.4.4-6241c2)](docs/CHANGELOG.md)
 [![License GPL v3 or later](https://img.shields.io/badge/license-GPLv3%20or%20later-blue.svg)](LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-6-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Vite](https://img.shields.io/badge/Vite-8-646cff?logo=vite&logoColor=white)](https://vite.dev/)
@@ -42,6 +42,19 @@ processes your text in the browser without sending it to a server.
 3. Choose Markdown or Unicode in the output picker, then use **Copy all** or
    **Export**. The picker controls what you copy or download.
 
+Keyboard shortcuts work while the draft has focus. On macOS, use Cmd in
+place of Ctrl.
+
+| Action        | Shortcut               |
+| ------------- | ---------------------- |
+| Bold          | Ctrl+B                 |
+| Italic        | Ctrl+I                 |
+| Underline     | Ctrl+U                 |
+| Strikethrough | Ctrl+Shift+X           |
+| Bulleted list | Ctrl+Shift+8           |
+| Undo          | Ctrl+Z                 |
+| Redo          | Ctrl+Shift+Z or Ctrl+Y |
+
 The Unicode line controls default to short strikethrough and double macron
 underline. Choose a different line to use on new formatting. Existing text
 keeps its marks. Fonts and apps may display the lines differently.
@@ -61,9 +74,11 @@ for a short hint. It expands after four seconds. Open **Help** by the editor to
 read the full explanations.
 
 Links, code, tables, and task lists keep their original Markdown when you
-switch to Unicode. Simple unordered lists become Unicode bullets. After an
-edit in the other view, the editor keeps the original Markdown spelling where
-it still recognizes the same span. Browser text input uses LF line endings.
+switch to Unicode. Simple unordered lists become Unicode bullets. Nested and
+numbered lists keep their markers, and their item text can still be
+formatted. After an edit in the other view, the editor keeps the original
+Markdown spelling where it still recognizes the same span. Browser text input
+uses LF line endings.
 Drafts live in the current tab. Export a copy to keep one.
 
 ## Repository layout
