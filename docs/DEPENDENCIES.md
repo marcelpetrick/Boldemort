@@ -7,7 +7,7 @@ optional packages for other platforms.
 
 | Package | Version | License | Use | Purpose |
 | --- | --- | --- | --- | --- |
-| @axe-core/playwright | 4.14.0 | MPL-2.0 | Direct development | Browser accessibility assertions. |
+| @axe-core/playwright | 4.14.1 | MPL-2.0 | Direct development | Browser accessibility assertions. |
 | @babel/code-frame | 7.29.7 | MIT | Transitive development | Dependency of a package listed here. |
 | @babel/code-frame | 8.0.6 | MIT | Transitive development | Dependency of a package listed here. |
 | @babel/compat-data | 7.29.7 | MIT | Transitive development | Dependency of a package listed here. |
@@ -162,7 +162,7 @@ optional packages for other platforms.
 | @types/katex | 0.16.8 | MIT | Transitive development | Dependency of a package listed here. |
 | @types/mdast | 4.0.4 | MIT | Transitive runtime | Dependency of a package listed here. |
 | @types/ms | 2.1.0 | MIT | Transitive runtime | Dependency of a package listed here. |
-| @types/node | 26.6.6 | MIT | Direct development | Node type definitions for tooling. |
+| @types/node | 26.6.10 | MIT | Direct development | Node type definitions for tooling. |
 | @types/unist | 2.0.11 | MIT | Transitive development | Dependency of a package listed here. |
 | @types/unist | 3.0.3 | MIT | Transitive runtime | Dependency of a package listed here. |
 | @typescript-eslint/eslint-plugin | 8.74.0 | MIT | Transitive development | Dependency of a package listed here. |
@@ -175,11 +175,11 @@ optional packages for other platforms.
 | @typescript-eslint/typescript-estree | 8.74.0 | MIT | Transitive development | Dependency of a package listed here. |
 | @typescript-eslint/utils | 8.74.0 | MIT | Transitive development | Dependency of a package listed here. |
 | @typescript-eslint/visitor-keys | 8.74.0 | MIT | Transitive development | Dependency of a package listed here. |
-| @vitest/coverage-v8 | 5.1.1 | MIT | Direct development | Unit test coverage. |
-| @vitest/istanbul-lib-coverage | 2.1.0 | MIT | Transitive development | Dependency of a package listed here. |
-| @vitest/istanbul-lib-report | 2.1.0 | MIT | Transitive development | Dependency of a package listed here. |
-| @vitest/mocker | 5.1.1 | MIT | Transitive development | Dependency of a package listed here. |
-| @vitest/spy | 5.1.1 | MIT | Transitive development | Dependency of a package listed here. |
+| @vitest/coverage-v8 | 5.1.2 | MIT | Direct development | Unit test coverage. |
+| @vitest/istanbul-lib-coverage | 2.1.1 | MIT | Transitive development | Dependency of a package listed here. |
+| @vitest/istanbul-lib-report | 2.1.1 | MIT | Transitive development | Dependency of a package listed here. |
+| @vitest/mocker | 5.1.2 | MIT | Transitive development | Dependency of a package listed here. |
+| @vitest/spy | 5.1.2 | MIT | Transitive development | Dependency of a package listed here. |
 | acorn | 8.19.0 | MIT | Transitive development | Dependency of a package listed here. |
 | acorn-jsx | 5.3.2 | MIT | Transitive development | Dependency of a package listed here. |
 | ajv | 6.15.0 | MIT | Transitive development | Dependency of a package listed here. |
@@ -287,7 +287,7 @@ optional packages for other platforms.
 | hasown | 2.0.4 | MIT | Transitive development | Dependency of a package listed here. |
 | hookified | 1.15.1 | MIT | Transitive development | Dependency of a package listed here. |
 | hookified | 2.2.0 | MIT | Transitive development | Dependency of a package listed here. |
-| html-validate | 11.21.1 | MIT | Direct development | Static HTML and accessibility-markup validation. |
+| html-validate | 11.22.1 | MIT | Direct development | Static HTML and accessibility-markup validation. |
 | human-signals | 8.0.1 | Apache-2.0 | Transitive development | Dependency of a package listed here. |
 | iconv-lite | 0.7.3 | MIT | Transitive development | Dependency of a package listed here. |
 | ignore | 5.3.2 | MIT | Transitive development | Dependency of a package listed here. |
@@ -507,7 +507,7 @@ optional packages for other platforms.
 | verkit | 0.5.0 | MIT | Transitive development | Dependency of a package listed here. |
 | vite | 8.3.8 | MIT | Direct development | Bundles local static assets and runs the dev server. |
 | vite-plugin-istanbul | 9.0.1 | MIT | Direct development | Instruments browser code in test builds. |
-| vitest | 5.1.1 | MIT | Direct development | Unit test runner. |
+| vitest | 5.1.2 | MIT | Direct development | Unit test runner. |
 | weapon-regex | 2.0.6 | Apache-2.0 | Transitive development | Dependency of a package listed here. |
 | which | 2.0.2 | ISC | Transitive development | Dependency of a package listed here. |
 | why-is-node-running | 3.2.1 | MIT | Transitive development | Dependency of a package listed here. |
