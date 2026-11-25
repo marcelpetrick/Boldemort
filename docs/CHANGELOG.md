@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.3
+
+- Format text inside nested, ordered, and multi-line list items. Their list
+  markers stay literal, and task lists stay protected.
+- Update the axe, Node.js types, Vitest, and HTML validation test tooling.
+
 ## 0.4.2
 
 - Update Markdown and CSS lint tooling and the TypeScript ESLint integration.
