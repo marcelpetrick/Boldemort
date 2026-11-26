@@ -3,12 +3,12 @@
 [![CI](https://github.com/marcelpetrick/Boldemort/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/marcelpetrick/Boldemort/actions/workflows/ci.yml)
 [![GitHub Pages](https://github.com/marcelpetrick/Boldemort/actions/workflows/pages.yml/badge.svg)](https://github.com/marcelpetrick/Boldemort/actions/workflows/pages.yml)
 [![Release pipeline](https://github.com/marcelpetrick/Boldemort/actions/workflows/release.yml/badge.svg)](https://github.com/marcelpetrick/Boldemort/actions/workflows/release.yml)
-[![Version 0.4.5](https://img.shields.io/badge/version-0.4.5-6241c2)](docs/CHANGELOG.md)
+[![Version 0.4.6](https://img.shields.io/badge/version-0.4.6-6241c2)](docs/CHANGELOG.md)
 [![License GPL v3 or later](https://img.shields.io/badge/license-GPLv3%20or%20later-blue.svg)](LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-6-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Vite](https://img.shields.io/badge/Vite-8-646cff?logo=vite&logoColor=white)](https://vite.dev/)
 [![GFM](https://img.shields.io/badge/Markdown-GFM-24292f)](https://github.github.com/gfm/)
-[![Coverage gate](https://img.shields.io/badge/coverage%20gate-98%25-26704d)](#local-development)
+[![Coverage gate](https://img.shields.io/badge/coverage%20gate-100%25-26704d)](#local-development)
 [![Mutation testing](https://img.shields.io/badge/mutation%20testing-Stryker-f28c28)](#local-development)
 [![Playwright](https://img.shields.io/badge/tested_with-Playwright-2ead33)](https://playwright.dev/)
 [![Languages](https://img.shields.io/badge/languages-English%20%7C%20Deutsch-6241c2)](#using-the-editor)
@@ -106,7 +106,8 @@ npm run dev
 The shared local and GitHub Actions pipeline installs the locked dependencies
 and Playwright browsers. It checks source, documentation, dependencies, and
 long-draft performance, builds the site, and tests it at the Pages subpath.
-Combined unit and browser line coverage must reach 98%. The pipeline also
+Every application module must reach 100% line, statement, branch, and
+function coverage from unit and browser tests combined. The pipeline also
 runs ShellCheck and actionlint when installed.
 
 - Run `npm run performance` for the [long-draft checks](docs/PERFORMANCE.md).

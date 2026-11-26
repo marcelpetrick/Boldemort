@@ -130,10 +130,10 @@ export function inspectMarkdown(
         simpleFormats.push({ ...range, body: span(child), active });
         return;
       }
-      const style = emphasis.get(child.type);
-      if (!style || !('children' in child)) break;
-      active.add(style);
-      children = child.children;
+      // Callers render the span first, so every other node is emphasis.
+      const wrapper = child as import('mdast').Strong;
+      active.add(emphasis.get(wrapper.type)!);
+      children = wrapper.children;
     }
     complexFormatting = true;
   }
@@ -213,16 +213,11 @@ export function inspectMarkdown(
       ) {
         for (const item of node.children) {
           const { start } = span(item);
-          const paragraph = item.children[0];
-          delimiterRanges.push({
-            start,
-            end:
-              paragraph?.type === 'paragraph'
-                ? span(paragraph).start
-                : start + 1,
-          });
+          // The list check above guarantees one paragraph per item.
+          const paragraph = item.children[0] as import('mdast').Paragraph;
+          delimiterRanges.push({ start, end: span(paragraph).start });
           changes.push({ start, end: start + 1, value: '•' });
-          if (paragraph?.type === 'paragraph') visit(paragraph.children);
+          visit(paragraph.children);
         }
       } else if (
         node.type === 'list' &&

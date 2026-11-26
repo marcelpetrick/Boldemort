@@ -118,10 +118,7 @@ export function* graphemes(text: string): Iterable<Grapheme> {
     yield { segment: match[0], index: match.index };
 }
 export function decode(segment: string) {
-  const glyph = segment.slice(
-    0,
-    (segment.codePointAt(0) ?? 0) > 0xffff ? 2 : 1,
-  );
+  const glyph = segment.slice(0, segment.codePointAt(0)! > 0xffff ? 2 : 1);
   const [base, mask] = reverse.get(glyph) ?? [glyph, 0];
   const tail = segment.slice(glyph.length);
   const rest = tail && acceptsLine.test(glyph) ? [...tail] : undefined;
@@ -175,7 +172,6 @@ function encode(item: ReturnType<typeof decode>, lineStyles: LineStyles) {
   const glyph =
     (mask === 0 ? item.alternative : undefined) ??
     maps[mask]?.[plain.indexOf(item.base)] ??
-    (mask === 3 ? bold[plain.indexOf(item.base)] : undefined) ??
     item.base;
   return (
     glyph +

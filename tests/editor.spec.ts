@@ -14,7 +14,7 @@ test.afterEach(async ({ page }, info) => {
 
 test.beforeEach(async ({ page }) => {
   await page.goto('./');
-  await expect(page.getByRole('textbox', { name: 'Your draft' })).toBeVisible();
+  await expect(page.locator('#editor')).toBeVisible();
 });
 test('formats selection, combines styles, and restores exact Markdown and edits', async ({
   page,
@@ -363,6 +363,20 @@ test('opens full help and keeps UTF-8 exports available', async ({ page }) => {
   await page.clock.fastForward(1250);
 });
 
+test('explains when a style cannot change the selected characters', async ({
+  page,
+}) => {
+  const editor = page.locator('#editor');
+  await page.getByRole('button', { name: 'Unicode', exact: true }).click();
+  await editor.fill('?!');
+  await editor.press('Control+a');
+  await editor.press('Control+b');
+  await expect(editor).toHaveValue('?!');
+  await expect(page.getByRole('status')).toContainText(
+    'This style does not change the selected characters.',
+  );
+});
+
 test('copies either representation and exports UTF-8', async ({ page }) => {
   const draft = page.locator('#editor');
   await page.evaluate(() => {
@@ -383,11 +397,20 @@ test('copies either representation and exports UTF-8', async ({ page }) => {
     'data-clipboard',
     '**Hello** 👩🏽‍💻',
   );
+  await page.evaluate(() => {
+    const revoke = URL.revokeObjectURL.bind(URL);
+    URL.revokeObjectURL = (url: string) => {
+      document.body.dataset.revoked = url;
+      revoke(url);
+    };
+  });
   const downloadReady = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Export' }).click();
   const download = await downloadReady;
   expect(download.suggestedFilename()).toBe('boldemort-draft.md');
   expect(await readFile(await download.path(), 'utf8')).toBe('**Hello** 👩🏽‍💻');
+  // The temporary download URL is released after the browser starts saving.
+  await expect(page.locator('body')).toHaveAttribute('data-revoked', /^blob:/);
   await page.locator('#output').selectOption('unicode');
   await page.getByRole('button', { name: 'Copy all' }).click();
   await expect(page.locator('body')).toHaveAttribute(
@@ -615,4 +638,120 @@ test('offers random Unicode lettering, an overview above the draft, and a Bavari
     page.getByRole('button', { name: 'Zufallsschrift' }),
   ).toBeVisible();
   await expect(page.locator('#theme option:checked')).toHaveText('Bayerisch');
+});
+
+test('handles undo limits, armed Unicode typing and composition guards', async ({
+  page,
+}) => {
+  const editor = page.locator('#editor');
+  const bold = page.getByRole('button', { name: 'Bold', exact: true });
+  await editor.press('Control+z');
+  await expect(editor).toHaveValue('');
+  await page.getByRole('button', { name: 'Unicode', exact: true }).click();
+  await editor.press('Control+b');
+  await expect(bold).toHaveAttribute('aria-pressed', 'true');
+  await editor.pressSequentially('a');
+  await editor.press('Enter');
+  await editor.evaluate((element) =>
+    element.dispatchEvent(
+      new InputEvent('beforeinput', {
+        inputType: 'insertText',
+        cancelable: true,
+        bubbles: true,
+      }),
+    ),
+  );
+  await expect(editor).toHaveValue('𝐚\n');
+  await editor.press('Control+b');
+  await expect(bold).toHaveAttribute('aria-pressed', 'false');
+  await editor.press('Control+z');
+  await expect(editor).toHaveValue('𝐚');
+  await editor.evaluate((element) =>
+    element.dispatchEvent(
+      new InputEvent('beforeinput', {
+        inputType: 'historyRedo',
+        cancelable: true,
+        bubbles: true,
+      }),
+    ),
+  );
+  await expect(editor).toHaveValue('𝐚\n');
+  // Events during IME composition are left to the browser.
+  const handled = await editor.evaluate((element) => {
+    const input = element as HTMLTextAreaElement;
+    input.dispatchEvent(new CompositionEvent('compositionstart'));
+    const before = new InputEvent('beforeinput', {
+      inputType: 'historyUndo',
+      cancelable: true,
+      bubbles: true,
+    });
+    input.dispatchEvent(before);
+    const data = new DataTransfer();
+    data.setData('text/plain', 'x'.repeat(10_001));
+    const paste = new ClipboardEvent('paste', {
+      clipboardData: data,
+      cancelable: true,
+      bubbles: true,
+    });
+    input.dispatchEvent(paste);
+    input.dispatchEvent(new Event('select'));
+    input.dispatchEvent(new CompositionEvent('compositionend'));
+    return before.defaultPrevented || paste.defaultPrevented;
+  });
+  expect(handled).toBe(false);
+  await expect(editor).toHaveValue('𝐚\n');
+});
+
+test('reports near limits, literal output, long-draft diagnostics and empty clears', async ({
+  page,
+}) => {
+  const editor = page.locator('#editor');
+  await page.locator('#destination').selectOption('note');
+  await page.getByRole('button', { name: 'Clear draft' }).click();
+  await expect(page.locator('dialog[open]')).toHaveCount(0);
+  await editor.fill('a'.repeat(185));
+  await expect(page.locator('#limit')).toContainText('Near the limit');
+  await page.getByRole('button', { name: 'Markdown', exact: true }).click();
+  await editor.fill('| A |\n| - |\n| 1 |');
+  await page.locator('#output').selectOption('unicode');
+  await expect(page.getByRole('status')).toContainText(
+    'Complex Markdown stays literal',
+  );
+  // Very long drafts skip the line gutter, so jumps use the line height.
+  await editor.fill('line\n'.repeat(1700) + '```js\ncode');
+  await page.getByText('Writing hints').click();
+  await page.getByRole('button', { name: /^Line 1,701 / }).click();
+  await expect(editor).toBeFocused();
+  expect(await editor.evaluate((element) => element.scrollTop)).toBeGreaterThan(
+    0,
+  );
+});
+
+test('moves hints between controls and hides them when the pointer leaves', async ({
+  page,
+}) => {
+  const tooltip = page.getByRole('tooltip');
+  await page.getByRole('button', { name: 'Bold', exact: true }).hover();
+  await expect(tooltip).toHaveText('Toggle bold (Ctrl+B).');
+  await page.getByRole('button', { name: 'Italic', exact: true }).hover();
+  await expect(tooltip).toHaveText('Toggle italic (Ctrl+I).');
+  await page.locator('h1').hover();
+  await expect(tooltip).toBeHidden();
+  // Clicking dismisses the hint until the pointer moves to another control.
+  const bold = page.getByRole('button', { name: 'Bold', exact: true });
+  await bold.click();
+  await expect(tooltip).toBeHidden();
+  await page.getByRole('button', { name: 'Italic', exact: true }).hover();
+  await expect(tooltip).toHaveText('Toggle italic (Ctrl+I).');
+  await bold.hover();
+  await expect(tooltip).toHaveText('Toggle bold (Ctrl+B).');
+});
+
+test.describe('with a German browser', () => {
+  test.use({ locale: 'de-DE' });
+  test('starts in German', async ({ page }) => {
+    await expect(
+      page.getByRole('textbox', { name: 'Dein Entwurf' }),
+    ).toBeVisible();
+  });
 });

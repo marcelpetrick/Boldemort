@@ -26,6 +26,9 @@ The [product vision](../vision.md) sets the requirements. The
   that have no styled glyph, such as punctuation and accented letters, but
   never across a line break. When such a run joins spans with remembered
   Markdown spelling, each remembered span keeps its spelling.
+- Coverage must be complete for lines, statements, branches, and functions.
+  Code that the parser or earlier checks make unreachable is removed rather
+  than excluded from coverage, and each remaining branch has a test.
 - Formatting shortcuts follow Word and Google Docs: Ctrl or Cmd with B, I,
   U, Shift+X for strikethrough, and Shift+8 for bullets. They apply only
   while the draft has focus, so Ctrl+U opens page source everywhere else.

@@ -195,9 +195,7 @@ function renderAnalysis() {
   // Character count reflects what the user sees in the sole editor.
   let characters = stats.characters;
   if (source !== doc.frame.text) {
-    characters = 0;
-    for (const grapheme of graphemes(doc.frame.text))
-      if (grapheme.segment) characters++;
+    characters = Array.from(graphemes(doc.frame.text)).length;
   }
   get('characters').textContent = number(characters);
   renderDiagnostics(stats.warnings);
@@ -241,11 +239,11 @@ function renderControls() {
   get('undo').setAttribute('aria-disabled', String(!doc.canUndo));
   get('redo').setAttribute('aria-disabled', String(!doc.canRedo));
 }
-function renderEditor(focus = false) {
+function renderEditor() {
   const scroll = editor.scrollTop;
   const frame = doc.frame;
   if (editor.value !== frame.text) editor.value = frame.text;
-  if (focus) editor.focus({ preventScroll: true });
+  editor.focus({ preventScroll: true });
   editor.setSelectionRange(frame.start, frame.end);
   editor.scrollTop = scroll;
   renderControls();
@@ -258,7 +256,7 @@ function replace(change: Replacement, selectResult: boolean, kind = '') {
     editor.value.slice(change.end);
   const end = change.caret ?? change.start + change.value.length;
   doc.edit(text, { start: selectResult ? change.start : end, end }, kind);
-  renderEditor(true);
+  renderEditor();
 }
 function applyFormatting(change: Replacement | undefined) {
   if (!change) {
@@ -292,14 +290,14 @@ function toggle(style: Style) {
       }
       armed.delete(style);
     } else armed.add(style);
-    renderEditor(true);
+    renderEditor();
     return;
   }
   applyFormatting(formatSelection(doc.frame, style, doc.lineStyles));
 }
 function history(direction: 'undo' | 'redo') {
   doc.select(selection());
-  if (doc[direction]()) renderEditor(true);
+  if (doc[direction]()) renderEditor();
 }
 
 editor.addEventListener('beforeinput', (event) => {
@@ -413,7 +411,7 @@ for (const button of modes)
         ? 'literal'
         : undefined,
     );
-    renderEditor(true);
+    renderEditor();
   });
 function toggleBullets() {
   doc.select(selection());
@@ -429,7 +427,7 @@ randomButton.addEventListener('click', () => {
   doc.endGroup();
   if (doc.frame.start === doc.frame.end) {
     randomFont = !randomFont;
-    renderEditor(true);
+    renderEditor();
     return;
   }
   applyFormatting(formatSelection(doc.frame, 'random', doc.lineStyles));
@@ -517,7 +515,7 @@ clearDialog.addEventListener('close', () => {
     randomFont = false;
     doc.edit('', { start: 0, end: 0 });
     setNotice();
-    renderEditor(true);
+    renderEditor();
   }
 });
 get('help').addEventListener('click', () => {

@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.4.6
+
+- Hide a hint when the pointer leaves a control for an empty area.
+- Show a dismissed hint again after the pointer visits another control.
+- Require 100% line, statement, branch, and function coverage, and remove
+  unreachable fallback code.
+
 ## 0.4.5
 
 - Format lines that contain `<`, `>`, `*`, `_`, or `~` when the result still

@@ -13,6 +13,7 @@ import {
   graphemes,
   defaultLineStyles,
   randomizeUnicode,
+  activeUnicodeStyles,
   decode,
   lineMarks,
   styleUnicode,
@@ -562,4 +563,77 @@ it('formats text with angle brackets and stars only when it parses as one span',
   expect(formatSelection(select('a\\b', 'markdown', 0, 3), 'bold')?.value).toBe(
     '**a\\b**',
   );
+});
+
+it('skips symbol-only lines, merges touching spans, and protects blocks in list items', () => {
+  expect(
+    formatSelection(select('Hello\n\n?!', 'markdown', 0, 9), 'bold')?.value,
+  ).toBe('**Hello**\n\n?!');
+  expect(
+    formatSelection(select('a**b**\nc', 'markdown', 0, 8), 'bold')?.value,
+  ).toBe('**ab**\n**c**');
+  const quoted = '- item\n  > quote';
+  const analysis = inspectMarkdown(quoted);
+  expect(analysis.literal).toBe(true);
+  expect(analysis.protectedRanges).toEqual([{ start: 9, end: 16 }]);
+  expect(formatSelection(select(quoted, 'markdown', 2, 6), 'bold')?.value).toBe(
+    '**item**',
+  );
+});
+
+it('covers boundary cases in editing, conversion and selection mapping', () => {
+  const doc = new Document();
+  doc.switchTo('markdown');
+  doc.edit('**a**b', { start: 6, end: 6 });
+  doc.switchTo('unicode');
+  doc.switchTo('markdown');
+  doc.edit('**a**', { start: 5, end: 5 });
+  expect(doc.output('unicode')).toBe('𝐚');
+  const bold = new Set(['bold'] as const);
+  expect(
+    formatSelection(select('**a\nb**\nc', 'markdown', 0, 9), 'bold')?.value,
+  ).toBe('**a\nb**\n**c**');
+  expect(
+    formatSelection(select('a *\nb *', 'markdown', 0, 7), 'bold'),
+  ).toBeUndefined();
+  expect(
+    formatSelection(select('x\ny z', 'markdown', 0, 3), 'bold'),
+  ).toBeUndefined();
+  expect(formatTyping(select('**ab**', 'markdown', 3, 3), ' ', bold)).toEqual({
+    start: 3,
+    end: 3,
+    value: ' ',
+  });
+  expect(inspectMarkdown('**a *b***').complexFormatting).toBe(true);
+  expect(activeUnicodeStyles('𝐀?')).toEqual(['bold']);
+  expect(styleUnicode('1', ['bold', 'italic'])).toBe('𝟏');
+  expect(
+    styleUnicode(
+      'ab',
+      ['bold'],
+      false,
+      defaultLineStyles,
+      (start) => start > 0,
+    ),
+  ).toBe('a𝐛');
+  const piece = { markdown: '**a**', unicode: '𝐚' };
+  expect(
+    mapProjectionSelection([piece], 'markdown', 'unicode', {
+      start: 4,
+      end: 5,
+    }),
+  ).toEqual({ start: 2, end: 2 });
+  expect(
+    mapProjectionSelection([piece], 'markdown', 'unicode', {
+      start: 0,
+      end: 1,
+    }),
+  ).toEqual({ start: 0, end: 0 });
+  const underlined = { markdown: '<u>**a**</u>', unicode: '𝐚͟' };
+  expect(
+    mapProjectionSelection([underlined], 'unicode', 'markdown', {
+      start: 2,
+      end: 3,
+    }).start,
+  ).toBe(12);
 });

@@ -55,6 +55,15 @@
 3. Run the shared pipeline and mutation tests, bump to 0.4.5, push, and
    verify CI, the release, and Pages.
 
+## 0.4.6 complete coverage
+
+1. List every uncovered line, statement, and branch in unit and browser
+   coverage, and classify each as reachable or unreachable.
+2. Remove unreachable fallbacks. Add tests for each reachable branch and
+   fix any defects they expose.
+3. Enforce 100% for all four metrics in Vitest and the combined coverage
+   script, run the shared pipeline and mutation tests, then release 0.4.6.
+
 ## Progress
 
 - Vision intake complete. Both input files matched byte for byte. The root

@@ -15,41 +15,66 @@ const browser = await sourceMaps.createSourceMapStore().transformCoverage(raw);
 const unit = JSON.parse(
   await readFile('coverage/coverage-summary.json', 'utf8'),
 );
+// Every application module must cover all of its lines, statements,
+// branches, and functions, whether unit or browser tests exercise it.
+const metrics = ['lines', 'statements', 'branches', 'functions'];
 const sources = new Map();
 for (const [file, summary] of Object.entries(unit)) {
-  if (file.endsWith('.ts')) sources.set(file.split('/').at(-1), summary.lines);
+  if (file.endsWith('.ts')) sources.set(file.split('/').at(-1), summary);
 }
 for (const file of browser.files()) {
   const fileCoverage = browser.fileCoverageFor(file);
   const name = file.split('/').at(-1);
   if (sources.has(name)) throw new Error('Overlapping coverage for ' + file);
-  sources.set(name, fileCoverage.toSummary().lines);
+  sources.set(name, fileCoverage.toSummary().data);
   const missed = fileCoverage.getUncoveredLines();
   if (missed.length)
     process.stdout.write(name + ' uncovered lines ' + missed.join(', ') + '\n');
+  const branches = fileCoverage.getBranchCoverageByLine();
+  const partial = Object.entries(branches)
+    .filter(([, entry]) => entry.coverage < 100)
+    .map(([line]) => line);
+  if (partial.length)
+    process.stdout.write(
+      name + ' partial branches on lines ' + partial.join(', ') + '\n',
+    );
 }
-let covered = 0;
-let total = 0;
+const totals = Object.fromEntries(
+  metrics.map((metric) => [metric, { covered: 0, total: 0 }]),
+);
 for (const name of (await readdir('src'))
   .filter((item) => item.endsWith('.ts'))
   .sort()) {
   const entry = sources.get(name);
   if (!entry) throw new Error('Missing coverage for ' + name);
-  covered += entry.covered;
-  total += entry.total;
+  for (const metric of metrics) {
+    totals[metric].covered += entry[metric].covered;
+    totals[metric].total += entry[metric].total;
+  }
   process.stdout.write(
-    name + ' ' + entry.covered + '/' + entry.total + ' lines\n',
+    name +
+      ' ' +
+      metrics
+        .map((metric) => entry[metric].covered + '/' + entry[metric].total)
+        .join(' ') +
+      ' lines statements branches functions\n',
   );
 }
-const percentage = (100 * covered) / total;
-process.stdout.write(
-  'Application line coverage ' +
-    percentage.toFixed(2) +
-    '% (' +
-    covered +
-    '/' +
-    total +
-    ')\n',
-);
-if (percentage < 98)
-  throw new Error('Application line coverage must be at least 98%.');
+let complete = true;
+for (const metric of metrics) {
+  const { covered, total } = totals[metric];
+  const percentage = total ? (100 * covered) / total : 100;
+  complete &&= covered === total;
+  process.stdout.write(
+    'Application ' +
+      metric +
+      ' coverage ' +
+      percentage.toFixed(2) +
+      '% (' +
+      covered +
+      '/' +
+      total +
+      ')\n',
+  );
+}
+if (!complete) throw new Error('Application coverage must be 100%.');

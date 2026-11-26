@@ -24,7 +24,8 @@ function prose(node: Node): string {
       : '';
     return node.children.map(prose).join(separator);
   }
-  if ('alt' in node) return node.alt ?? '';
+  // The parser always records image text, even when it is empty.
+  if ('alt' in node) return node.alt!;
   if ('value' in node && node.type !== 'html') return node.value;
   return node.type === 'break' ? '\n' : '';
 }
@@ -32,13 +33,10 @@ function prose(node: Node): string {
 export function analyze(source: string, locale: string) {
   const tree = parse(source);
   const warnings: Warning[] = [];
+  // Every node from the parser carries its source position.
   const report = (node: Node, key: Warning['key']) => {
-    if (node.position?.start.offset === undefined) return;
-    warnings.push({
-      line: node.position.start.line,
-      offset: node.position.start.offset,
-      key,
-    });
+    const { line, offset } = node.position!.start;
+    warnings.push({ line, offset: offset!, key });
   };
   function diagnostics(node: Node) {
     if (node.type === 'code' && node.position?.start.offset !== undefined) {
@@ -49,9 +47,7 @@ export function analyze(source: string, locale: string) {
       const opener = /^[ \t]*([`~])\1{2,}/u.exec(raw)?.[0].trim();
       if (opener) {
         const lines = raw.trimEnd().split(/\r?\n/u);
-        const closer = /^[ \t>]*(([`~])\2+)[ \t]*$/u.exec(
-          lines.at(-1) ?? '',
-        )?.[1];
+        const closer = /^[ \t>]*(([`~])\2+)[ \t]*$/u.exec(lines.at(-1)!)?.[1];
         // Parsed code includes a fence-looking final line only when it is code
         // content. A real closer contributes its own source line.
         const contentReachesEnd =
@@ -114,8 +110,7 @@ export function analyze(source: string, locale: string) {
     .sort((a, b) => a - b);
   const total = counts.reduce((sum, count) => sum + count, 0);
   const middle = Math.floor(counts.length / 2);
-  let characters = 0;
-  for (const glyph of graphemes(source)) if (glyph.segment.length) characters++;
+  const characters = Array.from(graphemes(source)).length;
   return {
     words: wordCount(plain),
     characters,

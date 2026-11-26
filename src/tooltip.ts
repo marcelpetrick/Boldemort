@@ -39,7 +39,8 @@ export function installTooltips(tooltip: HTMLElement, locale: () => Locale) {
   }
   function show() {
     const next = pointer ?? focus;
-    if (next === target || next === dismissed) return;
+    // Leaving every control must hide the hint even when none was dismissed.
+    if (next === target || (next && next === dismissed)) return;
     hide();
     if (!next) return;
     target = next;
@@ -55,17 +56,20 @@ export function installTooltips(tooltip: HTMLElement, locale: () => Locale) {
       position();
     }, 4000);
   }
-  document.addEventListener('pointerover', (event) => {
-    if (event.pointerType === 'touch' || pointerSuppressed) return;
-    const next = resolve(event.target);
+  // Pointer out runs before pointer over, so both must notice when the
+  // pointer reaches another control and allow a dismissed hint again.
+  function point(next: HTMLElement | undefined) {
     if (pointer !== next) dismissed = undefined;
     pointer = next;
     show();
+  }
+  document.addEventListener('pointerover', (event) => {
+    if (event.pointerType === 'touch' || pointerSuppressed) return;
+    point(resolve(event.target));
   });
   document.addEventListener('pointerout', (event) => {
     if (event.pointerType === 'touch' || pointerSuppressed) return;
-    pointer = resolve(event.relatedTarget);
-    show();
+    point(resolve(event.relatedTarget));
   });
   document.addEventListener('pointermove', (event) => {
     if (!pointerSuppressed || event.pointerType === 'touch') return;
