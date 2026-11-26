@@ -57,7 +57,13 @@ describe('GFM source conversion', () => {
     expect(convert('***hello*** ~~draft~~', 'markdown')).toBe('𝒉𝒆𝒍𝒍𝒐 d̵r̵a̵f̵t̵');
     expect(convert('__one__ _two_', 'markdown')).toBe('𝐨𝐧𝐞 𝑡𝑤𝑜');
     expect(convert('𝐇𝐞𝐥𝐥𝐨 𝐰𝐨𝐫𝐥𝐝.', 'unicode')).toBe('**Hello world**.');
-    expect(convert('𝐀. 𝐁 <u>x</u>', 'unicode')).toBe('**A**. **B** <u>x</u>');
+    expect(convert('𝐀. 𝐁 <u>x</u>', 'unicode')).toBe('**A. B** <u>x</u>');
+    expect(convert('𝐒𝐩𝐞𝐚𝐤𝐞𝐫: 𝐆ä𝐫𝐭𝐧𝐞𝐫 (𝐀𝐕𝐏, 𝐆𝐢𝐭𝐋𝐚𝐛)', 'unicode')).toBe(
+      '**Speaker: Gärtner (AVP, GitLab**)',
+    );
+    expect(convert('𝐀:\n𝐁', 'unicode')).toBe('**A**:\n**B**');
+    expect(convert('<u>A</u>. <u>B</u>', 'markdown')).toBe('A͟. B͟');
+    expect(convert('A͟. B͟', 'unicode')).toBe('<u>A</u>. <u>B</u>');
     expect(convert('👩🏽‍💻 unknown ', 'unicode')).toBe('👩🏽‍💻 unknown ');
     expect(convert('**[x](url)** and **a\\*b**', 'markdown')).toBe(
       '**[x](url)** and **a\\*b**',
@@ -524,4 +530,36 @@ it('mixes compatible copyable fonts while preserving content and line marks', ()
       true,
     ).value,
   ).toMatch(/͟$/u);
+});
+
+it('formats text with angle brackets and stars only when it parses as one span', () => {
+  const draft = '- Check <-- meaning\n- 2 * 3 and a_b\n- keep x<u>y';
+  const all = formatSelection(
+    select(draft, 'markdown', 0, draft.length),
+    'bold',
+  );
+  expect(all).toEqual({
+    start: 0,
+    end: draft.length,
+    value: '- **Check <-- meaning**\n- **2 * 3 and a_b**\n- **keep x**<u>**y**',
+    preservedSyntax: true,
+  });
+  expect(
+    formatSelection(select('a <-- b', 'markdown', 0, 7), 'bold')?.value,
+  ).toBe('**a <-- b**');
+  expect(
+    formatSelection(select('x<u>y', 'markdown', 0, 4), 'bold'),
+  ).toBeUndefined();
+  expect(formatSelection(select('a *\nz', 'markdown', 0, 5), 'bold')).toEqual({
+    start: 0,
+    end: 5,
+    value: 'a *\n**z**',
+    preservedSyntax: true,
+  });
+  expect(
+    formatSelection(select('a *', 'markdown', 0, 3), 'bold'),
+  ).toBeUndefined();
+  expect(formatSelection(select('a\\b', 'markdown', 0, 3), 'bold')?.value).toBe(
+    '**a\\b**',
+  );
 });

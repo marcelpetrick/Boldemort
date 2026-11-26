@@ -3,7 +3,7 @@
 [![CI](https://github.com/marcelpetrick/Boldemort/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/marcelpetrick/Boldemort/actions/workflows/ci.yml)
 [![GitHub Pages](https://github.com/marcelpetrick/Boldemort/actions/workflows/pages.yml/badge.svg)](https://github.com/marcelpetrick/Boldemort/actions/workflows/pages.yml)
 [![Release pipeline](https://github.com/marcelpetrick/Boldemort/actions/workflows/release.yml/badge.svg)](https://github.com/marcelpetrick/Boldemort/actions/workflows/release.yml)
-[![Version 0.4.4](https://img.shields.io/badge/version-0.4.4-6241c2)](docs/CHANGELOG.md)
+[![Version 0.4.5](https://img.shields.io/badge/version-0.4.5-6241c2)](docs/CHANGELOG.md)
 [![License GPL v3 or later](https://img.shields.io/badge/license-GPLv3%20or%20later-blue.svg)](LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-6-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Vite](https://img.shields.io/badge/Vite-8-646cff?logo=vite&logoColor=white)](https://vite.dev/)

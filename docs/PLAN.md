@@ -45,6 +45,16 @@
 3. Run the shared pipeline and mutation tests, bump to 0.4.4, push, and
    verify CI, the release, and Pages.
 
+## 0.4.5 punctuation and angle brackets
+
+1. Reproduce both reported gaps: whole-draft Bold skips `<-- check` lines,
+   and Unicode to Markdown splits bold around punctuation.
+2. Wrap text with `<>*_~` only when a reparse confirms one styled span.
+   Bridge inert characters inside a styled run and keep remembered
+   spellings, such as `__one__, __two__`.
+3. Run the shared pipeline and mutation tests, bump to 0.4.5, push, and
+   verify CI, the release, and Pages.
+
 ## Progress
 
 - Vision intake complete. Both input files matched byte for byte. The root

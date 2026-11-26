@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.4.5
+
+- Format lines that contain `<`, `>`, `*`, `_`, or `~` when the result still
+  reads as one styled span, such as `Check <-- meaning`.
+- Keep a styled run together across punctuation and accented letters when
+  converting Unicode to Markdown, for example `**Speaker: Gärtner**`. Spans
+  you wrote separately in Markdown keep their original spelling.
+
 ## 0.4.4
 
 - Add Ctrl or Cmd+U for underline, Ctrl or Cmd+Shift+X for strikethrough,

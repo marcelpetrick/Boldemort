@@ -15,6 +15,7 @@ import {
   styleUnicode,
   styles,
   wrapMarkdown,
+  type LineStyles,
   type Mode,
   type Style,
 } from './unicode.ts';
@@ -164,13 +165,17 @@ export class Document {
       }
     }
     offset = 0;
-    return project(text, mode, this.lineStyles).map((piece) => {
-      const original = remembered.get(offset);
+    return project(text, mode, this.lineStyles).flatMap((piece) => {
+      const start = offset;
       offset += piece[mode].length;
-      return piece.markdown !== piece.unicode &&
-        original?.[mode] === piece[mode]
-        ? original
-        : piece;
+      if (piece.markdown === piece.unicode) return [piece];
+      const original = remembered.get(start);
+      if (original?.[mode] === piece[mode]) return [original];
+      return (
+        rejoin(remembered, text, start, offset, mode, this.lineStyles) ?? [
+          piece,
+        ]
+      );
     });
   }
   switchTo(mode: Mode) {
@@ -208,6 +213,37 @@ export type Replacement = Selection & {
   caret?: number;
   preservedSyntax?: boolean;
 };
+
+// A styled run can bridge punctuation between spans that had separate
+// spellings, such as `__one__, __two__`. Keep each remembered spelling and
+// convert only the stretches between them.
+function rejoin(
+  remembered: Map<number, Projection>,
+  text: string,
+  start: number,
+  end: number,
+  mode: Mode,
+  lineStyles: LineStyles,
+) {
+  const pieces: Projection[] = [];
+  let reused = false;
+  let gap = start;
+  for (let position = start; position < end;) {
+    const original = remembered.get(position);
+    const length = original?.[mode].length ?? 0;
+    if (!original || position + length > end) {
+      position++;
+      continue;
+    }
+    pieces.push(...project(text.slice(gap, position), mode, lineStyles));
+    pieces.push(original);
+    reused = true;
+    position += length;
+    gap = position;
+  }
+  pieces.push(...project(text.slice(gap, end), mode, lineStyles));
+  return reused ? pieces : undefined;
+}
 
 function editableGlyphs(ranges: Selection[], offset: number) {
   let current = 0;
@@ -251,7 +287,7 @@ function markdownDraftSpans(
       .matchAll(/[^\r\n]+/gu)) {
       const raw = line[0];
       const body = raw.trim();
-      if (!body || /[*_~<>\\]/u.test(body)) continue;
+      if (!body || body.includes('\\')) continue;
       if (
         (style === 'bold' || style === 'italic') &&
         !/[\p{L}\p{N}]/u.test(body)
@@ -263,15 +299,31 @@ function markdownDraftSpans(
         end: start + body.length,
         body,
         active: new Set<Style>(),
+        risky: risky.test(body),
       });
     }
   }
   for (const { start, end, body: content, active } of analysis.simpleFormats) {
     const body = text.slice(content.start, content.end);
     if (/[\r\n]/u.test(body)) continue;
-    spans.push({ start, end, body, active: new Set(active) });
+    spans.push({ start, end, body, active: new Set(active), risky: false });
   }
   return spans;
+}
+
+const risky = /[*_~<>]/u;
+
+function wrapsCleanly(
+  text: string,
+  edit: { start: number; end: number; body: string; active: Set<Style> },
+) {
+  return inspectMarkdown(text).simpleFormats.some(
+    (format) =>
+      format.start === edit.start &&
+      format.end === edit.end &&
+      text.slice(format.body.start, format.body.end) === edit.body &&
+      styles.every((key) => format.active.has(key) === edit.active.has(key)),
+  );
 }
 
 function exposesMarkdownBlock(text: string, start: number, body: string) {
@@ -312,22 +364,36 @@ function formatMarkdownDraft(
     ) {
       previous.body += span.body;
       previous.end = span.end;
+      previous.risky ||= span.risky;
     } else edits.push(span);
   }
-  if (!edits.length) return;
-  let offset = 0;
-  let value = '';
-  for (const edit of edits) {
-    value +=
-      text.slice(offset, edit.start) + wrapMarkdown(edit.body, edit.active);
-    offset = edit.end;
+  for (;;) {
+    if (!edits.length) return;
+    let offset = 0;
+    let value = '';
+    const placed = [];
+    for (const edit of edits) {
+      value += text.slice(offset, edit.start);
+      const wrapped = wrapMarkdown(edit.body, edit.active);
+      placed.push({
+        ...edit,
+        start: value.length,
+        end: value.length + wrapped.length,
+      });
+      value += wrapped;
+      offset = edit.end;
+    }
+    value += text.slice(offset);
+    const failed = placed.flatMap((edit, index) =>
+      edit.risky && !wrapsCleanly(value, edit) ? [index] : [],
+    );
+    if (!failed.length)
+      return { start: 0, end: text.length, value, preservedSyntax };
+    // Characters such as `<` or `*` are kept only when the parser still
+    // reads the result as one styled span; otherwise the text stays as is.
+    preservedSyntax = true;
+    for (const index of failed.reverse()) edits.splice(index, 1);
   }
-  return {
-    start: 0,
-    end: text.length,
-    value: value + text.slice(offset),
-    preservedSyntax,
-  };
 }
 
 function usesMarkdownBatch(
@@ -412,8 +478,20 @@ export function formatSelection(
     };
   }
   const raw = text.slice(start, end);
-  if (/[*_~<>\r\n]/u.test(raw)) return;
-  return { start, end, value: wrapMarkdown(raw, new Set([style])) };
+  if (/[\r\n]/u.test(raw)) return;
+  const active = new Set([style]);
+  const value = wrapMarkdown(raw, active);
+  if (
+    risky.test(raw) &&
+    !wrapsCleanly(text.slice(0, start) + value + text.slice(end), {
+      start,
+      end: start + value.length,
+      body: raw,
+      active,
+    })
+  )
+    return;
+  return { start, end, value };
 }
 
 export function formatTyping(

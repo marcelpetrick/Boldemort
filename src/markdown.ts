@@ -277,6 +277,12 @@ function unicodeChanges(source: string) {
       run = '';
     }
   };
+  // Punctuation and accented letters have no styled glyph, so a styled run
+  // continues across them when the next styled glyph matches.
+  const inert = (segment: string) =>
+    !/[\r\n]/u.test(segment) &&
+    decode(segment).active.size === 0 &&
+    styleUnicode(segment, active) === segment;
   const glyphs = Array.from(graphemes(source));
   for (let position = 0; position < glyphs.length; position++) {
     const { segment, index } = glyphs[position]!;
@@ -301,12 +307,13 @@ function unicodeChanges(source: string) {
     const item = decode(segment);
     if (range && index >= range.start) {
       emit();
-    } else if (horizontalSpace.test(item.base)) {
+    } else if (horizontalSpace.test(item.base) || (run && inert(segment))) {
       if (!run) continue;
       let next = position;
       while (
         next < glyphs.length &&
-        horizontalSpace.test(glyphs[next]!.segment)
+        (horizontalSpace.test(glyphs[next]!.segment) ||
+          inert(glyphs[next]!.segment))
       )
         next++;
       const following = glyphs[next];

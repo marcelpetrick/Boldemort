@@ -19,6 +19,13 @@ The [product vision](../vision.md) sets the requirements. The
   marks are short strikethrough and double macron below. Changing a line style
   affects new formatting. Pasted text and unchanged round-trips keep their
   original marks.
+- Text containing `<`, `>`, `*`, `_`, or `~` is formatted only when the
+  parser reads the result as one styled span with the same text. Otherwise
+  it stays as written and the editor says so.
+- Unicode to Markdown conversion continues a styled run across characters
+  that have no styled glyph, such as punctuation and accented letters, but
+  never across a line break. When such a run joins spans with remembered
+  Markdown spelling, each remembered span keeps its spelling.
 - Formatting shortcuts follow Word and Google Docs: Ctrl or Cmd with B, I,
   U, Shift+X for strikethrough, and Shift+8 for bullets. They apply only
   while the draft has focus, so Ctrl+U opens page source everywhere else.
