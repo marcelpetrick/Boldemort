@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.7
+
+- Keep a closing parenthesis inside a styled run when it balances an opening
+  one in the run, for example `**Speaker: Gärtner (AVP, GitLab)**`.
+
 ## 0.4.6
 
 - Hide a hint when the pointer leaves a control for an empty area.

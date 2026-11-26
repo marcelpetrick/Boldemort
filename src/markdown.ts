@@ -331,6 +331,13 @@ function unicodeChanges(source: string) {
         }
         end = following.index;
         position = next - 1;
+      } else if (
+        segment === ')' &&
+        run.split('(').length > run.split(')').length
+      ) {
+        // A closing parenthesis joins the run when it balances one inside.
+        run += segment;
+        end = index + 1;
       } else emit();
     } else if (item.active.size) {
       if (styles.some((style) => item.active.has(style) !== active.has(style)))

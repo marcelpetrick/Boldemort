@@ -64,6 +64,13 @@
 3. Enforce 100% for all four metrics in Vitest and the combined coverage
    script, run the shared pipeline and mutation tests, then release 0.4.6.
 
+## 0.4.7 balanced parentheses
+
+1. Reproduce the split run in `**Speaker: Gärtner (AVP, GitLab**)`.
+2. Keep a trailing `)` in a styled run only when it closes an unmatched `(`
+   from that run. Leave `(**A**) x` unchanged.
+3. Run the shared pipeline and mutation tests, then release 0.4.7.
+
 ## Progress
 
 - Vision intake complete. Both input files matched byte for byte. The root

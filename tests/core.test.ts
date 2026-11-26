@@ -60,8 +60,10 @@ describe('GFM source conversion', () => {
     expect(convert('𝐇𝐞𝐥𝐥𝐨 𝐰𝐨𝐫𝐥𝐝.', 'unicode')).toBe('**Hello world**.');
     expect(convert('𝐀. 𝐁 <u>x</u>', 'unicode')).toBe('**A. B** <u>x</u>');
     expect(convert('𝐒𝐩𝐞𝐚𝐤𝐞𝐫: 𝐆ä𝐫𝐭𝐧𝐞𝐫 (𝐀𝐕𝐏, 𝐆𝐢𝐭𝐋𝐚𝐛)', 'unicode')).toBe(
-      '**Speaker: Gärtner (AVP, GitLab**)',
+      '**Speaker: Gärtner (AVP, GitLab)**',
     );
+    expect(convert('(𝐀) x', 'unicode')).toBe('(**A**) x');
+    expect(convert('𝐀 (𝐁)) x', 'unicode')).toBe('**A (B)**) x');
     expect(convert('𝐀:\n𝐁', 'unicode')).toBe('**A**:\n**B**');
     expect(convert('<u>A</u>. <u>B</u>', 'markdown')).toBe('A͟. B͟');
     expect(convert('A͟. B͟', 'unicode')).toBe('<u>A</u>. <u>B</u>');
