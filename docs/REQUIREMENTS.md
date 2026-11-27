@@ -32,7 +32,7 @@ checks for the editor and its delivery workflow.
 | 100% application line, statement, branch, and function coverage and 95% overall mutation score | Merge browser and unit coverage and run mutation analysis in an isolated sandbox. CI publishes the reports. |
 | Long drafts stay responsive | Run [the performance checks](PERFORMANCE.md) in the local pipeline and CI. |
 | Exact supported npm pins | Compare the registry, lockfile, and dependency inventory. Run the audit and full gate for package changes. |
-| GitHub Pages and a separate release pipeline | Check the Pages deployment at its public subpath and verify the release archive and SHA-256 checksum. |
+| GitHub Pages and a separate release pipeline | Check the Pages deployment at its public subpath. Download the public release archive and SHA-256 checksum and verify the download. |
 
 Run `./localPipeline.sh` for the local checks and `npm run mutation` for mutation
 testing. The

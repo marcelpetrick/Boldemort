@@ -53,6 +53,10 @@ export const messages = {
     'Could not delete the locally saved draft. It may still reopen. Turn off local draft saving to try again.',
     'Der lokal gespeicherte Entwurf konnte nicht gelöscht werden und kann beim erneuten Öffnen erscheinen. Schalte das lokale Speichern aus, um es erneut zu versuchen.',
   ],
+  storageOptOutRemovalWarning: [
+    'Local draft saving is off. The browser could not delete the older copy.',
+    'Das lokale Speichern ist aus. Der Browser konnte die ältere Kopie nicht löschen.',
+  ],
   mode: ['Editing mode', 'Bearbeitungsmodus'],
   formatting: ['Formatting', 'Formatierung'],
   bold: ['Bold', 'Fett'],

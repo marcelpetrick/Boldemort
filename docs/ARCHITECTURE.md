@@ -61,8 +61,9 @@ The draft reader validates the stored mode, line styles, and ordered pieces.
 Restoring these pieces preserves both exact spellings and pending edits
 without restoring the undo stack. One key records the active draft location
 and saving preference. Turning saving back on selects a fresh snapshot key.
-Tabs check the active location before saving and remove writes that arrive
-at a retired location while saving is off.
+Opt-out writes the disabled preference before deleting its snapshot. Tabs
+check the active location before and after saving, and discard stale writes
+to a retired snapshot key.
 
 ```mermaid
 flowchart TB

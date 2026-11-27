@@ -595,8 +595,9 @@ InMail needs more than one profile.
   acceptable initially.
 - Keep editing and export available if browser storage fails. Start with a
   fresh draft if saved data cannot be read. Retain the previous saving
-  preference if the browser rejects a change, and show a warning if a saved
-  copy could not be deleted.
+  preference and saved copy if the browser rejects a setting change. Show
+  a warning if deletion fails after the browser accepts opt-out. The older
+  copy stays closed while saving is off.
 
 ### Paste and external compatibility
 

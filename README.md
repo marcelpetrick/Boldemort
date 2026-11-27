@@ -20,6 +20,8 @@ processes your text in the browser without sending it to a server.
 
 **[Try Boldemort on GitHub Pages](https://marcelpetrick.github.io/Boldemort/)**
 
+[Download the static site and its checksum from GitHub Releases](https://github.com/marcelpetrick/Boldemort/releases/latest).
+
 **Author: Marcel Petrick <mail@marcelpetrick.it>**
 
 **License: [GPL v3 or later](LICENSE).**
@@ -86,9 +88,10 @@ saving off deletes the saved copy immediately and leaves the text in your
 open tab. Turning it back on saves the text you are editing. **Clear draft**
 also deletes the saved copy after confirmation. Undo history starts fresh on
 each load. If you edit in several tabs, the last saved change is the one
-you'll see when you reopen the site. If the browser rejects a setting change
-or deletion, the editor shows what failed. Use **Export** for a separate file
-copy.
+you'll see when you reopen the site. If the browser rejects a setting change,
+the previous setting stays selected. If saving is off and deletion fails, the
+editor warns you and keeps the older copy closed. Use **Export** for a separate
+file copy.
 
 ## Repository layout
 
@@ -149,12 +152,12 @@ Set **Settings → Pages → Source** to **GitHub Actions** and the Actions vari
 CI triggers Pages deployment. The Pages workflow can also be dispatched for
 the current tip of `main`.
 
-For a release, update the package version and changelog, verify the pipeline,
-then push a matching tag such as `v0.2.1` from `main`. The release workflow
-reruns local verification, packages the static site with licensing information,
-and publishes a SHA-256 checksum alongside the archive. Dispatch the Release
-workflow on `main` to verify and download the archive from Actions without
-creating a GitHub release.
+For a release, update the package version, README badge, and changelog.
+Verify the pipeline and push a matching SemVer tag from `main`. The release
+workflow runs the shared pipeline and mutation suite, then publishes the
+static site archive with a SHA-256 checksum. The archive includes the
+dependency inventory and license notices. A manual Release workflow run on
+`main` produces a downloadable Actions artifact for a rehearsal.
 
 ## History
 

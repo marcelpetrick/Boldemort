@@ -615,22 +615,31 @@ get('help').addEventListener('click', () => {
 });
 get('version').textContent = 'v' + version;
 keepDraft.addEventListener('change', () => {
+  let retiredKey: string | undefined;
   const saved = accessDraftStorage((storage) => {
     if (keepDraft.checked) {
       // A fresh key prevents a delayed edit from replacing a reenabled draft.
+      const current = currentDraftLocation(storage);
+      if (!current.enabled) storage.removeItem(current.key);
       storage.setItem(draftPreferenceKey, crypto.randomUUID());
     } else {
       const { id, key } = currentDraftLocation(storage);
-      storage.removeItem(key);
       storage.setItem(draftPreferenceKey, '!' + id);
+      retiredKey = key;
     }
   }, 'storagePreferenceWarning');
-  if (saved) {
-    storageWarning.hidden = true;
-    saveDraft();
-  } else {
+  if (!saved) {
     keepDraft.checked = !keepDraft.checked;
+    return;
   }
+  storageWarning.hidden = true;
+  const key = retiredKey;
+  if (key)
+    accessDraftStorage(
+      (storage) => storage.removeItem(key),
+      'storageOptOutRemovalWarning',
+    );
+  else saveDraft();
 });
 window.addEventListener('storage', (event) => {
   if (

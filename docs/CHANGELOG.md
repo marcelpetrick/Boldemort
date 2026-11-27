@@ -4,6 +4,8 @@
 
 - Keep local saving off even when another tab is finishing a save. Report
   storage failures and make saving help accessible from the keyboard.
+- Preserve the saved draft when the browser rejects the opt-out preference.
+  Report a failed deletion separately once saving is off.
 - Discard malformed drafts with empty conversion spans and retain exact
   Markdown spelling while editing across unchanged spans.
 - Preserve indented and nested code when applying bullets, and omit

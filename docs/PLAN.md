@@ -103,6 +103,16 @@
    measured score before targeting 95.48%, then check whether remaining
    mutants can be distinguished by supported behavior on the way to 100%.
 
+## 0.5.1 public release
+
+1. Review the release changes since v0.4.7 and check tracked Markdown.
+2. Verify that a rejected opt-out preference write preserves the saved
+   draft. If deleting the snapshot fails after opt-out, verify the switch
+   stays off and the editor reports the failed deletion. Verify that
+   turning saving back on retries the deletion before writing a new copy.
+3. Run the shared pipeline, push the reviewed commit and matching SemVer
+   tag, and verify the public release, SHA-256 checksum, and deployed build.
+
 ## Progress
 
 - The second sandboxed mutation checkpoint reached 95.48% with zero

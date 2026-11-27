@@ -317,6 +317,8 @@ test('uses the current storage preference before another tab receives the event'
   await expect(
     page.evaluate((key) => localStorage.getItem(key), draftKey),
   ).resolves.toBe('off');
+  await saving.check();
+  await expect(draft).toHaveValue('Current tab only');
   await page.evaluate(() => {
     localStorage.clear();
     window.dispatchEvent(new StorageEvent('storage', { key: null }));
@@ -460,6 +462,72 @@ test('shows that a rejected storage change can leave an older draft', async ({
   await expect(page.locator('#storage-warning')).toBeHidden();
   await reopened.reload();
   await expect(reopened.locator('#editor')).toHaveValue('');
+});
+
+for (const operation of ['setItem', 'removeItem'] as const) {
+  test(`keeps the committed draft preference when ${operation} fails`, async ({
+    page,
+    context,
+  }) => {
+    const saving = page.getByRole('checkbox', { name: 'Save draft locally' });
+    await page.locator('#editor').fill('Saved draft');
+    await page.evaluate((method) => {
+      const storage = window.localStorage;
+      Object.defineProperty(window, 'localStorage', {
+        value: {
+          getItem: storage.getItem.bind(storage),
+          setItem: storage.setItem.bind(storage),
+          removeItem: storage.removeItem.bind(storage),
+          [method]() {
+            throw new DOMException('Blocked', 'SecurityError');
+          },
+        },
+      });
+    }, operation);
+    await saving.click();
+    const keptSaving = operation === 'setItem';
+    await expect(saving).toBeChecked({ checked: keptSaving });
+    await expect(page.locator('#storage-warning')).toContainText(
+      keptSaving
+        ? 'Could not change local draft saving.'
+        : 'The browser could not delete the older copy.',
+    );
+    const reopened = await context.newPage();
+    await reopened.goto(page.url());
+    await expect(reopened.locator('#editor')).toHaveValue(
+      keptSaving ? 'Saved draft' : '',
+    );
+  });
+}
+
+test('retries a failed snapshot deletion before enabling saving again', async ({
+  page,
+}) => {
+  const saving = page.getByRole('checkbox', { name: 'Save draft locally' });
+  await page.locator('#editor').fill('Draft awaiting deletion');
+  await page.evaluate(() => {
+    const storage = window.localStorage;
+    let rejected = false;
+    Object.defineProperty(window, 'localStorage', {
+      value: {
+        getItem: storage.getItem.bind(storage),
+        setItem: storage.setItem.bind(storage),
+        removeItem(key: string) {
+          if (!rejected) {
+            rejected = true;
+            throw new DOMException('Blocked', 'SecurityError');
+          }
+          storage.removeItem(key);
+        },
+      },
+    });
+  });
+  await saving.uncheck();
+  const legacyCopy = () =>
+    page.evaluate((key) => localStorage.getItem(key), draftKey);
+  await expect(legacyCopy()).resolves.toContain('Draft awaiting deletion');
+  await saving.check();
+  await expect(legacyCopy()).resolves.toBe(null);
 });
 
 test('describes local draft saving on keyboard focus and label hover', async ({
