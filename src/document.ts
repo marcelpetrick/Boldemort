@@ -25,6 +25,7 @@ type Piece = Projection | Pending;
 type Selection = { start: number; end: number };
 export type Frame = Selection & { text: string; mode: Mode };
 type State = Frame & { pieces: Piece[] };
+export type Draft = Pick<State, 'mode' | 'pieces'> & { lineStyles: LineStyles };
 
 function changedRange(previous: string, next: string) {
   let start = 0;
@@ -64,6 +65,21 @@ export class Document {
   #redo: State[] = [];
   #editedAt = 0;
   #editKind = '';
+
+  constructor(draft?: Draft) {
+    if (!draft) return;
+    const { mode, pieces, lineStyles } = draft;
+    const text = pieces
+      .map((piece) => ('text' in piece ? piece.text : piece[mode]))
+      .join('');
+    this.#state = { mode, pieces, text, start: text.length, end: text.length };
+    this.lineStyles = { ...lineStyles };
+  }
+
+  draft(): Draft {
+    const { mode, pieces } = this.#state;
+    return { mode, pieces, lineStyles: { ...this.lineStyles } };
+  }
 
   get frame(): Frame {
     return this.#state;

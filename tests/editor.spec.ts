@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { readFile, writeFile } from 'node:fs/promises';
+import { draftKey } from '../src/draft.ts';
 
 test.afterEach(async ({ page }, info) => {
   if (process.env.BOLD_COVERAGE !== '1') return;
@@ -84,11 +85,206 @@ test('arms Markdown typing, handles composition, and keeps manual drafts', async
   await expect(draft).toHaveValue(/日本語/u);
 });
 
-test('a reload opens a fresh draft', async ({ page }) => {
+test('saves the exact draft and editing mode across reload and a new tab', async ({
+  page,
+  context,
+}) => {
   const draft = page.locator('#editor');
-  await draft.fill('Only in memory');
+  await expect(
+    page.getByRole('checkbox', { name: 'Save draft locally' }),
+  ).toBeChecked();
+  await page.getByRole('button', { name: 'Markdown', exact: true }).click();
+  await draft.fill('__Hello__, [source](https://example.com)\n\n- Item\n');
+  await page.getByRole('button', { name: 'Unicode', exact: true }).click();
+  await draft.press('Control+End');
+  await draft.pressSequentially('More');
+  const unicode = await draft.inputValue();
+  await page.reload();
+  await expect(draft).toHaveValue(unicode);
+  await expect(page.getByRole('button', { name: 'Undo' })).toHaveAttribute(
+    'aria-disabled',
+    'true',
+  );
+  const url = page.url();
+  // Keep the fixture page open for the browser coverage hook.
+  const writer = await context.newPage();
+  await writer.goto(url);
+  await writer.locator('#editor').press('End');
+  await writer.locator('#editor').pressSequentially(' text');
+  await writer.close();
+  const reopened = await context.newPage();
+  await reopened.goto(url);
+  await expect(
+    reopened.getByRole('button', { name: 'Unicode', exact: true }),
+  ).toHaveAttribute('aria-pressed', 'true');
+  await expect(reopened.locator('#editor')).toHaveValue(unicode + ' text');
+  await reopened.getByRole('button', { name: 'Markdown', exact: true }).click();
+  await expect(reopened.locator('#editor')).toHaveValue(
+    '__Hello__, [source](https://example.com)\n\n- Item\nMore text',
+  );
+  await reopened.reload();
+  await expect(
+    reopened.getByRole('button', { name: 'Markdown', exact: true }),
+  ).toHaveAttribute('aria-pressed', 'true');
+  await expect(reopened.locator('#editor')).toHaveValue(
+    '__Hello__, [source](https://example.com)\n\n- Item\nMore text',
+  );
+});
+
+test('turning off saving removes the browser copy and keeps the open draft', async ({
+  page,
+  context,
+}) => {
+  const editor = page.locator('#editor');
+  const saving = page.getByRole('checkbox', { name: 'Save draft locally' });
+  await editor.fill('Saved text');
+  const other = await context.newPage();
+  await other.goto(page.url());
+  await expect(other.locator('#editor')).toHaveValue('Saved text');
+  await saving.uncheck();
+  await expect(editor).toHaveValue('Saved text');
+  await expect(
+    other.getByRole('checkbox', { name: 'Save draft locally' }),
+  ).not.toBeChecked();
+  await other.locator('#editor').fill('Still open');
+  await editor.fill('Current tab only');
+  await other.reload();
+  await expect(other.locator('#editor')).toHaveValue('');
+  await expect(
+    other.getByRole('checkbox', { name: 'Save draft locally' }),
+  ).not.toBeChecked();
+  await saving.check();
+  await other.reload();
+  await expect(saving).toBeChecked();
+  await expect(other.locator('#editor')).toHaveValue('Current tab only');
+});
+
+test('an empty tab changing mode leaves the saved draft intact', async ({
+  page,
+  context,
+}) => {
+  const writer = await context.newPage();
+  await writer.goto(page.url());
+  await writer.locator('#editor').fill('Saved in another tab');
+  await page.getByRole('button', { name: 'Markdown', exact: true }).click();
+  await page.getByRole('button', { name: 'Undo' }).click();
+  await writer.reload();
+  await expect(writer.locator('#editor')).toHaveValue('Saved in another tab');
+});
+
+test('clearing a draft clears the saved copy and undo can save it again', async ({
+  page,
+  context,
+}) => {
+  const draft = page.locator('#editor');
+  await draft.fill('Keep me');
+  const clear = page.getByRole('button', { name: 'Clear draft' });
+  await clear.click();
+  await page
+    .getByRole('dialog')
+    .getByRole('button', { name: 'Clear draft' })
+    .click();
+  await expect(draft).toHaveValue('');
+  const reader = await context.newPage();
+  await reader.goto(page.url());
+  await expect(reader.locator('#editor')).toHaveValue('');
+  await page.getByRole('button', { name: 'Undo' }).click();
+  await reader.reload();
+  await expect(reader.locator('#editor')).toHaveValue('Keep me');
+  await page.getByRole('button', { name: 'Redo' }).click();
+  await reader.reload();
+  await expect(reader.locator('#editor')).toHaveValue('');
+});
+
+test('uses the current storage preference before another tab receives the event', async ({
+  page,
+}) => {
+  const draft = page.locator('#editor');
+  const saving = page.getByRole('checkbox', { name: 'Save draft locally' });
+  await page.evaluate((key) => localStorage.setItem(key, 'off'), draftKey);
+  await expect(saving).toBeChecked();
+  await draft.fill('Current tab only');
+  await expect(saving).not.toBeChecked();
+  await expect(draft).toHaveValue('Current tab only');
+  await expect(
+    page.evaluate((key) => localStorage.getItem(key), draftKey),
+  ).resolves.toBe('off');
+  await page.evaluate(() => {
+    localStorage.clear();
+    window.dispatchEvent(new StorageEvent('storage', { key: null }));
+  });
+  await expect(saving).toBeChecked();
+  await page.evaluate((key) => {
+    localStorage.setItem(key, 'off');
+    window.dispatchEvent(new StorageEvent('storage', { key: 'unrelated' }));
+  }, draftKey);
+  await expect(saving).toBeChecked();
+});
+
+test('ignores damaged data and recovers when storage can be written again', async ({
+  page,
+}) => {
+  const draft = page.locator('#editor');
+  await page.evaluate((key) => localStorage.setItem(key, '{'), draftKey);
   await page.reload();
   await expect(draft).toHaveValue('');
+  await page.evaluate(() => {
+    const storage = window.localStorage;
+    Object.defineProperty(window, 'localStorage', {
+      configurable: true,
+      value: {
+        getItem: storage.getItem.bind(storage),
+        setItem() {
+          throw new DOMException('Full', 'QuotaExceededError');
+        },
+      },
+    });
+    window.addEventListener(
+      'restore-storage',
+      () => {
+        Object.defineProperty(window, 'localStorage', { value: storage });
+      },
+      { once: true },
+    );
+  });
+  await draft.fill('Keep editing');
+  await expect(
+    page.getByText('Local draft storage is unavailable.'),
+  ).toBeVisible();
+  await expect(draft).toHaveValue('Keep editing');
+  await page.evaluate(() => {
+    window.dispatchEvent(new Event('restore-storage'));
+  });
+  await draft.pressSequentially('!');
+  await expect(
+    page.getByText('Local draft storage is unavailable.'),
+  ).toBeHidden();
+  await page.reload();
+  await expect(draft).toHaveValue('Keep editing!');
+});
+
+test('editing and export work when the browser blocks storage', async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(window, 'localStorage', {
+      get() {
+        throw new DOMException('Blocked', 'SecurityError');
+      },
+    });
+  });
+  await page.reload();
+  const draft = page.locator('#editor');
+  await expect(draft).toHaveValue('');
+  await expect(
+    page.getByText('Local draft storage is unavailable.'),
+  ).toBeVisible();
+  await draft.fill('Still here');
+  const downloadReady = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Export' }).click();
+  expect(await readFile((await (await downloadReady).path())!, 'utf8')).toBe(
+    'Still here',
+  );
 });
 
 test('keeps the same words selected when switching between editor modes', async ({

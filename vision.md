@@ -35,8 +35,7 @@ GitHub Pages paths. The name plays on “bold” and “Voldemort.”
 8. See live word, character, paragraph, and sentence statistics, plus
    platform-length guidance.
 9. Receive helpful nonintrusive line-based warnings for likely problems.
-10. Export the document manually as a local text file and leave without any
-    server-side storage.
+10. Reopen the draft in the same browser, or export it as a local text file.
 
 ### Product principles, in priority order
 
@@ -82,7 +81,7 @@ Use this file for product requirements and acceptance tests. The
 | D-05 | DECIDED | Markdown underline syntax is **`<u>text</u>`**.                                                                                               |
 | D-06 | DECIDED | Support **full GitHub Flavored Markdown** in Markdown mode.                                                                                   |
 | D-07 | DECIDED | **Copy All** must let users choose **Markdown or Unicode**, not merely copy whichever mode is visible.                                        |
-| D-08 | DECIDED | Save/export is **manual**, to a local text file. Browser autosave is **not** part of the specified workflow.                                  |
+| D-08 | DECIDED | Save one draft in the current browser by default. Turning saving off deletes the browser copy. Offer manual file export.                      |
 | D-09 | DECIDED | Support selected-text style toggling, including returning Unicode bold text to ordinary text.                                                 |
 | D-10 | DECIDED | Include Bold, Italic, Underline, Strikethrough, and investigate/support bullet lists while retaining sensible layout.                         |
 | D-11 | DECIDED | Show live **words**, **total characters**, **paragraphs**, **average words per sentence**, and **median words per sentence**.                 |
@@ -101,8 +100,7 @@ Use this file for product requirements and acceptance tests. The
   switch.
 - Account registration, login, hosted document storage, text analytics,
   tracking, remote conversion APIs, or subscription features.
-- Automatic cloud saving or automatic browser `localStorage`/IndexedDB saving of
-  drafts without a new owner decision.
+- Automatic cloud saving or synchronizing drafts across devices.
 - Silent truncation or deletion when LinkedIn limits are exceeded.
 - Copying third-party application source code, text, or visual assets from the
   reference page.
@@ -150,7 +148,7 @@ Markdown to operate the toolbar.
 - Navigate and format using only keyboard controls.
 - Enlarge browser zoom to 200% or 400%; content, controls, copy, and export
   remain reachable.
-- Export the draft if you want to keep it after leaving the page.
+- Reopen the same URL in the same browser to resume a locally saved draft.
 
 ## 4. Interface and layout specification
 
@@ -159,8 +157,8 @@ Markdown to operate the toolbar.
 1. Header with the name, language, and theme.
 2. A short overview that readers can collapse.
 3. The draft card with editing modes, formatting, copy and export, and Help
-   and Clear draft. Leave most of the card for the editor. Put writing stats
-   below the draft.
+   and Clear draft. Show the local saving control in the draft header. Leave
+   most of the card for the editor. Put writing stats below the draft.
 4. LinkedIn length guidance and a footer with version, author, and project
    links.
 
@@ -573,13 +571,19 @@ InMail needs more than one profile.
 - If unrepresentable GFM features are preserved as literal source in Unicode
   output, the user should know this before copying.
 
-### Manual save/export — DECIDED
+### Local draft saving and manual export — DECIDED
 
 - Provide **Export** with a `.md` download for Markdown and a `.txt` download
   for Unicode. A native save dialog is optional. The download must work in
   modern browsers without special permissions.
-- Export is **manual only**. No automatic draft persistence or automatic saving
-  to localStorage, IndexedDB, cloud, or server should be introduced.
+- Save the current draft on edits in browser `localStorage` by default.
+  Reopen it in the same browser profile with its editing mode, exact
+  Markdown and Unicode representations, and Unicode line style options.
+  Undo and redo begin with empty history in a new tab or after reload.
+- Turning **Save draft locally** off removes the stored copy, keeps the open
+  draft editable, and remembers the preference. Turning it back on saves the
+  current draft. When multiple tabs edit with saving on, the last saved edit
+  determines what reopens.
 - Filenames should be safe and predictable, e.g., `boldemort-draft.md` /
   `boldemort-draft.txt` (or an explicitly entered name).
 - Use UTF-8 and preserve line breaks. Respect whether the user exports Markdown
@@ -589,8 +593,8 @@ InMail needs more than one profile.
 - **OPEN:** import/open existing `.txt`/`.md` files, multiple drafts/tabs, and
   precise unsaved-changes indicators. A minimal one-document implementation is
   acceptable initially.
-- Export is how the user keeps a draft when leaving. Any future browser
-  departure warning would be advisory because browser support varies.
+- Keep editing and export available if browser storage fails. Start with a
+  fresh draft if saved data cannot be read.
 
 ### Paste and external compatibility
 
@@ -811,9 +815,9 @@ follow-up questions open until the owner chooses a different behavior.
 | Unicode emphasis | Should the editor offer other alphabets or rules for mixed selections? | Keep mathematical serif emphasis and the current selection toggle. |
 | LinkedIn | Are more presets needed, and how does LinkedIn count characters? | Show an estimated count based on the selected output. |
 | Diagnostics | Which additional hints are reliable and useful? | Keep warnings advisory and use high-confidence checks. |
-| File workflow | Should the editor open files or manage more than one draft? | Keep one draft in the tab and offer manual export. |
+| File workflow | Should the editor open files or manage more than one draft? | Save one draft locally and offer manual export. |
 | Extra controls | Should readers get a preview, selection metrics, or more shortcuts? | Keep the editor compact. |
-| Draft lifecycle | Should the app warn before leaving the page? | Confirm Clear draft and rely on export for keeping drafts. |
+| Draft lifecycle | Should the app warn before leaving the page? | Confirm Clear draft and save locally by default. |
 
 ## 15. Maintenance and release
 

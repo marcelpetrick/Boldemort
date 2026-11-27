@@ -71,8 +71,28 @@
    from that run. Leave `(**A**) x` unchanged.
 3. Run the shared pipeline and mutation tests, then release 0.4.7.
 
+## 0.5.0 local draft saving
+
+1. Replace the manual-only draft decision in the product brief. Add a
+   default-on **Save draft locally** control alongside the editor.
+2. Save the document after edits, formatting, undo, redo, and mode switches.
+   Reopen the same URL in a new tab after closing the editor. Verify the draft
+   restores in the same mode and both representations keep their exact text.
+3. Turn saving off and verify the browser copy is removed immediately, even
+   when another tab continues editing. Verify later visits stay blank with
+   saving off. Re-enable saving and verify the current draft is saved.
+4. Verify confirmed Clear draft removes the saved copy and undo can save it
+   again. Exercise malformed data and blocked or full storage without losing
+   access to editing or export.
+5. Update the README, screenshot, and changelog. Run local and browser checks,
+   sandboxed mutation tests, and the release archive check before committing.
+
 ## Progress
 
+- Verified default-on saving, tab close and reopen, opt-out, Clear draft,
+  undo, and storage failures in Chromium, Firefox, and WebKit. Verified the
+  0.5.0 archive checksum and repeated the storage checks across a full
+  Chromium restart using the unpacked site.
 - Vision intake complete. Both input files matched byte for byte. The root
   `vision.md` is the canonical copy.
 - Editor first pass complete. The browser workflow is running on Chromium and

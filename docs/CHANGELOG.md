@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.0
+
+- Save the current draft locally by default and restore its editing mode and
+  exact Markdown and Unicode text after reopening.
+- Turn off **Save draft locally** to delete the browser copy while keeping
+  the draft editable in the current tab.
+
 ## 0.4.7
 
 - Keep a closing parenthesis inside a styled run when it balances an opening

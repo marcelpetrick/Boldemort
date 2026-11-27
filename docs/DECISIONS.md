@@ -5,8 +5,10 @@ The [product vision](../vision.md) sets the requirements. The
 
 ## Editor and output
 
-- One textarea shows the same draft in Markdown or Unicode. The browser keeps
-  the draft and editing history in memory for the current tab.
+- One textarea shows the same draft in Markdown or Unicode. The browser saves
+  the draft, editing mode, and Unicode line style options by default. Turning
+  saving off replaces the stored draft with an off preference. Confirmed
+  Clear draft removes the saved copy. Editing history lasts for the tab.
 - The GFM parser records where elements begin and end in the Markdown source.
   Simple unordered lists become Unicode bullets. Nested lists, task lists,
   and other complex structures keep their original Markdown. Nested,
@@ -36,8 +38,8 @@ The [product vision](../vision.md) sets the requirements. The
   Mode switching and Copy all have no shortcut because the obvious keys
   belong to browser developer tools.
 - English and German are available with System, Light, Dark, and Bavarian
-  themes. Settings last for the current tab. The Help dialog makes the full
-  tooltips available on touch devices.
+  themes. Language and theme choices last for the current tab. The Help
+  dialog makes the full tooltips available on touch devices.
 - LinkedIn estimates use UTF-16 units from the selected output. The app warns
   at 90% and labels the source of each limit. Writing statistics use the
   parsed content, and the visible character count uses Unicode graphemes.

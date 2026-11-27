@@ -6,8 +6,10 @@ import {
   formatSelection,
   formatTyping,
   selectionFormatting,
+  type Draft,
   type Replacement,
 } from './document.ts';
+import { draftKey, readDraft } from './draft.ts';
 import { analyze, limits, measureLimit, type Warning } from './analysis.ts';
 import {
   explanation,
@@ -40,7 +42,9 @@ const diagnostics = get('diagnostics');
 const helpDialog = get<HTMLDialogElement>('help-dialog');
 const clearDialog = get<HTMLDialogElement>('clear-dialog');
 const clipboardDialog = get<HTMLDialogElement>('clipboard-dialog');
-const doc = new Document();
+const keepDraft = get<HTMLInputElement>('draft-saving');
+const storageWarning = get('storage-warning');
+const doc = restoreDraft();
 const armed = new Set<Style>();
 const randomButton = get<HTMLButtonElement>('random-font');
 let randomFont = false;
@@ -65,6 +69,58 @@ const t = (key: Key, values?: Record<string, string>) =>
 const dismissTooltip = installTooltips(get('tooltip'), () => locale);
 const number = (value: number) =>
   new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(value);
+
+function accessDraftStorage(operation: (storage: Storage) => void) {
+  try {
+    operation(window.localStorage);
+    return true;
+  } catch {
+    storageWarning.hidden = false;
+    return false;
+  }
+}
+
+function restoreDraft() {
+  let draft: Draft | undefined;
+  accessDraftStorage((storage) => {
+    const saved = storage.getItem(draftKey);
+    keepDraft.checked = saved !== 'off';
+    if (saved && keepDraft.checked) draft = readDraft(saved);
+  });
+  return new Document(draft);
+}
+
+function saveDraft({ preferenceChanged = false, previousText = '' } = {}) {
+  if (
+    !preferenceChanged &&
+    (!keepDraft.checked || (!doc.frame.text && !previousText))
+  )
+    return;
+  if (
+    accessDraftStorage((storage) => {
+      // Check storage before writing in case another tab just turned saving off.
+      if (!preferenceChanged && storage.getItem(draftKey) === 'off') {
+        keepDraft.checked = false;
+        return;
+      }
+      if (!keepDraft.checked) storage.setItem(draftKey, 'off');
+      else if (doc.frame.text)
+        storage.setItem(draftKey, JSON.stringify(doc.draft()));
+      else storage.removeItem(draftKey);
+    })
+  )
+    storageWarning.hidden = true;
+}
+
+function editDraft(
+  text: string,
+  range: ReturnType<typeof selection>,
+  kind = '',
+) {
+  const previousText = doc.frame.text;
+  doc.edit(text, range, kind);
+  saveDraft({ previousText });
+}
 
 function setNotice(key?: Key, values?: Record<string, string>) {
   notice = key;
@@ -255,7 +311,7 @@ function replace(change: Replacement, selectResult: boolean, kind = '') {
     change.value +
     editor.value.slice(change.end);
   const end = change.caret ?? change.start + change.value.length;
-  doc.edit(text, { start: selectResult ? change.start : end, end }, kind);
+  editDraft(text, { start: selectResult ? change.start : end, end }, kind);
   renderEditor();
 }
 function applyFormatting(change: Replacement | undefined) {
@@ -297,7 +353,11 @@ function toggle(style: Style) {
 }
 function history(direction: 'undo' | 'redo') {
   doc.select(selection());
-  if (doc[direction]()) renderEditor();
+  const previousText = doc.frame.text;
+  if (doc[direction]()) {
+    saveDraft({ previousText });
+    renderEditor();
+  }
 }
 
 editor.addEventListener('beforeinput', (event) => {
@@ -340,7 +400,7 @@ editor.addEventListener('input', (event) => {
   if (composing) return;
   dismissTooltip();
   const kind = (event as InputEvent).inputType;
-  doc.edit(
+  editDraft(
     editor.value,
     selection(),
     /^(insertText|deleteContentBackward|deleteContentForward)$/u.test(kind)
@@ -358,7 +418,7 @@ editor.addEventListener('compositionstart', () => {
 });
 editor.addEventListener('compositionend', () => {
   composing = false;
-  doc.edit(editor.value, selection());
+  editDraft(editor.value, selection());
   renderControls();
   scheduleAnalysis();
 });
@@ -405,6 +465,7 @@ for (const button of modes)
     if (button.dataset.mode === doc.frame.mode) return;
     doc.select(selection());
     doc.switchTo(button.dataset.mode as Mode);
+    saveDraft();
     setNotice(
       doc.frame.mode === 'unicode' &&
         inspectMarkdown(doc.output('markdown')).literal
@@ -452,10 +513,12 @@ const underlineStyle = get<HTMLSelectElement>('underline-style');
 const strikeStyle = get<HTMLSelectElement>('strike-style');
 underlineStyle.addEventListener('change', () => {
   doc.lineStyles.underline = underlineStyle.value as LineStyles['underline'];
+  saveDraft();
   renderAnalysis();
 });
 strikeStyle.addEventListener('change', () => {
   doc.lineStyles.strike = strikeStyle.value as LineStyles['strike'];
+  saveDraft();
   renderAnalysis();
 });
 
@@ -513,7 +576,7 @@ clearDialog.addEventListener('close', () => {
     clearDialog.returnValue = '';
     armed.clear();
     randomFont = false;
-    doc.edit('', { start: 0, end: 0 });
+    editDraft('', { start: 0, end: 0 });
     setNotice();
     renderEditor();
   }
@@ -531,6 +594,20 @@ get('help').addEventListener('click', () => {
   helpDialog.showModal();
 });
 get('version').textContent = 'v' + version;
-editor.value = '';
+keepDraft.addEventListener('change', () => {
+  saveDraft({ preferenceChanged: true });
+});
+window.addEventListener('storage', (event) => {
+  if (event.key === draftKey || event.key === null) {
+    accessDraftStorage((storage) => {
+      keepDraft.checked = storage.getItem(draftKey) !== 'off';
+    });
+  }
+});
+underlineStyle.value = doc.lineStyles.underline;
+strikeStyle.value = doc.lineStyles.strike;
+editor.value = doc.frame.text;
+editor.setSelectionRange(doc.frame.start, doc.frame.end);
 translate();
+renderControls();
 renderAnalysis();

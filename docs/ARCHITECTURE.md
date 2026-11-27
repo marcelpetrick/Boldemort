@@ -2,7 +2,7 @@
 
 <!-- markdownlint-configure-file { "MD013": { "code_blocks": false } } -->
 
-Boldemort keeps one draft in a browser tab. The writer can edit it as
+Boldemort saves one draft in the browser by default. The writer can edit it as
 Markdown or Unicode, then copy or download either form. GitHub Pages serves
 the app files. The browser handles the draft, undo history, and writing
 checks locally.
@@ -31,13 +31,14 @@ C4Context
 
 The editor is the single application container. GitHub Actions builds its
 static files and GitHub Pages serves them. The editor uses browser APIs for
-clipboard access and downloads. Refreshing the page starts a new draft.
+clipboard access, downloads, and local storage. On startup the editor reads
+the saved draft from the same browser profile.
 
 ```mermaid
 flowchart TB
     writer(["Writer"])
     pages["GitHub Pages · external host"]
-    browser["Browser APIs · clipboard and downloads"]
+    browser["Browser APIs · clipboard, downloads, local storage"]
 
     subgraph boldemort["Boldemort"]
         editor["Editor in the browser<br/>HTML, CSS, and TypeScript<br/>Draft and history in tab memory"]
@@ -45,7 +46,7 @@ flowchart TB
 
     writer -->|Edits the draft| editor
     pages -->|Serves static files over HTTPS| editor
-    editor -->|Copies or exports text| browser
+    editor -->|Copies, exports, or saves the draft| browser
 ```
 
 ## 3. Components
@@ -56,6 +57,12 @@ operate on text, so they can be tested without a browser. The writing checks
 and UI also use the Markdown parser and Unicode helpers for notices, writing
 statistics, and the visible character count.
 
+The draft reader validates the stored mode, line styles, and ordered pieces.
+Restoring these pieces preserves both exact spellings and pending edits
+without restoring the undo stack. A versioned storage key holds either one
+snapshot or the off preference. Open tabs read the preference when storage
+changes and check it before saving.
+
 ```mermaid
 flowchart TB
     subgraph editor["Boldemort editor"]
@@ -65,12 +72,14 @@ flowchart TB
         selection["Selection mapping<br/>selection.ts"]
         analysis["Writing checks<br/>analysis.ts"]
         help["Language and help<br/>i18n.ts, tooltip.ts"]
+        draft["Saved draft validation<br/>draft.ts"]
         markdown["Markdown conversion<br/>markdown.ts"]
         unicode["Unicode styling<br/>unicode.ts"]
 
         ui -->|Applies edits| doc
         ui -->|Requests statistics and warnings| analysis
         ui -->|Shows labels and help| help
+        ui -->|Validates the stored draft| draft
         doc -->|Projects the draft| markdown
         doc -->|Formats text| unicode
         doc -->|Maps the selection| selection

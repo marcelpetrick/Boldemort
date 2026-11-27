@@ -14,6 +14,7 @@ checks for the editor and its delivery workflow.
 | Random font in Unicode mode | Test predictable glyph choices, undo, formatting as you type, code protection, combining marks, and Markdown round-trips. |
 | Whole-draft formatting and reversible Random font | Select a multiline draft with code and links. Apply Bold or Random font, then click again to restore eligible text. |
 | Visible editor actions and warnings | Find Help and Clear draft next to the editor. Verify that skipped Markdown syntax is explained beside the draft. |
+| Local draft saving | With saving on by default, reopen the URL in a new tab and verify the exact draft and mode. Turn saving off and verify later visits stay blank. Clear the draft and verify the saved copy is removed. |
 | Light, Dark, System, and Bavarian | Change the theme in browser tests and check Bavarian contrast with axe. |
 | English, German, and tooltips | Switch languages and check that short hints expand after four seconds. |
 | Overview before the editor | Verify the introduction is open by default and above the draft with a paragraph and three bullets explaining LinkedIn and plain-text email use. |

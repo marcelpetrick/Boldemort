@@ -3,7 +3,7 @@
 [![CI](https://github.com/marcelpetrick/Boldemort/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/marcelpetrick/Boldemort/actions/workflows/ci.yml)
 [![GitHub Pages](https://github.com/marcelpetrick/Boldemort/actions/workflows/pages.yml/badge.svg)](https://github.com/marcelpetrick/Boldemort/actions/workflows/pages.yml)
 [![Release pipeline](https://github.com/marcelpetrick/Boldemort/actions/workflows/release.yml/badge.svg)](https://github.com/marcelpetrick/Boldemort/actions/workflows/release.yml)
-[![Version 0.4.7](https://img.shields.io/badge/version-0.4.7-6241c2)](docs/CHANGELOG.md)
+[![Version 0.5.0](https://img.shields.io/badge/version-0.5.0-6241c2)](docs/CHANGELOG.md)
 [![License GPL v3 or later](https://img.shields.io/badge/license-GPLv3%20or%20later-blue.svg)](LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-6-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Vite](https://img.shields.io/badge/Vite-8-646cff?logo=vite&logoColor=white)](https://vite.dev/)
@@ -12,7 +12,7 @@
 [![Mutation testing](https://img.shields.io/badge/mutation%20testing-Stryker-f28c28)](#local-development)
 [![Playwright](https://img.shields.io/badge/tested_with-Playwright-2ead33)](https://playwright.dev/)
 [![Languages](https://img.shields.io/badge/languages-English%20%7C%20Deutsch-6241c2)](#using-the-editor)
-[![Privacy](https://img.shields.io/badge/drafts-browser%20memory-26704d)](#using-the-editor)
+[![Privacy](https://img.shields.io/badge/drafts-local%20browser-26704d)](#using-the-editor)
 
 Give a LinkedIn post or plain-text email a little emphasis. Write in Markdown,
 switch to copyable Unicode, and keep editing in the same draft. Boldemort
@@ -79,7 +79,14 @@ numbered lists keep their markers, and their item text can still be
 formatted. After an edit in the other view, the editor keeps the original
 Markdown spelling where it still recognizes the same span. Browser text input
 uses LF line endings.
-Drafts live in the current tab. Export a copy to keep one.
+
+**Save draft locally** is on by default. Reload or reopen the same URL in
+the same browser profile to recover your draft and editing mode. Turning
+saving off deletes the saved copy immediately and leaves the text in your
+open tab. Turning it back on saves the text you are editing. **Clear draft**
+also deletes the saved copy after confirmation. Undo history starts fresh on
+each load. If you edit in several tabs, the last saved change is the one
+you'll see when you reopen the site. Use **Export** for a separate file copy.
 
 ## Repository layout
 

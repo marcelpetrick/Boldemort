@@ -221,6 +221,15 @@ h2 {
   font-size: 1rem;
 }
 
+.draft-saving {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 1.85rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
 .modes {
   display: inline-flex;
   gap: 0.12rem;
@@ -431,7 +440,9 @@ button[aria-pressed='true'] {
 }
 
 .hint:empty,
-.notices:has(.hint:empty):has(details[hidden]):has(#literal-notice[hidden]) {
+.notices:has(.hint:empty):has(details[hidden]):has(#literal-notice[hidden]):has(
+    #storage-warning[hidden]
+  ) {
   display: none;
 }
 
@@ -442,13 +453,15 @@ button[aria-pressed='true'] {
 
 .hint.warning,
 #literal-notice,
+#storage-warning,
 .notices summary {
   color: var(--warning);
   font-weight: 700;
 }
 
 .hint.warning,
-#literal-notice {
+#literal-notice,
+#storage-warning {
   margin: 0 0 0.35rem;
   padding: 0.45rem 0.65rem;
   border-inline-start: 0.25rem solid var(--warning);

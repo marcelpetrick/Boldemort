@@ -40,6 +40,11 @@ export const messages = {
   light: ['Light', 'Hell'],
   dark: ['Dark', 'Dunkel'],
   draft: ['Your draft', 'Dein Entwurf'],
+  draftSaving: ['Save draft locally', 'Entwurf lokal speichern'],
+  storageWarning: [
+    'Local draft storage is unavailable. Export a copy to keep your current text.',
+    'Der lokale Entwurfsspeicher ist nicht verfügbar. Exportiere eine Kopie, um deinen aktuellen Text zu behalten.',
+  ],
   mode: ['Editing mode', 'Bearbeitungsmodus'],
   formatting: ['Formatting', 'Formatierung'],
   bold: ['Bold', 'Fett'],
@@ -71,7 +76,10 @@ export const messages = {
   note: ['Connection note', 'Kontaktanfrage'],
   source: ['Source', 'Quelle'],
   diagnostics: ['Writing hints', 'Schreibhilfen'],
-  privacy: ['Drafts stay in this tab', 'Entwürfe bleiben in diesem Tab'],
+  privacy: [
+    'Drafts stay in your browser',
+    'Entwürfe bleiben in deinem Browser',
+  ],
   help: ['Help', 'Hilfe'],
   clear: ['Clear draft', 'Entwurf leeren'],
   close: ['Close', 'Schließen'],
@@ -258,9 +266,15 @@ export const help = {
   ],
   editor: [
     'Write or paste plain text.',
-    'The text lives in this tab. Use the toolbar on a selection, or arm a style before typing. Export before closing to keep a copy.',
+    'Use the toolbar on a selection, or arm a style before typing. Export to download a copy.',
     'Klartext schreiben oder einfügen.',
-    'Der Text bleibt in diesem Tab. Formatiere eine Auswahl oder aktiviere einen Stil für die Eingabe. Exportiere deinen Entwurf vor dem Schließen.',
+    'Formatiere eine Auswahl oder aktiviere einen Stil für die Eingabe. Exportiere den Entwurf, um eine Kopie herunterzuladen.',
+  ],
+  draftSaving: [
+    'Save your draft in this browser.',
+    'The draft reopens in this browser. Turning saving off deletes the saved copy and keeps the text in the open tab.',
+    'Speichere deinen Entwurf in diesem Browser.',
+    'Der Entwurf wird in diesem Browser erneut geöffnet. Wenn du das Speichern ausschaltest, wird die gespeicherte Kopie gelöscht. Im offenen Tab bleibt der Text erhalten.',
   ],
   words: [
     'Words in the draft.',
