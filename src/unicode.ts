@@ -40,9 +40,13 @@ for (const font of randomFonts) {
 
 type EditableGlyph = (start: number, end: number) => boolean;
 
+function firstGlyph(segment: string) {
+  return segment.slice(0, segment.codePointAt(0)! > 0xffff ? 2 : 1);
+}
+
 function* randomFontGlyphs(text: string, editable?: EditableGlyph) {
   for (const { segment, index } of graphemes(text)) {
-    const [glyph = ''] = segment;
+    const glyph = firstGlyph(segment);
     const base = reverse.get(glyph)?.[0];
     const eligible =
       base !== undefined && (editable?.(index, index + segment.length) ?? true);
@@ -103,7 +107,7 @@ const strikes = new Set<string>(Object.values(lineMarks.strike));
 export const needsUnicodeDecoding =
   /[\u210e\u{1d400}-\u{1d7ff}\uff10-\uff19\uff21-\uff3a\uff41-\uff5a]|[\u0332-\u0336]|\u035f/u;
 const acceptsLine = /[^\s]|\p{Zs}/u;
-export const horizontalSpace = /^\p{Zs}|^\t/u;
+export const horizontalSpace = /^[\t\p{Zs}]/u;
 const segmenter =
   typeof Intl.Segmenter === 'function' ? new Intl.Segmenter() : undefined;
 type Grapheme = { segment: string; index: number };
@@ -118,7 +122,7 @@ export function* graphemes(text: string): Iterable<Grapheme> {
     yield { segment: match[0], index: match.index };
 }
 export function decode(segment: string) {
-  const glyph = segment.slice(0, segment.codePointAt(0)! > 0xffff ? 2 : 1);
+  const glyph = firstGlyph(segment);
   const [base, mask] = reverse.get(glyph) ?? [glyph, 0];
   const tail = segment.slice(glyph.length);
   const rest = tail && acceptsLine.test(glyph) ? [...tail] : undefined;
@@ -171,7 +175,7 @@ function encode(item: ReturnType<typeof decode>, lineStyles: LineStyles) {
     Number(item.active.has('bold')) + 2 * Number(item.active.has('italic'));
   const glyph =
     (mask === 0 ? item.alternative : undefined) ??
-    maps[mask]?.[plain.indexOf(item.base)] ??
+    maps[mask]![plain.indexOf(item.base)] ??
     item.base;
   return (
     glyph +

@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
+import type { Nodes } from 'mdast';
 import {
   inspectMarkdown,
   parse,
@@ -31,31 +32,23 @@ function changedRange(previous: string, next: string) {
   let start = 0;
   let end = previous.length;
   let nextEnd = next.length;
-  while (start < end && start < nextEnd && previous[start] === next[start])
-    start++;
-  // Keep UTF-16 surrogate pairs together at edit boundaries.
-  if (
-    /[\udc00-\udfff]/u.test(previous[start] ?? '') ||
-    /[\udc00-\udfff]/u.test(next[start] ?? '')
-  )
-    start--;
-  start = Math.max(0, start);
+  // A shared high surrogate alone must not make two different glyphs part
+  // of the common prefix. That would hide an unchanged glyph in the suffix.
+  for (;;) {
+    const codePoint = previous.codePointAt(start);
+    if (codePoint === undefined || codePoint !== next.codePointAt(start)) break;
+    start += codePoint > 0xffff ? 2 : 1;
+  }
+  // These offsets only decide which whole projections can be kept. The
+  // edited text supplies every gap, including edits inside a surrogate pair.
   while (
-    end > start &&
-    nextEnd > start &&
+    Math.min(end, nextEnd) > start &&
     previous[end - 1] === next[nextEnd - 1]
   ) {
     end--;
     nextEnd--;
   }
-  if (
-    /[\udc00-\udfff]/u.test(previous[end] ?? '') ||
-    /[\udc00-\udfff]/u.test(next[nextEnd] ?? '')
-  ) {
-    end++;
-    nextEnd++;
-  }
-  return { start, end, value: next.slice(start, nextEnd) };
+  return { start, end };
 }
 
 export class Document {
@@ -64,7 +57,7 @@ export class Document {
   #undo: State[] = [];
   #redo: State[] = [];
   #editedAt = 0;
-  #editKind = '';
+  #editKind: string | undefined;
 
   constructor(draft?: Draft) {
     if (!draft) return;
@@ -105,7 +98,7 @@ export class Document {
     this.#editKind = kind;
   }
   endGroup() {
-    this.#editKind = '';
+    this.#editKind = undefined;
   }
   edit(text: string, selection: Selection, kind = '') {
     const before = this.#state;
@@ -123,38 +116,33 @@ export class Document {
       };
       return;
     }
-    const { start, end, value } = changedRange(before.text, text);
+    const { start, end } = changedRange(before.text, text);
+    const shift = text.length - before.text.length;
     const pieces: Piece[] = [];
     const mode = before.mode;
-    function addPending(raw: string) {
-      if (!raw) return;
-      const previous = pieces.at(-1);
-      if (previous && 'text' in previous)
-        pieces[pieces.length - 1] = { mode, text: previous.text + raw };
-      else pieces.push({ mode, text: raw });
-    }
-    let offset = 0;
-    let inserted = false;
+    let previousOffset = 0;
+    let written = 0;
     for (const piece of before.pieces) {
-      const raw = 'text' in piece ? piece.text : piece[mode];
-      const limit = offset + raw.length;
-      if (limit <= start || offset >= end) {
-        if (!inserted && offset >= end) {
-          addPending(value);
-          inserted = true;
-        }
-        pieces.push(piece);
-      } else {
-        addPending(raw.slice(0, Math.max(0, start - offset)));
-        if (!inserted) {
-          addPending(value);
-          inserted = true;
-        }
-        if (limit > end) addPending(raw.slice(end - offset));
+      if ('text' in piece) {
+        previousOffset += piece.text.length;
+        continue;
       }
-      offset = limit;
+      let position = previousOffset;
+      const length = piece[mode].length;
+      previousOffset += length;
+      if (previousOffset > start) {
+        if (position < end) continue;
+        position += shift;
+      }
+      // Unchanged projections retain their exact spelling. Everything between
+      // them comes straight from the edited representation.
+      const gap = text.slice(written, position);
+      if (gap) pieces.push({ mode, text: gap });
+      pieces.push(piece);
+      written = position + length;
     }
-    if (!inserted) addPending(value);
+    const tail = text.slice(written);
+    if (tail) pieces.push({ mode, text: tail });
     this.#state = { mode, text, ...selection, pieces };
   }
   output(mode: Mode) {
@@ -219,7 +207,6 @@ export class Document {
     if (!state) return false;
     this.#undo.push(this.#state);
     this.#state = state;
-    this.endGroup();
     return true;
   }
 }
@@ -242,7 +229,6 @@ function rejoin(
   lineStyles: LineStyles,
 ) {
   const pieces: Projection[] = [];
-  let reused = false;
   let gap = start;
   for (let position = start; position < end;) {
     const original = remembered.get(position);
@@ -253,12 +239,12 @@ function rejoin(
     }
     pieces.push(...project(text.slice(gap, position), mode, lineStyles));
     pieces.push(original);
-    reused = true;
     position += length;
     gap = position;
   }
+  if (gap === start) return;
   pieces.push(...project(text.slice(gap, end), mode, lineStyles));
-  return reused ? pieces : undefined;
+  return pieces;
 }
 
 function editableGlyphs(ranges: Selection[], offset: number) {
@@ -345,10 +331,12 @@ function wrapsCleanly(
 function exposesMarkdownBlock(text: string, start: number, body: string) {
   const lineStart = start === 0 ? 0 : text.lastIndexOf('\n', start - 1) + 1;
   const prefix = text.slice(lineStart, start);
+  if (!/^[ \t]*(?:(?:[-+*]|\d{1,9}[.)]|>)[ \t]*)*$/u.test(prefix)) return false;
+  // The indentation before an inline wrapper still counts after removal.
+  const candidate = /^[ \t]*$/u.test(prefix) ? prefix + body : body;
   return (
-    /^[ \t]*(?:(?:[-+*]|\d{1,9}[.)]|>)[ \t]*)*$/u.test(prefix) &&
-    /^(?:[#>*+[\x60_~-]|\d{1,9}[.)])/u.test(body) &&
-    parse(body).children[0]?.type !== 'paragraph'
+    /^(?:[ \t#>*+[\x60_~-]|\d{1,9}[.)])/u.test(candidate) &&
+    parse(candidate).children[0]?.type !== 'paragraph'
   );
 }
 
@@ -621,14 +609,14 @@ export function bulletLines(frame: Frame): Replacement {
     ),
   );
   const end = next === -1 ? text.length : next;
-  if (
-    inspectMarkdown(text).protectedRanges.some(
-      (range) =>
-        range.start < end &&
-        range.end > start &&
-        /^(?: {4}[^ ]|\t|\s*[`~]{3})/u.test(text.slice(range.start, range.end)),
-    )
-  ) {
+  function intersectsCode(node: Nodes): boolean {
+    if (node.type === 'code') {
+      const range = node.position!;
+      return range.start.offset! < end && range.end.offset! > start;
+    }
+    return 'children' in node && node.children.some(intersectsCode);
+  }
+  if (intersectsCode(parse(text))) {
     return { start, end, value: text.slice(start, end) };
   }
   const lines = text.slice(start, end).split('\n');

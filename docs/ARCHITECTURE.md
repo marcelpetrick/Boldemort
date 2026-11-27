@@ -59,9 +59,10 @@ statistics, and the visible character count.
 
 The draft reader validates the stored mode, line styles, and ordered pieces.
 Restoring these pieces preserves both exact spellings and pending edits
-without restoring the undo stack. A versioned storage key holds either one
-snapshot or the off preference. Open tabs read the preference when storage
-changes and check it before saving.
+without restoring the undo stack. One key records the active draft location
+and saving preference. Turning saving back on selects a fresh snapshot key.
+Tabs check the active location before saving and remove writes that arrive
+at a retired location while saving is off.
 
 ```mermaid
 flowchart TB

@@ -3,7 +3,7 @@
 [![CI](https://github.com/marcelpetrick/Boldemort/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/marcelpetrick/Boldemort/actions/workflows/ci.yml)
 [![GitHub Pages](https://github.com/marcelpetrick/Boldemort/actions/workflows/pages.yml/badge.svg)](https://github.com/marcelpetrick/Boldemort/actions/workflows/pages.yml)
 [![Release pipeline](https://github.com/marcelpetrick/Boldemort/actions/workflows/release.yml/badge.svg)](https://github.com/marcelpetrick/Boldemort/actions/workflows/release.yml)
-[![Version 0.5.0](https://img.shields.io/badge/version-0.5.0-6241c2)](docs/CHANGELOG.md)
+[![Version 0.5.1](https://img.shields.io/badge/version-0.5.1-6241c2)](docs/CHANGELOG.md)
 [![License GPL v3 or later](https://img.shields.io/badge/license-GPLv3%20or%20later-blue.svg)](LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-6-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Vite](https://img.shields.io/badge/Vite-8-646cff?logo=vite&logoColor=white)](https://vite.dev/)
@@ -86,7 +86,9 @@ saving off deletes the saved copy immediately and leaves the text in your
 open tab. Turning it back on saves the text you are editing. **Clear draft**
 also deletes the saved copy after confirmation. Undo history starts fresh on
 each load. If you edit in several tabs, the last saved change is the one
-you'll see when you reopen the site. Use **Export** for a separate file copy.
+you'll see when you reopen the site. If the browser rejects a setting change
+or deletion, the editor shows what failed. Use **Export** for a separate file
+copy.
 
 ## Repository layout
 
@@ -119,7 +121,7 @@ runs ShellCheck and actionlint when installed.
 
 - Run `npm run performance` for the [long-draft checks](docs/PERFORMANCE.md).
 - Run `npm run mutation` to test the conversion and analysis core in a sandbox.
-  The minimum score is 80%, and reports go to `reports/mutation/`.
+  The minimum score is 95%, and reports go to `reports/mutation/`.
 
 On supported Linux hosts, Playwright can install system libraries with
 `npx playwright install --with-deps chromium firefox webkit` after the npm

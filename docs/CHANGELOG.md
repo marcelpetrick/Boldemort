@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.5.1
+
+- Keep local saving off even when another tab is finishing a save. Report
+  storage failures and make saving help accessible from the keyboard.
+- Discard malformed drafts with empty conversion spans and retain exact
+  Markdown spelling while editing across unchanged spans.
+- Preserve indented and nested code when applying bullets, and omit
+  unclosed-fence warnings for fence characters inside indented code.
+- Keep inline formatting when removing it would turn the line into an
+  indented code block or a heading.
+- Raise the sandboxed mutation score gate to 95%.
+
 ## 0.5.0
 
 - Save the current draft locally by default and restore its editing mode and

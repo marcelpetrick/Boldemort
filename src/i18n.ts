@@ -45,6 +45,14 @@ export const messages = {
     'Local draft storage is unavailable. Export a copy to keep your current text.',
     'Der lokale Entwurfsspeicher ist nicht verfügbar. Exportiere eine Kopie, um deinen aktuellen Text zu behalten.',
   ],
+  storagePreferenceWarning: [
+    'Could not change local draft saving. The browser kept the previous setting.',
+    'Das lokale Speichern konnte nicht geändert werden. Der Browser hat die bisherige Einstellung beibehalten.',
+  ],
+  storageRemovalWarning: [
+    'Could not delete the locally saved draft. It may still reopen. Turn off local draft saving to try again.',
+    'Der lokal gespeicherte Entwurf konnte nicht gelöscht werden und kann beim erneuten Öffnen erscheinen. Schalte das lokale Speichern aus, um es erneut zu versuchen.',
+  ],
   mode: ['Editing mode', 'Bearbeitungsmodus'],
   formatting: ['Formatting', 'Formatierung'],
   bold: ['Bold', 'Fett'],

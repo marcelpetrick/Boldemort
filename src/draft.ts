@@ -3,6 +3,14 @@ import type { Draft } from './document.ts';
 import { lineMarks } from './unicode.ts';
 
 export const draftKey = 'boldemort:draft:v1';
+export const draftPreferenceKey = 'boldemort:draft-preference:v1';
+
+export function draftLocation(preference: string) {
+  const enabled = !preference.startsWith('!');
+  const id = enabled ? preference : preference.slice(1);
+  const key = id ? draftKey + ':' + id : draftKey;
+  return { id, key, enabled };
+}
 
 export function readDraft(raw: string): Draft | undefined {
   let draft: Draft | null;
@@ -19,7 +27,9 @@ export function readDraft(raw: string): Draft | undefined {
       return 'text' in piece
         ? typeof piece.text === 'string' && piece.mode === draft.mode
         : typeof piece.markdown === 'string' &&
-            typeof piece.unicode === 'string';
+            piece.markdown.length > 0 &&
+            typeof piece.unicode === 'string' &&
+            piece.unicode.length > 0;
     })
   )
     return;

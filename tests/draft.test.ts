@@ -1,7 +1,22 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import { describe, expect, it } from 'vitest';
 import { Document } from '../src/document.ts';
-import { readDraft } from '../src/draft.ts';
+import { draftKey, draftLocation, readDraft } from '../src/draft.ts';
+
+it('retains the last draft location while saving is off', () => {
+  expect(draftLocation('')).toEqual({ id: '', key: draftKey, enabled: true });
+  expect(draftLocation('!')).toEqual({ id: '', key: draftKey, enabled: false });
+  expect(draftLocation('token')).toEqual({
+    id: 'token',
+    key: draftKey + ':token',
+    enabled: true,
+  });
+  expect(draftLocation('!token')).toEqual({
+    id: 'token',
+    key: draftKey + ':token',
+    enabled: false,
+  });
+});
 
 describe('browser draft data', () => {
   const lineStyles = { underline: 'low', strike: 'long' } as const;
@@ -40,6 +55,21 @@ describe('browser draft data', () => {
     expect(document.output('unicode')).toBe('a\u0332 b\u0336');
   });
 
+  it('discards a projection with an empty representation inside a run', () => {
+    const saved = readDraft(
+      JSON.stringify({
+        ...snapshot,
+        pieces: [
+          { markdown: '__A__', unicode: '𝐀' },
+          { markdown: '__B__', unicode: '' },
+          { mode: 'unicode', text: '𝐂' },
+        ],
+      }),
+    );
+    expect(saved).toBeUndefined();
+    expect(new Document(saved).output('markdown')).toBe('');
+  });
+
   it.each([
     '{',
     'null',
@@ -53,6 +83,7 @@ describe('browser draft data', () => {
       { pieces: [{ mode: 'markdown', text: 'pending' }] },
       { pieces: [{ unicode: 'projected' }] },
       { pieces: [{ markdown: 'projected' }] },
+      { pieces: [{ markdown: '', unicode: 'projected' }] },
       { lineStyles: undefined },
       { lineStyles: { underline: 0, strike: 'short' } },
       { lineStyles: { underline: 'toString', strike: 'short' } },

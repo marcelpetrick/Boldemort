@@ -83,12 +83,36 @@
    saving off. Re-enable saving and verify the current draft is saved.
 4. Verify confirmed Clear draft removes the saved copy and undo can save it
    again. Exercise malformed data and blocked or full storage without losing
-   access to editing or export.
+   access to editing or export. Verify a failed preference change keeps the
+   prior setting visible and reports the error. Check saving help on keyboard
+   focus and label hover.
 5. Update the README, screenshot, and changelog. Run local and browser checks,
    sandboxed mutation tests, and the release archive check before committing.
 
+## Mutation coverage improvements
+
+1. Use the 85.48% sandboxed score as the baseline. Keep the existing
+   mutation scope and reach at least 90.48% in the first increment.
+2. Add regression scenarios for surviving mutants whose changes affect
+   document edits, conversion, selection, formatting, or writing analysis.
+   Check expected output in both editor modes and preserve complete coverage.
+   Verify that applying bullets preserves complete code blocks, including
+   nested blocks and indentation beyond four spaces. Verify that indented
+   code containing fence characters produces no unclosed-fence warning.
+3. Run the sandboxed mutation suite and the shared pipeline. Record the
+   measured score before targeting 95.48%, then check whether remaining
+   mutants can be distinguished by supported behavior on the way to 100%.
+
 ## Progress
 
+- The second sandboxed mutation checkpoint reached 95.48% with zero
+  uncovered mutants in the existing five-module scope. The CI gate is 95%.
+  Keep equivalent mutants in the report. For example, changing the
+  selection-start test from `index < start` to `index <= start` only
+  adds a case that assigns the current `start` back to itself.
+- The first mutation checkpoint reached 90.82% in a full sandbox run,
+  exceeding the 90.48% target. Regression tests now distinguish changes in
+  span formatting, selection, writing statistics, and draft restoration.
 - Verified default-on saving, tab close and reopen, opt-out, Clear draft,
   undo, and storage failures in Chromium, Firefox, and WebKit. Verified the
   0.5.0 archive checksum and repeated the storage checks across a full

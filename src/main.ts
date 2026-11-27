@@ -9,7 +9,12 @@ import {
   type Draft,
   type Replacement,
 } from './document.ts';
-import { draftKey, readDraft } from './draft.ts';
+import {
+  draftKey,
+  draftLocation,
+  draftPreferenceKey,
+  readDraft,
+} from './draft.ts';
 import { analyze, limits, measureLimit, type Warning } from './analysis.ts';
 import {
   explanation,
@@ -44,6 +49,11 @@ const clearDialog = get<HTMLDialogElement>('clear-dialog');
 const clipboardDialog = get<HTMLDialogElement>('clipboard-dialog');
 const keepDraft = get<HTMLInputElement>('draft-saving');
 const storageWarning = get('storage-warning');
+let locale: Locale = navigator.language.toLowerCase().startsWith('de')
+  ? 'de'
+  : 'en';
+const t = (key: Key, values?: Record<string, string>) =>
+  localize(locale, key, values);
 const doc = restoreDraft();
 const armed = new Set<Style>();
 const randomButton = get<HTMLButtonElement>('random-font');
@@ -54,9 +64,6 @@ const selection = () => ({
   start: editor.selectionStart,
   end: editor.selectionEnd,
 });
-let locale: Locale = navigator.language.toLowerCase().startsWith('de')
-  ? 'de'
-  : 'en';
 let timer = 0;
 let composing = false;
 let notice: Key | undefined;
@@ -64,17 +71,20 @@ let noticeValues: Record<string, string> | undefined;
 let lastAnalysis:
   | { source: string; locale: Locale; result: ReturnType<typeof analyze> }
   | undefined;
-const t = (key: Key, values?: Record<string, string>) =>
-  localize(locale, key, values);
 const dismissTooltip = installTooltips(get('tooltip'), () => locale);
 const number = (value: number) =>
   new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(value);
 
-function accessDraftStorage(operation: (storage: Storage) => void) {
+function accessDraftStorage(
+  operation: (storage: Storage) => void,
+  warning: Key = 'storageWarning',
+) {
   try {
     operation(window.localStorage);
     return true;
   } catch {
+    storageWarning.dataset.i = warning;
+    storageWarning.textContent = t(warning);
     storageWarning.hidden = false;
     return false;
   }
@@ -83,33 +93,43 @@ function accessDraftStorage(operation: (storage: Storage) => void) {
 function restoreDraft() {
   let draft: Draft | undefined;
   accessDraftStorage((storage) => {
-    const saved = storage.getItem(draftKey);
-    keepDraft.checked = saved !== 'off';
-    if (saved && keepDraft.checked) draft = readDraft(saved);
+    const saved = syncDraftPreference(storage);
+    if (saved) draft = readDraft(saved);
   });
   return new Document(draft);
 }
 
-function saveDraft({ preferenceChanged = false, previousText = '' } = {}) {
-  if (
-    !preferenceChanged &&
-    (!keepDraft.checked || (!doc.frame.text && !previousText))
-  )
-    return;
-  if (
-    accessDraftStorage((storage) => {
-      // Check storage before writing in case another tab just turned saving off.
-      if (!preferenceChanged && storage.getItem(draftKey) === 'off') {
-        keepDraft.checked = false;
-        return;
+function currentDraftLocation(storage: Storage) {
+  return draftLocation(storage.getItem(draftPreferenceKey) ?? '');
+}
+
+function syncDraftPreference(storage: Storage) {
+  const location = currentDraftLocation(storage);
+  const saved = storage.getItem(location.key);
+  keepDraft.checked = location.enabled && saved !== 'off';
+  if (!location.enabled) storage.removeItem(location.key);
+  return keepDraft.checked ? saved : null;
+}
+
+function saveDraft(previousText = '') {
+  if (!keepDraft.checked || (!doc.frame.text && !previousText)) return;
+  const warning = doc.frame.text ? 'storageWarning' : 'storageRemovalWarning';
+  const saved = accessDraftStorage((storage) => {
+    const location = currentDraftLocation(storage);
+    if (!location.enabled || storage.getItem(location.key) === 'off') {
+      keepDraft.checked = false;
+      return;
+    }
+    if (doc.frame.text) {
+      storage.setItem(location.key, JSON.stringify(doc.draft()));
+      const current = currentDraftLocation(storage);
+      if (!current.enabled || current.key !== location.key) {
+        storage.removeItem(location.key);
+        keepDraft.checked = current.enabled;
       }
-      if (!keepDraft.checked) storage.setItem(draftKey, 'off');
-      else if (doc.frame.text)
-        storage.setItem(draftKey, JSON.stringify(doc.draft()));
-      else storage.removeItem(draftKey);
-    })
-  )
-    storageWarning.hidden = true;
+    } else storage.removeItem(location.key);
+  }, warning);
+  if (saved) storageWarning.hidden = true;
 }
 
 function editDraft(
@@ -119,7 +139,7 @@ function editDraft(
 ) {
   const previousText = doc.frame.text;
   doc.edit(text, range, kind);
-  saveDraft({ previousText });
+  if (text !== previousText) saveDraft(previousText);
 }
 
 function setNotice(key?: Key, values?: Record<string, string>) {
@@ -355,7 +375,7 @@ function history(direction: 'undo' | 'redo') {
   doc.select(selection());
   const previousText = doc.frame.text;
   if (doc[direction]()) {
-    saveDraft({ previousText });
+    saveDraft(previousText);
     renderEditor();
   }
 }
@@ -595,12 +615,36 @@ get('help').addEventListener('click', () => {
 });
 get('version').textContent = 'v' + version;
 keepDraft.addEventListener('change', () => {
-  saveDraft({ preferenceChanged: true });
+  const saved = accessDraftStorage((storage) => {
+    if (keepDraft.checked) {
+      // A fresh key prevents a delayed edit from replacing a reenabled draft.
+      storage.setItem(draftPreferenceKey, crypto.randomUUID());
+    } else {
+      const { id, key } = currentDraftLocation(storage);
+      storage.removeItem(key);
+      storage.setItem(draftPreferenceKey, '!' + id);
+    }
+  }, 'storagePreferenceWarning');
+  if (saved) {
+    storageWarning.hidden = true;
+    saveDraft();
+  } else {
+    keepDraft.checked = !keepDraft.checked;
+  }
 });
 window.addEventListener('storage', (event) => {
-  if (event.key === draftKey || event.key === null) {
+  if (
+    event.key === null ||
+    event.key === draftPreferenceKey ||
+    event.key === draftKey ||
+    event.key.startsWith(draftKey + ':')
+  ) {
     accessDraftStorage((storage) => {
-      keepDraft.checked = storage.getItem(draftKey) !== 'off';
+      // The old key can receive a final write from a tab already editing.
+      const preference = event.newValue ?? '';
+      if (event.key === draftPreferenceKey && preference.startsWith('!'))
+        storage.removeItem(draftLocation(preference).key);
+      syncDraftPreference(storage);
     });
   }
 });

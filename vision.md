@@ -594,7 +594,9 @@ InMail needs more than one profile.
   precise unsaved-changes indicators. A minimal one-document implementation is
   acceptable initially.
 - Keep editing and export available if browser storage fails. Start with a
-  fresh draft if saved data cannot be read.
+  fresh draft if saved data cannot be read. Retain the previous saving
+  preference if the browser rejects a change, and show a warning if a saved
+  copy could not be deleted.
 
 ### Paste and external compatibility
 

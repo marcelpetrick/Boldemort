@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { readFile, writeFile } from 'node:fs/promises';
-import { draftKey } from '../src/draft.ts';
+import { draftKey, draftPreferenceKey } from '../src/draft.ts';
 
 test.afterEach(async ({ page }, info) => {
   if (process.env.BOLD_COVERAGE !== '1') return;
@@ -157,6 +157,114 @@ test('turning off saving removes the browser copy and keeps the open draft', asy
   await other.reload();
   await expect(saving).toBeChecked();
   await expect(other.locator('#editor')).toHaveValue('Current tab only');
+  await other.locator('#editor').fill('Saved at the new location');
+  await expect(saving).toBeChecked();
+});
+
+for (const reenable of [false, true]) {
+  test(`an edit already in flight cannot republish a retired draft (reenable=${String(reenable)})`, async ({
+    page,
+    context,
+  }) => {
+    const writer = page;
+    const toggler = await context.newPage();
+    await toggler.goto(page.url());
+    await writer.locator('#editor').fill('Originally saved');
+    let resume!: () => void;
+    const resumed = new Promise<void>((resolve) => {
+      resume = resolve;
+    });
+    const reading = writer.waitForRequest('**/pause-draft-write');
+    await writer.route('**/pause-draft-write', async (route) => {
+      await resumed;
+      await route.fulfill({ status: 204 });
+    });
+    await writer.evaluate((key) => {
+      const storage = window.localStorage;
+      let paused = false;
+      Object.defineProperty(window, 'localStorage', {
+        value: {
+          getItem: storage.getItem.bind(storage),
+          setItem(name: string, value: string) {
+            if (!paused && name === key && value.includes('Racing edit')) {
+              paused = true;
+              // Hold the actual write, after the location has been selected.
+              const gate = new XMLHttpRequest();
+              gate.open('GET', './pause-draft-write', false);
+              gate.send();
+            }
+            storage.setItem(name, value);
+          },
+          removeItem: storage.removeItem.bind(storage),
+        },
+      });
+    }, draftKey);
+    const writing = writer.locator('#editor').fill('Racing edit');
+    await reading;
+    const saving = toggler.getByRole('checkbox', {
+      name: 'Save draft locally',
+    });
+    try {
+      await saving.uncheck();
+      if (reenable) {
+        await saving.check();
+        await toggler.locator('#editor').fill('Replacement draft');
+      } else {
+        // The writer must be able to clean up even if the other tab has closed.
+        await toggler.close();
+      }
+    } finally {
+      resume();
+    }
+    await writing;
+    const writerSaving = writer.getByRole('checkbox', {
+      name: 'Save draft locally',
+    });
+    await expect(writerSaving).toBeChecked({ checked: reenable });
+    await expect
+      .poll(() => page.evaluate((key) => localStorage.getItem(key), draftKey))
+      .toBe(null);
+    const reader = await context.newPage();
+    await reader.goto(page.url());
+    await expect(reader.locator('#editor')).toHaveValue(
+      reenable ? 'Replacement draft' : '',
+    );
+    await expect(
+      reader.getByRole('checkbox', { name: 'Save draft locally' }),
+    ).toBeChecked({ checked: reenable });
+  });
+}
+
+test('rechecks the storage preference after a write before storage events arrive', async ({
+  page,
+}) => {
+  await page.evaluate(
+    ([draft, preference]) => {
+      const storage = window.localStorage;
+      Object.defineProperty(window, 'localStorage', {
+        value: {
+          getItem: storage.getItem.bind(storage),
+          setItem(key: string, value: string) {
+            storage.setItem(key, value);
+            if (key === draft) storage.setItem(preference, '!');
+          },
+          removeItem: storage.removeItem.bind(storage),
+        },
+      });
+    },
+    [draftKey, draftPreferenceKey] as const,
+  );
+  await page.locator('#editor').fill('Uncommitted tab edit');
+  await expect(
+    page.getByRole('checkbox', { name: 'Save draft locally' }),
+  ).not.toBeChecked();
+  await expect(
+    page.evaluate((key) => localStorage.getItem(key), draftKey),
+  ).resolves.toBe(null);
+  await page.locator('#editor').dispatchEvent('input');
+  await expect(
+    page.evaluate((key) => localStorage.getItem(key), draftKey),
+  ).resolves.toBe(null);
 });
 
 test('an empty tab changing mode leaves the saved draft intact', async ({
@@ -219,6 +327,16 @@ test('uses the current storage preference before another tab receives the event'
     window.dispatchEvent(new StorageEvent('storage', { key: 'unrelated' }));
   }, draftKey);
   await expect(saving).toBeChecked();
+  await page.evaluate(
+    ([draft, preference]) => {
+      localStorage.removeItem(draft);
+      localStorage.setItem(preference, '!');
+    },
+    [draftKey, draftPreferenceKey] as const,
+  );
+  await draft.fill('Another edit');
+  await expect(saving).not.toBeChecked();
+  await expect(draft).toHaveValue('Another edit');
 });
 
 test('ignores damaged data and recovers when storage can be written again', async ({
@@ -285,6 +403,78 @@ test('editing and export work when the browser blocks storage', async ({
   expect(await readFile((await (await downloadReady).path())!, 'utf8')).toBe(
     'Still here',
   );
+});
+
+test('shows that a rejected storage change can leave an older draft', async ({
+  page,
+  context,
+}) => {
+  const draft = page.locator('#editor');
+  const saving = page.getByRole('checkbox', { name: 'Save draft locally' });
+  await draft.fill('Saved draft');
+  await page.evaluate(() => {
+    const storage = window.localStorage;
+    function fail() {
+      throw new DOMException('Blocked', 'SecurityError');
+    }
+    Object.defineProperty(window, 'localStorage', {
+      configurable: true,
+      value: {
+        getItem: storage.getItem.bind(storage),
+        setItem: fail,
+        removeItem: fail,
+      },
+    });
+    window.addEventListener(
+      'restore-storage',
+      () => {
+        Object.defineProperty(window, 'localStorage', { value: storage });
+      },
+      { once: true },
+    );
+  });
+  await saving.click();
+  await expect(saving).toBeChecked();
+  await expect(
+    page.getByText('Could not change local draft saving.'),
+  ).toBeVisible();
+  await expect(draft).toHaveValue('Saved draft');
+
+  await page.getByRole('button', { name: 'Clear draft' }).click();
+  await page
+    .getByRole('dialog')
+    .getByRole('button', { name: 'Clear draft' })
+    .click();
+  await expect(draft).toHaveValue('');
+  await expect(
+    page.getByText('Could not delete the locally saved draft.'),
+  ).toBeVisible();
+  const reopened = await context.newPage();
+  await reopened.goto(page.url());
+  await expect(reopened.locator('#editor')).toHaveValue('Saved draft');
+
+  await page.evaluate(() => {
+    window.dispatchEvent(new Event('restore-storage'));
+  });
+  await saving.uncheck();
+  await expect(page.locator('#storage-warning')).toBeHidden();
+  await reopened.reload();
+  await expect(reopened.locator('#editor')).toHaveValue('');
+});
+
+test('describes local draft saving on keyboard focus and label hover', async ({
+  page,
+}) => {
+  const saving = page.getByRole('checkbox', { name: 'Save draft locally' });
+  await page.locator('#theme').focus();
+  await page.keyboard.press('Tab');
+  await page.keyboard.press('Tab');
+  await expect(saving).toBeFocused();
+  const description = 'Save your draft in this browser.';
+  await expect(saving).toHaveAccessibleDescription(description);
+  await page.keyboard.press('Tab');
+  await page.getByText('Save draft locally', { exact: true }).hover();
+  await expect(page.getByRole('tooltip')).toHaveText(description);
 });
 
 test('keeps the same words selected when switching between editor modes', async ({

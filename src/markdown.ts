@@ -25,6 +25,7 @@ export function parse(source: string) {
 type Node =
   | ReturnType<typeof parse>['children'][number]
   | import('mdast').PhrasingContent;
+type FormattingNode = Extract<Node, { type: 'strong' | 'emphasis' | 'delete' }>;
 type Positioned = { start: number; end: number };
 export type Change = Positioned & { value: string };
 export type Projection = {
@@ -36,6 +37,9 @@ const emphasis = new Map<string, Style>([
   ['emphasis', 'italic'],
   ['delete', 'strike'],
 ]);
+function isFormatting(node: Node): node is FormattingNode {
+  return emphasis.has(node.type);
+}
 function span(node: Pick<Node, 'position'>): Positioned {
   return {
     start: node.position!.start.offset!,
@@ -55,8 +59,8 @@ function inline(
       ? styleUnicode(raw, active, false, lineStyles)
       : undefined;
   }
-  const style = emphasis.get(node.type);
-  if (!style || !('children' in node)) return undefined;
+  if (!isFormatting(node)) return undefined;
+  const style = emphasis.get(node.type)!;
   return renderInline(
     node.children,
     source,
@@ -103,16 +107,15 @@ export function inspectMarkdown(
   function recordFormatting(range: Positioned, children: Node[]) {
     formattingRanges.push(range);
     const first = children[0];
-    const last = children.at(-1);
-    if (first && last) {
+    if (first) {
+      const last = children.at(-1)!;
       delimiterRanges.push(
         { start: range.start, end: span(first).start },
         { start: span(last).end, end: range.end },
       );
     }
     for (const child of children) {
-      if (emphasis.has(child.type) && 'children' in child)
-        recordFormatting(span(child), child.children);
+      if (isFormatting(child)) recordFormatting(span(child), child.children);
     }
   }
   function recordSimpleFormat(
@@ -131,7 +134,7 @@ export function inspectMarkdown(
         return;
       }
       // Callers render the span first, so every other node is emphasis.
-      const wrapper = child as import('mdast').Strong;
+      const wrapper = child as FormattingNode;
       active.add(emphasis.get(wrapper.type)!);
       children = wrapper.children;
     }
@@ -184,8 +187,8 @@ export function inspectMarkdown(
           }
         }
       }
-      const style = emphasis.get(node.type);
-      if (style && 'children' in node) {
+      if (isFormatting(node)) {
+        const style = emphasis.get(node.type)!;
         const value = inline(node, source, new Set(), lineStyles);
         if (value !== undefined) recordFormatting(range, node.children);
         if (
@@ -207,8 +210,8 @@ export function inspectMarkdown(
           (item) =>
             item.checked == null &&
             item.children.length === 1 &&
-            item.children[0]?.type === 'paragraph' &&
-            item.position?.start.line === item.position?.end.line,
+            item.children[0]!.type === 'paragraph' &&
+            item.position!.start.line === item.position!.end.line,
         )
       ) {
         for (const item of node.children) {

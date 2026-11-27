@@ -11,7 +11,8 @@ export function installTooltips(tooltip: HTMLElement, locale: () => Locale) {
   function resolve(node: EventTarget | null) {
     if (!(node instanceof Element)) return;
     if (tooltip.contains(node)) return target;
-    return node.closest<HTMLElement>('[data-help]') ?? undefined;
+    const control = node.closest('label')?.control ?? node;
+    return control.closest<HTMLElement>('[data-help]') ?? undefined;
   }
   function position() {
     if (!target || tooltip.hidden) return;

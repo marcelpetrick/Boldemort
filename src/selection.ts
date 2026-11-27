@@ -66,11 +66,9 @@ function align(piece: Projection): ProjectionGlyphs | undefined {
 }
 
 function boundary(glyphs: Glyph[], offset: number) {
-  for (const [index, { start, end }] of glyphs.entries()) {
-    if (offset <= start) return index;
-    if (offset < end) return offset - start <= end - offset ? index : index + 1;
-  }
-  return glyphs.length;
+  // Positions on a midpoint round towards the start of that glyph.
+  const index = glyphs.findIndex(({ start, end }) => 2 * offset <= start + end);
+  return index === -1 ? glyphs.length : index;
 }
 
 function nearestBoundary(text: string, estimate: number) {

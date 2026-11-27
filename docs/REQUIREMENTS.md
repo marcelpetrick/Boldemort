@@ -29,7 +29,7 @@ checks for the editor and its delivery workflow.
 | README links and history charts | Check links and build the charts from Git and [recorded CI samples](coverage-history.csv). |
 | GitHub About is concise and discoverable | Check the live repository description, homepage, and ten topics. |
 | Fresh-checkout verification | Run the shared pipeline from a clone without npm dependencies or output. Lint all tracked Markdown and check the shell entry point with ShellCheck. |
-| 100% application line, statement, branch, and function coverage and 80% overall mutation score | Merge browser and unit coverage and run mutation analysis in an isolated sandbox. CI publishes the reports. |
+| 100% application line, statement, branch, and function coverage and 95% overall mutation score | Merge browser and unit coverage and run mutation analysis in an isolated sandbox. CI publishes the reports. |
 | Long drafts stay responsive | Run [the performance checks](PERFORMANCE.md) in the local pipeline and CI. |
 | Exact supported npm pins | Compare the registry, lockfile, and dependency inventory. Run the audit and full gate for package changes. |
 | GitHub Pages and a separate release pipeline | Check the Pages deployment at its public subpath and verify the release archive and SHA-256 checksum. |

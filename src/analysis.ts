@@ -39,33 +39,28 @@ export function analyze(source: string, locale: string) {
     warnings.push({ line, offset: offset!, key });
   };
   function diagnostics(node: Node) {
-    if (node.type === 'code' && node.position?.start.offset !== undefined) {
-      const raw = source.slice(
-        node.position.start.offset,
-        node.position.end.offset,
-      );
-      const opener = /^[ \t]*([`~])\1{2,}/u.exec(raw)?.[0].trim();
-      if (opener) {
-        const lines = raw.trimEnd().split(/\r?\n/u);
-        const closer = /^[ \t>]*(([`~])\2+)[ \t]*$/u.exec(lines.at(-1)!)?.[1];
+    if (node.type === 'code') {
+      const { start, end } = node.position!;
+      const raw = source.slice(start.offset, end.offset);
+      // Fenced nodes start at the marker. Indented code starts at its indent.
+      if (raw.startsWith('`') || raw.startsWith('~')) {
+        const lines = raw.split(/\r\n?|\n/u);
+        const endsWithFence = /^[ \t>]*(?:`{3,}|~{3,})[ \t]*$/u.test(
+          lines.at(-1)!,
+        );
         // Parsed code includes a fence-looking final line only when it is code
         // content. A real closer contributes its own source line.
         const contentReachesEnd =
           node.value !== '' &&
-          node.value.split(/\r?\n/u).length >= lines.length - 1;
-        if (
-          lines.length < 2 ||
-          !closer ||
-          contentReachesEnd ||
-          closer[0] !== opener[0] ||
-          closer.length < opener.length
-        )
+          node.value.split(/\r\n?|\n/u).length >= lines.length - 1;
+        if (lines.length < 2 || !endsWithFence || contentReachesEnd)
           report(node, 'fence');
       }
     }
     if (node.type === 'table') {
-      const width = node.children[0]?.children.length;
-      for (const row of node.children.slice(1)) {
+      const [header, ...rows] = node.children;
+      const width = header!.children.length;
+      for (const row of rows) {
         if (row.children.length !== width) report(row, 'table');
       }
     }

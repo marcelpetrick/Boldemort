@@ -7,8 +7,10 @@ The [product vision](../vision.md) sets the requirements. The
 
 - One textarea shows the same draft in Markdown or Unicode. The browser saves
   the draft, editing mode, and Unicode line style options by default. Turning
-  saving off replaces the stored draft with an off preference. Confirmed
-  Clear draft removes the saved copy. Editing history lasts for the tab.
+  saving off deletes the stored draft and records the off preference. Confirmed
+  Clear draft removes the saved copy. If the browser rejects a setting change
+  or deletion, the editor shows the failure and retains the previous setting.
+  Editing history lasts for the tab.
 - The GFM parser records where elements begin and end in the Markdown source.
   Simple unordered lists become Unicode bullets. Nested lists, task lists,
   and other complex structures keep their original Markdown. Nested,
